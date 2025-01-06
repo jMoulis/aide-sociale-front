@@ -1,0 +1,44 @@
+{
+  "ClerkSection": {
+    "errors": {
+      "title": "Connexion",
+      "description": "Connectez-vous pour accéder à votre compte."
+    }
+  },
+  "ErrorSection": {
+    "signIn": {
+      "title": "Erreur lors de la connexion",
+      "description": "Une erreur est survenue lors de la connexion. Veuillez réessayer."
+    }
+  },
+  "GlobalSection": {
+    "actions": {
+      "submit": "Envoyer"
+    }
+  },
+  "HomePage": {
+    "title": "Bienvenue sur la page"
+  },
+  "SecuritySection": {
+    "actions": {
+      "signIn": "Se connecter",
+      "signOut": "Se déconnecter"
+    },
+    "signIn": {
+      "title": "Connexion",
+      "description": "Connectez-vous pour accéder à votre compte.",
+      "labels": {
+        "identifier": "Email",
+        "password": "Mot de passe"
+      },
+      "placeholders": {
+        "identifier": "ex: jean@dupond.fr",
+        "password": "Mot de passe"
+      },
+      "helpers": {
+        "identifier": "Votre email",
+        "password": "Votre mot de passe"
+      }
+    }
+  }
+}

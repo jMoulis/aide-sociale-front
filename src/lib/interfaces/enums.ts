@@ -1,0 +1,35 @@
+export enum ENUM_APP_ROUTES {
+  ADMIN_PAGE = '/admin',
+  ADMIN_ROLES = "/admin/roles",
+  ADMIN_USERS = "/admin/users",
+  MAIN_PAGE = '/main',
+  PROFILE = '/profile',
+  PROFILE_SECURITY = '/profile/security',
+  FORGOT_PASSWORD = '/forgot-password',
+  DASHBOARD = '/dashboard',
+  SIGN_IN = '/sign-in',
+  SIGN_UP = '/sign-up',
+  RESSOURCES = '/admin/ressources',
+  ORGANIZATION = '/dashboard/organization',
+  INSTITUTIONS = '/dashboard/institutions',
+  BENEFICIARIES = `/beneficiaries`,
+  TEMPLATES = "/dashboard/templates",
+}
+
+export enum ENUM_RESSOURCES {
+  ADMIN = 'admin',
+  ROLES = 'roles',
+  USERS = 'users',
+  RESSOURCES = 'ressources',
+  ORGANIZATION = 'organization',
+  BENEFICIARY = 'beneficiary',
+  TEAM = 'team',
+  PROJECT = 'project',
+}
+
+export enum ENUM_API_ROUTES {
+  ROLES_WEBHOOK = '/api/roles-webhook',
+  SIGN_UP = '/api/sign-up',
+  UPLOAD_MEDIA = '/api/upload-media',
+  DELETE_MEDIA = '/api/delete-media',
+}

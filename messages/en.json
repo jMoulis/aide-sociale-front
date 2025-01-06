@@ -1,0 +1,44 @@
+{
+  "ClerkSection": {
+    "errors": {
+      "title": "Connect",
+      "description": "Connect you to access your account."
+    }
+  },
+  "ErrorSection": {
+    "signIn": {
+      "title": "Error during connection",
+      "description": "An error occurred during the connection. Please try again."
+    }
+  },
+  "GlobalSection": {
+    "actions": {
+      "submit": "Submit"
+    }
+  },
+  "HomePage": {
+    "title": "Welcome to the page"
+  },
+  "SecuritySection": {
+    "actions": {
+      "signIn": "Sign in",
+      "signOut": "Sign out"
+    },
+    "signIn": {
+      "title": "Sign in",
+      "description": "Connect you to access your account.",
+      "labels": {
+        "identifier": "Email",
+        "password": "Password"
+      },
+      "placeholders": {
+        "identifier": "eg. john@doe.com",
+        "password": "Password"
+      },
+      "helpers": {
+        "identifier": "Your email",
+        "password": "Your password"
+      }
+    }
+  }
+}
