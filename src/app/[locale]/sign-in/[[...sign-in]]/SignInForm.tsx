@@ -14,7 +14,6 @@ import { Button } from '@/components/ui/button';
 import {
   Form,
   FormControl,
-  FormDescription,
   FormField,
   FormItem,
   FormLabel,
@@ -32,7 +31,7 @@ const formSchema = z.object({
 });
 
 export default function SignInForm() {
-  const { isLoaded, signIn, setActive } = useSignIn();
+  const { signIn, setActive } = useSignIn();
   const t = useTranslations('SecuritySection');
   const tError = useTranslations('ErrorSection');
   const tGlobal = useTranslations('GlobalSection');
@@ -47,7 +46,7 @@ export default function SignInForm() {
       password: ''
     }
   });
-  async function onSubmit(values: z.infer<typeof formSchema>) {
+  async function handleSubmit(values: z.infer<typeof formSchema>) {
     try {
       if (!signIn) return;
 
@@ -72,7 +71,7 @@ export default function SignInForm() {
       }
     } catch (err: any) {
       const errors = onCatchErrors(err);
-      console.log(err);
+
       toast({
         title: tError('signIn.title'),
         description: errors.join(', '),
@@ -83,7 +82,7 @@ export default function SignInForm() {
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className='space-y-2'>
+      <form onSubmit={form.handleSubmit(handleSubmit)} className='space-y-2'>
         <FormField
           control={form.control}
           name='identifier'

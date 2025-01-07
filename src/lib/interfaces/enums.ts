@@ -33,3 +33,12 @@ export enum ENUM_API_ROUTES {
   UPLOAD_MEDIA = '/api/upload-media',
   DELETE_MEDIA = '/api/delete-media',
 }
+
+export enum ENUM_ACTIONS {
+  READ = 'READ',
+  WRITE = 'WRITE',
+  DELETE = 'DELETE',
+  ALL = 'ALL'
+}
+
+export type ActionKey = keyof typeof ENUM_ACTIONS;

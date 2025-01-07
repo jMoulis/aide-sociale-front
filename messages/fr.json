@@ -19,6 +19,25 @@
   "HomePage": {
     "title": "Bienvenue sur la page"
   },
+  "OrganizationSection": {
+    "name": "Nom de l'organisation",
+    "placeholders": {
+      "name": "ex: ACME"
+    },
+    "create": {
+      "title": "Créer une organisation",
+      "description": "Créez une organisation pour gérer vos utilisateurs."
+    },
+    "organizationSubdomainName": "Nom du sous-domaine de l'organisation"
+  },
+  "ProfileSection": {
+    "firstName": "Prénom",
+    "lastName": "Nom",
+    "placeholders": {
+      "firstName": "ex: Jean",
+      "lastName": "ex: Dupond"
+    }
+  },
   "SecuritySection": {
     "actions": {
       "signIn": "Se connecter",
@@ -27,6 +46,28 @@
     "signIn": {
       "title": "Connexion",
       "description": "Connectez-vous pour accéder à votre compte.",
+      "labels": {
+        "identifier": "Email",
+        "password": "Mot de passe"
+      },
+      "placeholders": {
+        "identifier": "ex: jean@dupond.fr",
+        "password": "Mot de passe"
+      },
+      "helpers": {
+        "identifier": "Votre email",
+        "password": "Votre mot de passe"
+      }
+    },
+    "signUp": {
+      "title": "Inscription",
+      "description": "Inscrivez-vous pour créer un compte.",
+      "verify": "Vérifiez votre email",
+      "enterVerifyCode": "Entrez le code de vérification",
+      "verifyCodeEmail": {
+        "title": "Vérification de votre email",
+        "description": "Un code de vérification a été envoyé à votre adresse email. Veuillez le saisir ci-dessous."
+      },
       "labels": {
         "identifier": "Email",
         "password": "Mot de passe"

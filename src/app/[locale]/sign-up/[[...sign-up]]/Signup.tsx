@@ -5,62 +5,69 @@ import { useSignUp } from '@clerk/nextjs';
 import { useRouter } from 'next/navigation';
 import { isClerkErrors } from '@/lib/utils/auth/utils';
 import { toast } from '@/lib/hooks/use-toast';
-// import FormField from '@/components/form/FormField';
-// import FormLabel from '@/components/form/FormLabel';
 import { useTranslations } from 'next-intl';
-// import Input from '@/components/form/Input';
-// import InputPassword from '@/components/form/InputPassword';
-// import Button from '@/components/buttons/Button';
-// import FormFooterAction from '@/components/dialog/FormFooterAction';
-// import Form from '@/components/form/Form';
-import { ENUM_API_ROUTES } from '@/lib/interfaces/enums';
 import { ISignupApiBody } from '@/lib/interfaces/api/auth/interfaces';
-import { slugifyFunction } from '@/lib/utils/utils';
-// import { IOrganization } from '../../dashboard/organization/interfaces';
-import { v4 } from 'uuid';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { useForm } from 'react-hook-form';
+import { z } from 'zod';
+import { Input } from '@/components/ui/input';
+import { Form, FormField, FormItem, FormLabel } from '@/components/ui/form';
+import { Button } from '@/components/ui/button';
 
-type Identity = {
-  firstName: string;
-  lastName: string;
-  email: string;
-  password: string;
-};
+const formSchema = z.object({
+  identifier: z.string().min(2, {
+    message: 'Identifier must be at least 2 characters.'
+  }),
+  password: z.string().min(8, {
+    message: 'Password must be at least 8 characters.'
+  }),
+  firstName: z.string().min(2, {
+    message: 'First name must be at least 2 characters.'
+  }),
+  lastName: z.string().min(2, {
+    message: 'Last name must be at least 2 characters.'
+  })
+});
 
-export default function Page() {
+const formVerifyCodeSchema = z.object({
+  code: z.string().min(6, {
+    message: 'Code must be at least 6 characters.'
+  })
+});
+export default function SignupForm() {
   const { isLoaded, signUp, setActive } = useSignUp();
   const [verifying, setVerifying] = React.useState(false);
-  const [code, setCode] = React.useState('');
+
   const router = useRouter();
-  const t = useTranslations('SecuritySection');
-  const tProfile = useTranslations('ProfilePage');
-  const tGlobal = useTranslations('Global');
-  const tOrganization = useTranslations('OrganizationSection');
+  const t = useTranslations('SecuritySection.signUp');
+  const tProfile = useTranslations('ProfileSection');
 
-  const [formIdentity, setFormIdentity] = React.useState<Identity>({
-    firstName: '',
-    lastName: '',
-    email: '',
-    password: ''
+  const form = useForm<z.infer<typeof formSchema>>({
+    resolver: zodResolver(formSchema),
+    defaultValues: {
+      identifier: '',
+      password: '',
+      firstName: '',
+      lastName: ''
+    }
   });
-  // const [organization, setOrganization] = React.useState<IOrganization>({
-  //   _id: v4(),
-  //   name: '',
-  //   subDomain: '',
-  //   createdAt: new Date(),
-  //   addresses: [],
-  //   contactPoints: []
-  // });
 
-  const handleSubmit = async (event: React.FormEvent) => {
-    event.preventDefault();
-
+  const formVerifyCode = useForm<z.infer<typeof formVerifyCodeSchema>>({
+    resolver: zodResolver(formVerifyCodeSchema),
+    defaultValues: {
+      code: ''
+    }
+  });
+  const handleSubmit = async (values: z.infer<typeof formSchema>) => {
     if (!isLoaded) return;
 
     // Start the sign-up process using the email and password provided
     try {
       await signUp.create({
-        ...formIdentity,
-        emailAddress: formIdentity.email
+        firstName: values.firstName,
+        lastName: values.lastName,
+        emailAddress: values.identifier,
+        password: values.password
       });
       // Send the user an email with the verification code
       await signUp.prepareEmailAddressVerification({
@@ -81,45 +88,44 @@ export default function Page() {
 
   const resetForm = () => {
     setVerifying(false);
-    setCode('');
-    setFormIdentity({ firstName: '', lastName: '', email: '', password: '' });
+    form.reset();
+    formVerifyCode.reset();
   };
-  // Handle the submission of the verification form
-  const handleVerify = async (event: React.FormEvent) => {
-    event.preventDefault();
 
+  // Handle the submission of the verification form
+  const handleVerify = async (values: z.infer<typeof formVerifyCodeSchema>) => {
     if (!isLoaded) return;
 
     try {
       // Use the code the user provided to attempt verification
       const signUpAttempt = await signUp.attemptEmailAddressVerification({
-        code
+        code: values.code
       });
 
       // If verification was completed, set the session to active
       // and redirect the user
       if (signUpAttempt.status === 'complete') {
+        const mainFormValues = form.getValues();
         const signupApiBody: ISignupApiBody = {
           authId: signUpAttempt.createdUserId as string,
-          firstName: formIdentity.firstName,
-          lastName: formIdentity.lastName,
-          email: formIdentity.email
-          // organizationInput: organization
+          firstName: mainFormValues.firstName,
+          lastName: mainFormValues.lastName,
+          email: mainFormValues.identifier
         };
-        await fetch(ENUM_API_ROUTES.SIGN_UP, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify(signupApiBody)
-        });
-        const test = await signUpAttempt.reload();
-        await setActive({ session: test.createdSessionId });
+        // await fetch(ENUM_API_ROUTES.SIGN_UP, {
+        //   method: 'POST',
+        //   headers: {
+        //     'Content-Type': 'application/json'
+        //   },
+        //   body: JSON.stringify(signupApiBody)
+        // });
+        const { createdSessionId } = await signUpAttempt.reload();
+        await setActive({ session: createdSessionId });
         router.push('/');
       } else {
         toast({
           title: 'Error',
-          description: 'An error occurred',
+          description: signUpAttempt.missingFields?.join(', '),
           variant: 'destructive'
         });
       }
@@ -138,49 +144,32 @@ export default function Page() {
     }
   };
 
-  const handleInputIdentity = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setFormIdentity({
-      ...formIdentity,
-      [event.target.name]: event.target.value
-    });
-  };
-
-  const handleInputOrganization = (
-    event: React.ChangeEvent<HTMLInputElement>
-  ) => {
-    const { name, value } = event.target;
-    // if (name === 'name') {
-    //   setOrganization({
-    //     ...organization,
-    //     [name]: value,
-    //     subDomain: slugifyFunction(value)
-    //   });
-    // } else {
-    //   setOrganization({
-    //     ...organization,
-    //     [event.target.name]: event.target.value
-    //   });
-    // }
-  };
   // Display the verification form to capture the OTP code
   if (verifying) {
     return (
       <>
-        <h1>{t('verifyCodeEmail')}</h1>
-        {/* <Form onSubmit={handleVerify}>
-          <FormField>
-            <FormLabel htmlFor='code'>{t('enterVerifyCode')}</FormLabel>
-            <Input
-              value={code}
-              id='code'
+        <h1>{t('verifyCodeEmail.title')}</h1>
+        <Form {...formVerifyCode}>
+          <form onSubmit={formVerifyCode.handleSubmit(handleVerify)}>
+            <FormField
+              control={formVerifyCode.control}
               name='code'
-              onChange={(e) => setCode(e.target.value)}
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>{t('enterVerifyCode')}</FormLabel>
+                  <Input
+                    {...field}
+                    required
+                    placeholder={t('enterVerifyCode')}
+                  />
+                </FormItem>
+              )}
             />
-          </FormField>
-          <FormFooterAction>
-            <Button type='submit'>{t('verify')}</Button>
-          </FormFooterAction>
-        </Form> */}
+            <div>
+              <Button type='submit'>{t('verify')}</Button>
+            </div>
+          </form>
+        </Form>
       </>
     );
   }
@@ -188,91 +177,76 @@ export default function Page() {
   // Display the initial sign-up form to capture the email and password
   return (
     <>
-      <h1>{t('signUp')}</h1>
-      {/* <Form onSubmit={handleSubmit}>
-        <div>
+      <h1>{t('title')}</h1>
+      <Form {...form}>
+        <form onSubmit={form.handleSubmit(handleSubmit)} className='space-y-2'>
           <h1>Identité</h1>
-          <FormField>
-            <FormLabel required htmlFor='firstName'>
-              {tProfile('firstName')}
-            </FormLabel>
-            <Input
-              onChange={handleInputIdentity}
-              required
-              id='firstName'
-              name='firstName'
-              placeholder={tProfile('firstNamePlaceholder')}
-              value={formIdentity.firstName}
-            />
-          </FormField>
-          <FormField>
-            <FormLabel required htmlFor='lastName'>
-              {tProfile('lastName')}
-            </FormLabel>
-            <Input
-              onChange={handleInputIdentity}
-              required
-              id='lastName'
-              name='lastName'
-              placeholder={tProfile('lastNamePlaceholder')}
-              value={formIdentity.lastName}
-            />
-          </FormField>
-        </div>
-        <div>
-          <h1>{tOrganization('create.title')}</h1>
-          <FormField>
-            <FormLabel htmlFor='organization'>
-              {tOrganization('organizationName')}
-            </FormLabel>
-            <Input
-              onChange={handleInputOrganization}
-              required
-              id='organization'
-              name='name'
-              placeholder={tOrganization('organizationPlaceholder')}
-              value={organization.name}
-            />
-            <div className='text-xs text-muted-foreground flex flex-col mt-1 ml-1'>
-              <span className='text-xs text-muted-foreground flex flex-col'>
-                {tOrganization('organizationSubdomainName')}
-              </span>
-              <span className='text-xs text-muted-foreground flex flex-col'>
-                {organization.subDomain}.placementsocial.fr
-              </span>
-            </div>
-          </FormField>
-        </div>
-        <div>
-          <h1>Sécurité</h1>
-          <FormField>
-            <FormLabel required htmlFor='email'>
-              {tProfile('email')}
-            </FormLabel>
-            <Input
-              onChange={handleInputIdentity}
-              required
-              id='email'
-              name='email'
-              type='email'
-              placeholder={tGlobal('emailPlaceholder')}
-              value={formIdentity.email}
-            />
-          </FormField>
-          <FormField>
-            <FormLabel htmlFor='password'>{t('password')}</FormLabel>
-            <InputPassword
-              onChange={handleInputIdentity}
-              id='password'
-              name='password'
-              value={formIdentity.password}
-            />
-          </FormField>
-        </div>
-        <FormFooterAction>
-          <Button type='submit'>{t('signUp')}</Button>
-        </FormFooterAction>
-      </Form> */}
+          <FormField
+            control={form.control}
+            name='firstName'
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel htmlFor='firstName'>
+                  {tProfile('firstName')}
+                </FormLabel>
+                <Input
+                  {...field}
+                  required
+                  placeholder={tProfile('placeholders.firstName')}
+                />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name='lastName'
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel htmlFor='lastName'>{tProfile('lastName')}</FormLabel>
+                <Input
+                  {...field}
+                  placeholder={tProfile('placeholders.lastName')}
+                />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name='identifier'
+            render={({ field }) => (
+              <>
+                <h1>Sécurité</h1>
+                <FormItem>
+                  <FormLabel htmlFor='email'>
+                    {t('labels.identifier')}
+                  </FormLabel>
+                  <Input
+                    {...field}
+                    placeholder={t('placeholders.identifier')}
+                  />
+                </FormItem>
+              </>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name='password'
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel htmlFor='password'>{t('labels.password')}</FormLabel>
+                <Input
+                  {...field}
+                  type='password'
+                  placeholder={t('placeholders.password')}
+                />
+              </FormItem>
+            )}
+          />
+          <div>
+            <Button type='submit'>{t('title')}</Button>
+          </div>
+        </form>
+      </Form>
     </>
   );
 }
