@@ -1,3 +1,4 @@
+import { format, isToday, isYesterday, Locale } from 'date-fns';
 import slugify from 'slugify';
 
 export const slugifyFunction = (value: string) => {
@@ -52,5 +53,17 @@ export const isValidJSON = (str: string) => {
 
   } catch (e) {
     return false
+  }
+}
+
+export function formatTimestamp(timestamp: number, tTime: any, locale: Locale) {
+  const date = new Date(timestamp);
+
+  if (isToday(date)) {
+    return `${tTime('today')} - ${format(date, 'p', { locale })}`;
+  } else if (isYesterday(date)) {
+    return `${tTime('yesterday')} - ${format(date, 'p', { locale })}`;
+  } else {
+    return format(date, 'P p', { locale });
   }
 }

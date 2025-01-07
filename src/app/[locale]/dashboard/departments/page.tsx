@@ -1,7 +1,7 @@
-export default function Home() {
+export default function DepartmentsHome() {
   return (
-    <main>
-      <h1>Home</h1>
-    </main>
+    <>
+      <h1>DepartmentsHome</h1>
+    </>
   );
 }

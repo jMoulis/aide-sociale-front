@@ -6,6 +6,8 @@ import { NextIntlClientProvider } from 'next-intl';
 import { getMessages } from 'next-intl/server';
 import Header from './components/Header';
 import { Toaster } from '@/components/ui/toaster';
+import MongoSearchProvider from '@/lib/mongo/MongoSearchContext/MongoSearchContext';
+import MongoUserProvider from '@/lib/mongo/MongoUserContext/MongoUserContext';
 
 const geistSans = Geist({
   variable: '--font-geist-sans',
@@ -35,9 +37,11 @@ export default async function RootLayout({
         <body
           className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
           <NextIntlClientProvider messages={messages}>
-            <Header />
-            {children}
-            <Toaster />
+            <MongoUserProvider>
+              <Header />
+              {children}
+              <Toaster />
+            </MongoUserProvider>
           </NextIntlClientProvider>
         </body>
       </ClerkProvider>

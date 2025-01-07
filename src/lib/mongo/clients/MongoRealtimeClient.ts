@@ -67,14 +67,14 @@ class MongoRealtimeClient {
     });
   }
 
-  async create(collection: ENUM_COLLECTIONS, data: Record<string, any>, updateOptions = {}): Promise<ApiResponse<IUpsertResponse>> {
+  async create(collection: ENUM_COLLECTIONS, filter: Record<string, any>, data = {}, updateOptions = {}): Promise<ApiResponse<IUpsertResponse>> {
     return this.request<IUpsertResponse>(`upsert`, {
       method: 'POST',
       body: JSON.stringify({
         collection,
         data,
         updateOptions,
-        filter: {}
+        filter
       }),
     });
   }

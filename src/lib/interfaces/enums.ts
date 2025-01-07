@@ -10,10 +10,8 @@ export enum ENUM_APP_ROUTES {
   SIGN_IN = '/sign-in',
   SIGN_UP = '/sign-up',
   RESSOURCES = '/admin/ressources',
-  ORGANIZATION = '/dashboard/organization',
-  INSTITUTIONS = '/dashboard/institutions',
-  BENEFICIARIES = `/beneficiaries`,
-  TEMPLATES = "/dashboard/templates",
+  ORGANIZATIONS = '/dashboard/organizations',
+  DEPARTMENTS = '/dashboard/departments',
 }
 
 export enum ENUM_RESSOURCES {
