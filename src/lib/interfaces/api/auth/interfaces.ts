@@ -4,5 +4,5 @@ export interface ISignupApiBody {
   email: string;
   firstName: string;
   lastName: string;
-  // organizationInput?: IOrganization;
+  organizationId?: string;
 }

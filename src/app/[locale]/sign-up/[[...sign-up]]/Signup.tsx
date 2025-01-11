@@ -112,7 +112,8 @@ export default function SignupForm() {
           authId: signUpAttempt.createdUserId as string,
           firstName: mainFormValues.firstName,
           lastName: mainFormValues.lastName,
-          email: mainFormValues.identifier
+          email: mainFormValues.identifier,
+          organizationId: 'undefined'
         };
         await fetch(ENUM_API_ROUTES.SIGN_UP, {
           method: 'POST',
