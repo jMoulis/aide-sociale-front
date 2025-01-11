@@ -1,5 +1,6 @@
 
 
+import { IUser } from '@/lib/interfaces/interfaces';
 import clientMongoServer from '@/lib/mongo/initMongoServer';
 import { ENUM_COLLECTIONS } from '@/lib/mongo/interfaces';
 import { clerkClient } from '@clerk/nextjs/server';
@@ -28,7 +29,7 @@ export async function POST(req: Request) {
       email
     }
     const userId = v4();
-    const response = await clientMongoServer.upsertServer(ENUM_COLLECTIONS.USERS, { _id: userId }, { $set: userData });
+    const response = await clientMongoServer.upsertServer<IUser>(ENUM_COLLECTIONS.USERS, { _id: userId }, { $set: userData });
 
     if (response.error) {
       await client.users.deleteUser(authId);

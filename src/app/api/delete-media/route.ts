@@ -3,7 +3,7 @@ import { NextResponse } from 'next/server'
 
 export async function DELETE(request: Request): Promise<NextResponse> {
   const { searchParams } = new URL(request.url);
-  const urlToDelete = searchParams.get('url') as string;
+  const _urlToDelete = searchParams.get('url') as string;
   // await del(urlToDelete);
 
   return NextResponse.json({ message: 'success' });

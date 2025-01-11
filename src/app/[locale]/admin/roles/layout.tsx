@@ -3,8 +3,8 @@ import { routeSecurityMiddleware } from '@/lib/auth/routeSecurityMiddleware';
 import { ENUM_RESSOURCES } from '@/lib/interfaces/enums';
 
 export const metadata: Metadata = {
-  title: 'Placement app',
-  description: 'Admin'
+  title: `${process.env.NEXT_PUBLIC_APP_NAME} - Roles`,
+  description: 'Roles'
 };
 
 export default async function RootLayout({

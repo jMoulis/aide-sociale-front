@@ -35,7 +35,7 @@ function MongoUserProvider({ children }: Props) {
         .then(({ data }) => {
           setUser(data);
         })
-        .catch((error) => {
+        .catch((_error) => {
           signOut({
             redirectUrl: '/sign-in'
           });

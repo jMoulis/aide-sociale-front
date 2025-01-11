@@ -38,12 +38,32 @@ export interface IUser {
   updatedAt?: Date;
   gender?: string;
 }
+export interface IMenuEntry {
+  label: string;
+  uri: string;
+  roles: string[];
+}
+export interface IMenu {
+  _id: string;
+  title: string;
+  roles: string[];
+  entries: IMenuEntry[];
+}
+export interface ICollection {
+  _id: string;
+  name: string;
+  createdBy?: IUserSummary;
+  createdAt: Date;
+  organizationId: string;
+  fields: string[];
+}
 export interface IRessource {
   _id: string;
   name: string;
   description: string;
   mandatoryPermissions: ActionKey[];
-  fields: string[];
+  organizationId?: string;
+  menus: IMenu[]
 }
 export interface IRole {
   _id: string;
@@ -52,6 +72,7 @@ export interface IRole {
   permissions?: Record<string, ENUM_ACTIONS[]>;
   key: string;
   organizationId: string;
+  updatedAt?: Date;
 }
 export interface IRoleInput {
   _id: string;
@@ -69,10 +90,39 @@ export interface IPermission {
   key: string;
 }
 
+export interface IProject {
+  _id: string;
+  name: string;
+  description: string;
+  startDate: Date;
+  endDate: Date;
+  status: string;
+  teamId: string;
+  organizationId: string;
+  institutionId: string;
+  createdAt: Date;
+  updatedAt?: Date;
+}
+export interface IProjectSummary {
+  _id: string;
+  name: string;
+}
 export interface ITeamSummary {
   _id: string;
   name: string;
 }
+export interface ITeam {
+  _id: string;
+  name: string;
+  description: string;
+  organizationId: string;
+  institutionId: string;
+  members: IUserSummary[];
+  projects: IProjectSummary[];
+  createdAt: Date;
+  updatedAt?: Date;
+}
+
 
 export interface IModification {
   modifiedAt: Date; // Date of modification

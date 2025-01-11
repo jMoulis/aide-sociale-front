@@ -50,7 +50,7 @@ export async function deleteRoleAction(roleId: string) {
   await updateUsersRoles({ _id: roleId }, 'DELETE');
 }
 export async function updateRoleAction(roleId: string, updatedRole: Partial<IRole>) {
-  await clientMongoServer.update(ENUM_COLLECTIONS.ROLES,
+  await clientMongoServer.update<IRole>(ENUM_COLLECTIONS.ROLES,
     { _id: roleId },
     { $set: { ...updatedRole, updatedAt: new Date() } },
   );

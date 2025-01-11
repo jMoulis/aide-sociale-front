@@ -13,6 +13,7 @@ import { z } from 'zod';
 import { Input } from '@/components/ui/input';
 import { Form, FormField, FormItem, FormLabel } from '@/components/ui/form';
 import { Button } from '@/components/ui/button';
+import { ENUM_API_ROUTES } from '@/lib/interfaces/enums';
 
 const formSchema = z.object({
   identifier: z.string().min(2, {
@@ -105,6 +106,7 @@ export default function SignupForm() {
       // If verification was completed, set the session to active
       // and redirect the user
       if (signUpAttempt.status === 'complete') {
+        console.log('Add orgnization attachment logic on successful sign up');
         const mainFormValues = form.getValues();
         const signupApiBody: ISignupApiBody = {
           authId: signUpAttempt.createdUserId as string,
@@ -112,13 +114,13 @@ export default function SignupForm() {
           lastName: mainFormValues.lastName,
           email: mainFormValues.identifier
         };
-        // await fetch(ENUM_API_ROUTES.SIGN_UP, {
-        //   method: 'POST',
-        //   headers: {
-        //     'Content-Type': 'application/json'
-        //   },
-        //   body: JSON.stringify(signupApiBody)
-        // });
+        await fetch(ENUM_API_ROUTES.SIGN_UP, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(signupApiBody)
+        });
         const { createdSessionId } = await signUpAttempt.reload();
         await setActive({ session: createdSessionId });
         router.push('/');

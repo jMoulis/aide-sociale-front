@@ -12,6 +12,8 @@ export enum ENUM_APP_ROUTES {
   RESSOURCES = '/admin/ressources',
   ORGANIZATIONS = '/dashboard/organizations',
   DEPARTMENTS = '/dashboard/departments',
+  TEMPLATES = '/admin/templates',
+  COLLECTIONS = '/admin/collections',
 }
 
 export enum ENUM_RESSOURCES {
@@ -23,6 +25,7 @@ export enum ENUM_RESSOURCES {
   BENEFICIARY = 'beneficiary',
   TEAM = 'team',
   PROJECT = 'project',
+  COLLECTIONS = 'collections',
 }
 
 export enum ENUM_API_ROUTES {

@@ -17,6 +17,7 @@ import { frechDepartments } from '@/lib/datas/departements';
 import { IOrganization } from '@/lib/interfaces/interfaces';
 import client from '@/lib/mongo/initMongoClient';
 import { ENUM_COLLECTIONS } from '@/lib/mongo/interfaces';
+import { toastPromise } from '@/lib/toast/toastPromise';
 import { useTranslations } from 'next-intl';
 import { useState } from 'react';
 import { v4 } from 'uuid';
@@ -44,10 +45,12 @@ function OrganizationForm({}: Props) {
   const [open, setOpen] = useState(false);
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    try {
-      await client.create(ENUM_COLLECTIONS.ORGANIZATIONS, {}, form);
-      setOpen(false);
-    } catch (error) {}
+    await toastPromise(
+      client.create(ENUM_COLLECTIONS.ORGANIZATIONS, form),
+      t,
+      'create'
+    );
+    setOpen(false);
   };
   return (
     <div>

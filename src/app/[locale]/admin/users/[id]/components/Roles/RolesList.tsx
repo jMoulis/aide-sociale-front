@@ -49,7 +49,7 @@ function RolesList({ user, roles }: Props) {
 
   const handleSubmit = async () => {
     try {
-      await client.update(
+      await client.update<IUser>(
         ENUM_COLLECTIONS.USERS,
         { _id: user._id },
         {

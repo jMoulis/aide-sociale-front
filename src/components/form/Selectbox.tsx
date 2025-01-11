@@ -1,12 +1,6 @@
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue
-} from '@/components/ui/select';
+import { cn } from '@/lib/utils/shadcnUtils';
 import { useTranslations } from 'next-intl';
-import { useCallback } from 'react';
+import { ChangeEvent, useCallback, useState } from 'react';
 
 export type SelectboxEvent = {
   target: {
@@ -14,13 +8,13 @@ export type SelectboxEvent = {
     value: string;
   };
 };
-type Option = {
+export type SelectboxOption = {
   value: string;
   label: string;
 };
 
 type Props = {
-  options: Option[];
+  options: SelectboxOption[];
   onChange?: (event: SelectboxEvent) => void;
   name: string;
   placeholder?: string;
@@ -28,6 +22,7 @@ type Props = {
   required?: boolean;
   disabled?: boolean;
   className?: string;
+  error?: string;
 };
 function Selectbox({
   options,
@@ -40,36 +35,47 @@ function Selectbox({
   className
 }: Props) {
   const t = useTranslations('GlobalSection');
+  const [touched, setTouched] = useState(false);
+
+  const handleBlur = () => {
+    if (required) {
+      setTouched(true);
+    }
+  };
 
   const handleChange = useCallback(
-    (value: string) => {
-      onChange?.({ target: { name, value } });
+    (event: ChangeEvent<HTMLSelectElement>) => {
+      onChange?.(event);
     },
-    [name, onChange]
+    [onChange]
   );
 
   return (
-    <Select
-      onValueChange={handleChange}
-      defaultValue={value}
-      value={value}
-      disabled={disabled}
-      required={required}
-      name={name}>
-      <SelectTrigger className={className}>
-        <SelectValue placeholder={placeholder || t('select')} />
-      </SelectTrigger>
-      <SelectContent>
-        {options.map((option) => (
-          <SelectItem
-            key={option.value}
-            value={option.value}
-            onClick={(e) => e.preventDefault()}>
-            {option.label}
-          </SelectItem>
-        ))}
-      </SelectContent>
-    </Select>
+    <div>
+      <div className='relative' onBlur={handleBlur}>
+        <select
+          value={value || ''}
+          name={name}
+          onChange={handleChange}
+          required={required}
+          disabled={disabled}
+          className={cn(
+            `block w-full text-sm px-4 py-2 border ${
+              touched && required && !value
+                ? 'border-red-500'
+                : 'border-gray-300'
+            } rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500`,
+            className
+          )}>
+          <option value=''>{placeholder || t('select')}</option>
+          {options.map((option) => (
+            <option key={option.value} value={option.value}>
+              {option.label}
+            </option>
+          ))}
+        </select>
+      </div>
+    </div>
   );
 }
 export default Selectbox;

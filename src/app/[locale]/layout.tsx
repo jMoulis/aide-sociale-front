@@ -6,8 +6,10 @@ import { NextIntlClientProvider } from 'next-intl';
 import { getMessages } from 'next-intl/server';
 import Header from './components/Header';
 import { Toaster } from '@/components/ui/toaster';
-import MongoSearchProvider from '@/lib/mongo/MongoSearchContext/MongoSearchContext';
 import MongoUserProvider from '@/lib/mongo/MongoUserContext/MongoUserContext';
+import '@fortawesome/fontawesome-svg-core/styles.css';
+import { config } from '@fortawesome/fontawesome-svg-core';
+config.autoAddCss = false;
 
 const geistSans = Geist({
   variable: '--font-geist-sans',
@@ -33,13 +35,15 @@ export default async function RootLayout({
 
   return (
     <html lang='fr'>
-      <ClerkProvider>
+      <ClerkProvider dynamic>
         <body
           className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
           <NextIntlClientProvider messages={messages}>
             <MongoUserProvider>
-              <Header />
-              {children}
+              <div className='main-page'>
+                <Header />
+                {children}
+              </div>
               <Toaster />
             </MongoUserProvider>
           </NextIntlClientProvider>

@@ -13,6 +13,7 @@ import { useUser } from '@clerk/nextjs';
 import useForm from '@/lib/hooks/useForm';
 import client from '@/lib/mongo/initMongoClient';
 import { ENUM_COLLECTIONS } from '@/lib/mongo/interfaces';
+import { IUser } from '@/lib/interfaces/interfaces';
 
 type Props = {
   userServer: {
@@ -46,7 +47,7 @@ function ProfileForm({ userServer }: Props) {
       );
       await user?.update(inputsValue);
 
-      await client.update(
+      await client.update<IUser>(
         ENUM_COLLECTIONS.USERS,
         {
           authId: userServer.id

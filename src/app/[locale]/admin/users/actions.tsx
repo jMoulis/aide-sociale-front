@@ -206,22 +206,17 @@ export async function createUser({
     });
     const userId = v4();
 
-    await clientMongoServer.create(
-      ENUM_COLLECTIONS.USERS,
-      {
-        _id: userId
-      },
-      {
-        email,
-        firstName,
-        lastName,
-        authId: createdAuthUser.id,
-        imageUrl: createdAuthUser.imageUrl,
-        roles: [],
-        organizationId: await getServerSideCurrentUserOrganizationId(),
-        createdAt: new Date()
-      }
-    );
+    await clientMongoServer.create<IUser>(ENUM_COLLECTIONS.USERS, {
+      _id: userId,
+      email,
+      firstName,
+      lastName,
+      authId: createdAuthUser.id,
+      imageUrl: createdAuthUser.imageUrl,
+      roles: [],
+      organizationId: await getServerSideCurrentUserOrganizationId(),
+      createdAt: new Date()
+    });
     return {
       title: tUsersPage('create.title'),
       description: tUsersPage('create.success')

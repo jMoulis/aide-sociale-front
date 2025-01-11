@@ -12,6 +12,8 @@ export enum ENUM_COLLECTIONS {
   TEMPLATES_MASTER = 'templates_master',
   CATEGORIES = 'categories',
   DOCUMENTS = 'documents',
+  MENUS = 'menus',
+  COLLECTIONS = 'collections',
 }
 
 export interface IAutocompleteResponse<T> {

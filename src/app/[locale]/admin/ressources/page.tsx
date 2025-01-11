@@ -4,6 +4,7 @@ import { withOrganizationId } from '@/lib/utils/auth/serverUtils';
 import { IRessource } from '@/lib/interfaces/interfaces';
 import { ENUM_COLLECTIONS } from '@/lib/mongo/interfaces';
 import ErrorDefault from '../../components/ErrorDefault';
+import { sortArray } from '@/lib/utils/utils';
 
 async function RessourcesPage() {
   const { data: initialRessources, error } = await withOrganizationId(
@@ -13,7 +14,11 @@ async function RessourcesPage() {
   if (error) {
     return <ErrorDefault message={error} />;
   }
-  return <TableRessources initialRessources={initialRessources || []} />;
+  return (
+    <TableRessources
+      initialRessources={sortArray(initialRessources || [], 'name')}
+    />
+  );
 }
 
 export default RessourcesPage;

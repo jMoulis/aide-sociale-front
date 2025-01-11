@@ -11,6 +11,7 @@ import Button from '@/components/buttons/Button';
 import client from '@/lib/mongo/initMongoClient';
 import { useOrganization } from '@/lib/hooks/useOrganization';
 import { ENUM_COLLECTIONS } from '@/lib/mongo/interfaces';
+import { sortArray } from '@/lib/utils/utils';
 
 type Props = {
   initialRessources: IRessource[];
@@ -43,7 +44,7 @@ function Ressources({ initialRessources }: Props) {
     client.onSnapshotList<IRessource>(
       ENUM_COLLECTIONS.RESSOURCES,
       { organizationId },
-      (data) => setRessources(data)
+      (data) => setRessources(sortArray(data, 'name'))
     );
   }, [organizationId]);
 
@@ -52,6 +53,7 @@ function Ressources({ initialRessources }: Props) {
       <TableFull<IRessource>
         data={ressources}
         columns={columns}
+        withPagination
         onSelectRow={handleSelectRow}>
         <Dialog
           open={open}

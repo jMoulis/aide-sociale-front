@@ -5,6 +5,27 @@
       "description": "Connectez-vous pour accéder à votre compte."
     }
   },
+  "CollectionSection": {
+    "name": "Nom de la collection",
+    "labels": {
+      "name": "Nom",
+      "fields": "Champs"
+    },
+    "create": {
+      "title": "Créer une collection",
+      "description": "Créer une nouvelle collection",
+      "action": "Créer",
+      "success": "Collection créée avec succès",
+      "error": "Une erreur s'est produite lors de la création de la collection. <code>Erreur {error}</code>"
+    },
+    "edit": {
+      "title": "Modifier la collection",
+      "description": "Modifier une collection existante",
+      "action": "Modifier",
+      "success": "Collection mise à jour avec succès",
+      "error": "Une erreur s'est produite lors de la mise à jour de la collection. <code>Erreur {error}</code>"
+    }
+  },
   "ErrorSection": {
     "signIn": {
       "title": "Erreur lors de la connexion",
@@ -60,14 +81,26 @@
     "success": "Succès",
     "error": "Erreur",
     "never": "Jamais",
+    "profile": "Profil",
+    "logout": "Déconnexion",
+    "dashboard": "Tableau de bord",
+    "admin": "Admin",
     "errorOrganization": "Une erreur s'est produite, aucune organisation n'a été trouvée. Veuillez contacter l'administrateur.",
     "emailPlaceholder": "ex: jean@dupont.fr",
     "actions": {
+      "addTag": "Tapez un mot et appuyez sur Entrée",
       "submit": "Envoyer",
       "cancel": "Annuler",
       "save": "Enregistrer",
       "reset": "Réinitialiser",
-      "update": "Mettre à jour"
+      "update": "Mettre à jour",
+      "signIn": "Se connecter",
+      "publish": "Publier",
+      "onLine": "En ligne",
+      "create": "Créer",
+      "open": "Ouvrir",
+      "pickADate": "Choisir une date",
+      "pickRangeDate": "Choisir une période"
     }
   },
   "HomePage": {
@@ -156,6 +189,46 @@
       "write": "Création/Modification",
       "all": "Toutes les ressources",
       "mandatoryPermissions": "Droits",
+      "menu": {
+        "menuManagement": "Gestion des menus",
+        "labels": {
+          "title": "Nom menu",
+          "name": "Nom",
+          "uri": "Chemin",
+          "roles": "Rôles"
+        },
+        "create": {
+          "title": "Créer un menu",
+          "description": "Créer un nouveau menu",
+          "action": "Créer un menu",
+          "success": "Menu créé avec succès",
+          "error": "Une erreur s'est produite lors de la création du menu. <code>Erreur {error}</code>"
+        },
+        "edit": {
+          "title": "Modifier le menu",
+          "description": "Modifier un menu existant",
+          "action": "Modifier le menu",
+          "success": "Menu mise à jour avec succès",
+          "error": "Une erreur s'est produite lors de la mise à jour du menu. <code>Erreur {error}</code>"
+        },
+        "menuEntries": {
+          "title": "Entrées de menu",
+          "create": {
+            "title": "Créer une entrée de menu",
+            "description": "Créer une nouvelle entrée de menu",
+            "action": "Créer une entrée de menu",
+            "success": "Entrée de menu créée avec succès",
+            "error": "Une erreur s'est produite lors de la création de l'entrée de menu. <code>Erreur {error}</code>"
+          },
+          "edit": {
+            "title": "Modifier l'entrée de menu",
+            "description": "Modifier une entrée de menu existante",
+            "action": "Modifier l'entrée de menu",
+            "success": "Entrée de menu mise à jour avec succès",
+            "error": "Une erreur s'est produite lors de la mise à jour de l'entrée de menu. <code>Erreur {error}</code>"
+          }
+        }
+      },
       "create": {
         "title": "Créer une ressource",
         "description": "Créer une nouvelle ressource",
@@ -207,6 +280,7 @@
       "signIn": "Se connecter",
       "signOut": "Se déconnecter"
     },
+    "unAuthorized": "Non autorisé",
     "saveSuccess": "Mot de passe mis à jour avec succès",
     "title": "Sécurité",
     "2FARequired": "Authentification à deux facteurs requise",
@@ -314,6 +388,121 @@
       "action": "Créer un utilisateur",
       "success": "L'utilisateur a été créé",
       "error": "Une erreur s'est produite lors de la création de l'utilisateur. <code>Erreur {error}</code>"
+    }
+  },
+  "TemplateSection": {
+    "template": "modèle",
+    "generate": "Générer",
+    "askAiToCreateTemplate": "Demander à l'IA de créer un modèle",
+    "appendToTemplate": "Ajouter",
+    "replaceTemplate": "Remplacer",
+    "historyTab": "Historique",
+    "listItemTab": "Liste",
+    "availableFields": "Champs disponibles",
+    "templatePropertiesTab": "Modèle",
+    "elementPropertiesTab": "Elément",
+    "deleteBlock": "Supprimer la section",
+    "connectTemplate": "Connecter un modèle",
+    "version": "Version",
+    "connectedTemplate": "Modèle connecté",
+    "moveBlockDown": "Déplacer la section vers le bas",
+    "moveBlockUp": "Déplacer la section vers le haut",
+    "valueField": "Champ de valeur",
+    "labelField": "Champ d'étiquette",
+    "collectionName": "Nom de la collection",
+    "dataConnexion": "Connexion à la donnée",
+    "sourceOptions": "Source",
+    "databaseOptions": "Base de données",
+    "staticOptions": "Statiques",
+    "label": "Libellé",
+    "name": "Nom",
+    "forceUpdate": "Forcer la mise à jour",
+    "createNewVersion": "Créer une nouvelle version",
+    "addBlock": "Ajouter une section",
+    "description": "Description",
+    "placeholder": "Text d'indication",
+    "required": "Requis",
+    "remove": "Supprimer",
+    "newOption": "Nouvelle option",
+    "sectionProperties": "Propriétés de la section",
+    "fieldProperties": "Propriétés du champ",
+    "templateName": "Nom du modèle",
+    "addField": "Ajouter un champs",
+    "noBlockOrFieldSelected": "Aucune section ou champ sélectionné",
+    "blockNotFound": "Section non trouvé",
+    "fieldNotFound": "Champ non trouvé",
+    "fields": "Champs",
+    "field": "Champ",
+    "historyItemField": "{fullName} a {action} {field}",
+    "from": "de",
+    "to": "à",
+    "has": "a",
+    "added": "ajouté(s)",
+    "removed": "supprimé(s)",
+    "changed": "modifié(s)",
+    "created": "créé(s)",
+    "searchPotentialImpact": "Rechercher les impacts potentiels",
+    "noImpact": "Aucun impact trouvé",
+    "impactInfo": "Les impacts qui peuvent, potentiellement, rendre inaccessible (visuellement) la donnée, sont les suppressions",
+    "draftAlert": {
+      "title": "Brouillon en cours de création",
+      "description": "Vous avez un brouillon en cours de création. Voulez-vous continuez à éditer le brouillon ou créer une nouvelle version ?",
+      "continue": "Continuer l'édition",
+      "newVersion": "Créer une nouvelle version",
+      "cancel": "Annuler"
+    },
+    "relatedDocuments": {
+      "title": "Documents liés",
+      "description": "Documents liés à ce modèle",
+      "noRelatedDocuments": "Aucun document lié trouvé",
+      "warningRelatedDocuments": "Attention il y a {relatedDocumentsLength} document(s) créé(s) à partir de ce modèle. \nLes documents seront mis à jour à partir du modèle actuellement publié. \nCela implique une perte potentielle des données non correspondantes."
+    },
+    "delete": {
+      "title": "Supprimer le modèle",
+      "description": "Êtes-vous sûr de vouloir supprimer ce modèle ?",
+      "action": "Supprimer le modèle",
+      "success": "Modèle supprimé avec succès",
+      "toConfirm": "Saisissez \"<code>{templateName}</code>\" ci-dessous pour continuer.",
+      "error": "Une erreur s'est produite lors de la suppression du modèle. <code>Erreur {error}</code>"
+    },
+    "save": {
+      "title": "Enregistrer le modèle",
+      "description": "Enregistrer un nouveau modèle",
+      "action": "Enregistrer le modèle",
+      "success": "Modèle enregistré avec succès",
+      "error": "Une erreur s'est produite lors de l'enregistrement du modèle.  <code>Error {error}</code>"
+    },
+    "publish": {
+      "title": "Publier le modèle",
+      "description": "Publier un modèle existant",
+      "action": "Publier le modèle",
+      "success": "Modèle publié avec succès",
+      "error": "Une erreur s'est produite lors de la publication du modèle.  <code>Error {error}</code>"
+    },
+    "editMode": "Mode édition",
+    "previewMode": "Mode aperçu",
+    "blockTitle": "Titre du section",
+    "layout": {
+      "label": "Disposition",
+      "singleColumn": "1 colonne",
+      "twoColumns": "2 colonnes",
+      "threeColumns": "3 colonnes"
+    },
+    "master": {
+      "create": {
+        "title": "Créer un modèle principal",
+        "description": "Créer un nouveau modèle principal",
+        "action": "Créer un modèle principal",
+        "success": "Modèle créé avec succès",
+        "error": "Une erreur s'est produite lors de la création du modèle. <code>Erreur {error}</code>"
+      },
+      "edit": {
+        "title": "Modifier le modèle principal",
+        "description": "Modifier un modèle principal existant",
+        "action": "Modifier le modèle principal",
+        "success": "Modèle mis à jour avec succès",
+        "error": "Une erreur s'est produite lors de la mise à jour du modèle. <code>Erreur {error}</code>"
+      }
     }
   },
   "clerk": {

@@ -6,7 +6,6 @@ import {
   DialogTitle,
   DialogTrigger
 } from '@/components/ui/dialog';
-import { cn } from '@/lib/utils/shadcnUtils';
 import { JSX } from 'react';
 
 type Props = {
@@ -17,6 +16,7 @@ type Props = {
   onOpenChange?: (open: boolean) => void;
   Trigger?: JSX.Element;
   contentClassname?: string;
+  contentStyle?: React.CSSProperties;
 };
 function Dialog({
   onOpenChange,
@@ -25,14 +25,15 @@ function Dialog({
   children,
   triggerText,
   Trigger,
-  contentClassname
+  contentClassname,
+  contentStyle
 }: Props) {
   return (
-    <DialogComponent open={open} onOpenChange={onOpenChange}>
+    <DialogComponent open={open} onOpenChange={onOpenChange} modal>
       <DialogTrigger asChild={Boolean(Trigger)}>
         {Trigger ? Trigger : triggerText ?? 'Open Dialog'}
       </DialogTrigger>
-      <DialogContent className={cn(`w-fit`, contentClassname)}>
+      <DialogContent className={`${contentClassname}`} style={contentStyle}>
         <DialogHeader>
           <DialogTitle>{title}</DialogTitle>
           <DialogDescription className='hidden'>{title}</DialogDescription>
