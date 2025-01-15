@@ -18,6 +18,12 @@ function useColumnRessources() {
         cell: ({ row }) => <span>{row.original.name}</span>
       },
       {
+        id: 'route',
+        header: t('ressource.route'),
+        accessorKey: 'route',
+        cell: ({ row }) => <span>{row.original.route}</span>
+      },
+      {
         id: 'description',
         accessorKey: 'description',
         header: t('description'),

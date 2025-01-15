@@ -16,7 +16,6 @@ import {
   IFormField,
   ENUM_FIELD_TYPE,
   BlockLayout,
-  IMasterTemplate,
   TemplateDiff
 } from './interfaces';
 import { useRouter } from 'next/navigation';
@@ -27,7 +26,6 @@ import merge from 'deepmerge';
 import { diffTemplates } from './utils';
 import { ENUM_COLLECTIONS } from '../mongo/interfaces';
 import { ENUM_APP_ROUTES } from '../interfaces/enums';
-import { slugifyFunction } from '../utils/utils';
 import { ICollection, IUserSummary } from '../interfaces/interfaces';
 
 export type Tab = 'template' | 'element' | 'history' | 'listItem';
@@ -43,7 +41,8 @@ interface FormBuilderContextValue {
   isEditable: boolean;
   mode?: 'light' | 'full';
   availableFields?: IFormField[];
-  selectedCollection: ICollection | null;
+  selectedGlobalCollection: ICollection | null;
+  onSelectGlobalConnexion: (collection: ICollection | null) => void;
   selectBlock: (blockId: string) => void;
   selectField: (blockId: string, fieldId: string) => void;
   clearSelection: () => void;
@@ -52,12 +51,8 @@ interface FormBuilderContextValue {
     edit: () => void;
     create: () => Promise<void>;
   }>;
-  onSave: (replace?: boolean) => Promise<IFormTemplate | void>;
-  onFormSave: (
-    event: FormEvent<HTMLFormElement>,
-    replace: boolean,
-    formId?: string
-  ) => Promise<IFormTemplate | void>;
+  onSave: (template: IFormTemplate) => Promise<IFormTemplate | void>;
+  onFormSave: (event: FormEvent<HTMLFormElement>, formId?: string) => void;
   addBlock: (layout: BlockLayout) => void;
   reorderBlock: (blockId: string, direction: 'up' | 'down') => void;
   deleteBlock: (blockId: string) => void;
@@ -68,7 +63,6 @@ interface FormBuilderContextValue {
     direction: 'up' | 'down'
   ) => void;
   deleteField: (blockId: string, fieldId: string) => void;
-  onSelectCollection: (collection: ICollection | null) => void;
   updateField: (
     blockId: string,
     fieldId: string,
@@ -105,45 +99,36 @@ export function useTemplateBuilder() {
 // Our Provider component
 interface FormBuilderProviderProps {
   children: React.ReactNode;
-  initialTemplate: IFormTemplate | null;
-  excerptUser: IUserSummary;
-  organizationId: string;
+  initialTemplate: IFormTemplate;
   availableFields?: IFormField[];
   mode?: 'light' | 'full';
+  onSave: (template: IFormTemplate) => Promise<void>;
+  user: IUserSummary;
 }
 
 export function TemplateBuilderProvider({
   children,
   initialTemplate,
-  excerptUser,
-  organizationId,
   availableFields,
-  mode = 'full'
+  mode = 'full',
+  onSave,
+  user
 }: FormBuilderProviderProps) {
-  const defaultTemplate: IFormTemplate = {
-    title: '',
-    blocks: [],
-    createdBy: excerptUser,
-    createdAt: new Date(),
-    organizationId,
-    _id: v4(),
-    version: 1,
-    templateListItem: null
-  };
-  const [template, setTemplate] = useState<IFormTemplate>(
-    initialTemplate || defaultTemplate
-  );
-
-  useEffect(() => {
-    if (initialTemplate) {
-      setTemplate(initialTemplate);
-    }
-  }, [initialTemplate]);
-
+  // const defaultTemplate: IFormTemplate = {
+  //   title: '',
+  //   blocks: [],
+  //   createdBy: excerptUser,
+  //   createdAt: new Date(),
+  //   organizationId,
+  //   _id: v4(),
+  //   version: 1,
+  //   templateListItem: null
+  // };
+  const [template, setTemplate] = useState<IFormTemplate>(initialTemplate);
+  const [selectedGlobalCollection, setSelectedGlobalCollection] =
+    useState<ICollection | null>(null);
   const [selectedBlockId, setSelectedBlockId] = useState<string | null>(null);
   const [selectedFieldId, setSelectedFieldId] = useState<string | null>(null);
-  const [selectedCollection, setSelectedCollection] =
-    useState<ICollection | null>(null);
   const [selectedTab, setSelectedTab] = useState<Tab>('template');
   const router = useRouter();
   const t = useTranslations('TemplateSection');
@@ -156,6 +141,11 @@ export function TemplateBuilderProvider({
     () => !template.published && !template.hasBeenPublished,
     [template.published, template.hasBeenPublished]
   );
+
+  useEffect(() => {
+    setTemplate(initialTemplate);
+  }, [initialTemplate]);
+  // const isEditable = true;
   const selectField = (blockId: string, fieldId: string) => {
     setSelectedBlockId(blockId);
     setSelectedFieldId(fieldId);
@@ -288,10 +278,6 @@ export function TemplateBuilderProvider({
             ...b,
             fields: b.fields.map((field) => {
               if (field.id === fieldId) {
-                if (key === 'label') {
-                  const name = slugifyFunction(value);
-                  return { ...field, [key]: value, name };
-                }
                 return { ...field, [key]: value };
               }
               return field;
@@ -346,91 +332,132 @@ export function TemplateBuilderProvider({
     []
   );
 
-  const onSave = useCallback(
-    async (replace?: boolean) => {
+  // const onSave = useCallback(async () => {
+  //   const templateUpdatedChangedBy = {
+  //     ...template,
+  //     changedBy: excerptUser
+  //   };
+
+  //   let updatedTemplate: IFormTemplate = template;
+  //   if (initialTemplate) {
+  //     const diff = diffTemplates(initialTemplate, templateUpdatedChangedBy);
+  //     const mergedDiff = merge.all([
+  //       initialTemplate.diff || {},
+  //       diff
+  //     ]) as TemplateDiff;
+  //     // await client.update(
+  //     //   ENUM_COLLECTIONS.TEMPLATES,
+  //     //   {
+  //     //     _id: template._id
+  //     //   },
+  //     //   {
+  //     //     $set: {
+  //     //       ...templateUpdatedChangedBy,
+  //     //       diff: mergedDiff
+  //     //     }
+  //     //   }
+  //     // );
+  //     // const updatedTemplate = {
+
+  //     // };
+
+  //     updatedTemplate = {
+  //       ...templateUpdatedChangedBy,
+  //       diff: mergedDiff
+  //     };
+  //     // toast({
+  //     //   title: t('save.action'),
+  //     //   description: t('save.success'),
+  //     //   variant: 'success'
+  //     // });
+  //     // return updatedTemplate;
+  //   }
+  //   setTemplate(updatedTemplate);
+  //   return updatedTemplate;
+  //   // const masterTemplateId = v4();
+
+  //   // const masterTemplate: IMasterTemplate = {
+  //   //   _id: masterTemplateId,
+  //   //   title: template.title,
+  //   //   latestVersion: template.version,
+  //   //   createdBy: template.createdBy,
+  //   //   createdAt: template.createdAt,
+  //   //   organizationId: template.organizationId,
+  //   //   publishedVersionId: null,
+  //   //   forceUpdate: template.forceUpdate
+  //   // };
+  //   // // await client.create(ENUM_COLLECTIONS.TEMPLATES_MASTER, masterTemplate);
+  //   // const templateWithMasterId: IFormTemplate = {
+  //   //   ...template,
+  //   //   masterId: masterTemplateId
+  //   // };
+
+  //   // await client.create(ENUM_COLLECTIONS.TEMPLATES, templateWithMasterId);
+  //   // toast({
+  //   //   title: t('save.action'),
+  //   //   description: t('save.success'),
+  //   //   variant: 'success'
+  //   // });
+  //   // if (replace) {
+  //   //   router.replace(
+  //   //     `${ENUM_APP_ROUTES.TEMPLATES}/${masterTemplateId}/${template._id}`
+  //   //   );
+  //   //   return;
+  //   // }
+  //   // return templateWithMasterId;
+  // }, [excerptUser, initialTemplate, template]);
+  const onFormSave = useCallback(
+    (event: FormEvent<HTMLFormElement>, formId?: string) => {
+      event.preventDefault();
+      const submittedForm = event.target as HTMLFormElement;
+      const intendedFormId = formId || 'template-form'; // Replace with the actual ID of your form
+      if (submittedForm.id !== intendedFormId) {
+        return null; // Ignore submission from nested forms
+      }
       const templateUpdatedChangedBy = {
         ...template,
-        changedBy: excerptUser
+        changedBy: user
       };
 
+      let updatedTemplate: IFormTemplate = template;
       if (initialTemplate) {
         const diff = diffTemplates(initialTemplate, templateUpdatedChangedBy);
         const mergedDiff = merge.all([
           initialTemplate.diff || {},
           diff
         ]) as TemplateDiff;
-        await client.update(
-          ENUM_COLLECTIONS.TEMPLATES,
-          {
-            _id: template._id
-          },
-          {
-            $set: {
-              ...templateUpdatedChangedBy,
-              diff: mergedDiff
-            }
-          }
-        );
-        const updatedTemplate = {
+        updatedTemplate = {
           ...templateUpdatedChangedBy,
           diff: mergedDiff
         };
-        setTemplate(updatedTemplate);
-        toast({
-          title: t('save.action'),
-          description: t('save.success'),
-          variant: 'success'
-        });
-        return updatedTemplate;
-      }
-      const masterTemplateId = v4();
+        // await client.update(
+        //   ENUM_COLLECTIONS.TEMPLATES,
+        //   {
+        //     _id: template._id
+        //   },
+        //   {
+        //     $set: {
+        //       ...templateUpdatedChangedBy,
+        //       diff: mergedDiff
+        //     }
+        //   }
+        // );
+        // const updatedTemplate = {
 
-      const masterTemplate: IMasterTemplate = {
-        _id: masterTemplateId,
-        title: template.title,
-        latestVersion: template.version,
-        createdBy: template.createdBy,
-        createdAt: template.createdAt,
-        organizationId: template.organizationId,
-        publishedVersionId: null,
-        forceUpdate: template.forceUpdate
-      };
-      await client.create(ENUM_COLLECTIONS.TEMPLATES_MASTER, masterTemplate);
-      const templateWithMasterId: IFormTemplate = {
-        ...template,
-        masterId: masterTemplateId
-      };
-      await client.create(ENUM_COLLECTIONS.TEMPLATES, templateWithMasterId);
-      toast({
-        title: t('save.action'),
-        description: t('save.success'),
-        variant: 'success'
-      });
-      if (replace) {
-        router.replace(
-          `${ENUM_APP_ROUTES.TEMPLATES}/${masterTemplateId}/${template._id}`
-        );
-        return;
+        // };
+
+        // toast({
+        //   title: t('save.action'),
+        //   description: t('save.success'),
+        //   variant: 'success'
+        // });
+        // return updatedTemplate;
       }
-      return templateWithMasterId;
+      setTemplate(updatedTemplate);
+      onSave(updatedTemplate);
     },
-    [excerptUser, initialTemplate, router, t, template]
-  );
-  const onFormSave = useCallback(
-    async (
-      event: FormEvent<HTMLFormElement>,
-      replace: boolean,
-      formId?: string
-    ) => {
-      event.preventDefault();
-      const submittedForm = event.target as HTMLFormElement;
-      const intendedFormId = formId || 'template-form'; // Replace with the actual ID of your form
-      if (submittedForm.id !== intendedFormId) {
-        return; // Ignore submission from nested forms
-      }
-      await onSave(replace);
-    },
-    [onSave]
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [initialTemplate, template]
   );
   const handleCreateTemplate = useCallback(
     async (prevTemplate: IFormTemplate | null) => {
@@ -447,21 +474,21 @@ export function TemplateBuilderProvider({
         forceUpdate: false,
         hasBeenPublished: false,
         createdAt: new Date(),
-        createdBy: excerptUser,
-        changedBy: excerptUser,
-        organizationId: organizationId,
+        createdBy: user,
+        changedBy: user,
         title: prevTemplate.title,
         blocks: prevTemplate.blocks,
         masterId: prevTemplate.masterId,
         templateListItem: prevTemplate.templateListItem
       };
       await client.create(ENUM_COLLECTIONS.TEMPLATES, templatePayload);
-      router.replace(
-        `${ENUM_APP_ROUTES.TEMPLATES}/${template.masterId}/${newVersionTemplateId}`
-      );
+      onSave(templatePayload);
+      // router.replace(
+      //   `${ENUM_APP_ROUTES.TEMPLATES}/${template.masterId}/${newVersionTemplateId}`
+      // );
       return;
     },
-    [excerptUser, organizationId, router, template.masterId]
+    [user, onSave]
   );
 
   const onCreateNewVersion = useCallback(async () => {
@@ -505,6 +532,7 @@ export function TemplateBuilderProvider({
       return;
     }
   }, [handleCreateTemplate, template, router]);
+
   const onPublish = useCallback(async () => {
     await client.updateMany(
       ENUM_COLLECTIONS.TEMPLATES,
@@ -542,23 +570,26 @@ export function TemplateBuilderProvider({
     });
   }, [template, t]);
 
-  const onSelectCollection = useCallback((collection: ICollection | null) => {
-    setSelectedCollection(collection);
-    setTemplate((prev) => ({
-      ...prev,
-      collection: collection?._id
-    }));
-  }, []);
+  const handleSelectGlobalCollection = useCallback(
+    (collection: ICollection | null) => {
+      setSelectedGlobalCollection(collection);
+      setTemplate((prev) => ({
+        ...prev,
+        globalCollectionName: collection?.name
+      }));
+    },
+    []
+  );
   // Provide everything via context value
   const value: FormBuilderContextValue = {
+    selectedGlobalCollection,
+    onSelectGlobalConnexion: handleSelectGlobalCollection,
     template,
     isEditable,
     setTemplate,
     selectedBlockId,
-    selectedCollection,
     selectedFieldId,
     selectedTab,
-    onSelectCollection,
     onSelectTab: setSelectedTab,
     onFormSave,
     onSave,

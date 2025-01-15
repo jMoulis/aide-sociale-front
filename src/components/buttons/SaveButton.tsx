@@ -7,10 +7,10 @@ interface Props extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   active?: boolean;
 }
 const SaveButton = forwardRef<HTMLButtonElement, Props>(
-  ({ loading, children, ...props }, ref) => {
+  ({ loading, children, type, ...props }, ref) => {
     const t = useTranslations('GlobalSection');
     return (
-      <Button loading={loading} ref={ref} {...props}>
+      <Button type={type || 'submit'} loading={loading} ref={ref} {...props}>
         {children || t('actions.save')}
       </Button>
     );

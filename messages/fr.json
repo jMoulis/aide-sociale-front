@@ -1,4 +1,14 @@
 {
+  "AddressSection": {
+    "labels": {
+      "label": "Libellé",
+      "street": "Adresse",
+      "city": "Ville",
+      "country": "Pays",
+      "zipCode": "Code postal"
+    },
+    "addAddress": "Ajouter une adresse"
+  },
   "ClerkSection": {
     "errors": {
       "title": "Connexion",
@@ -24,6 +34,24 @@
       "action": "Modifier",
       "success": "Collection mise à jour avec succès",
       "error": "Une erreur s'est produite lors de la mise à jour de la collection. <code>Erreur {error}</code>"
+    }
+  },
+  "ContactInfoSection": {
+    "addContactInfo": "Ajouter des informations de contact",
+    "tooltips": {
+      "phone": "10 à 15 chiffres",
+      "email": "ex: jean@dupond.fr",
+      "website": "ex: www.jeandupond.fr",
+      "social": "ex: @jeandupond"
+    },
+    "labels": {
+      "type": "Type",
+      "label": "Libellé",
+      "value": "Valeur",
+      "phone": "Téléphone",
+      "email": "Email",
+      "website": "Site web",
+      "social": "Réseau social"
     }
   },
   "ErrorSection": {
@@ -86,12 +114,27 @@
     "dashboard": "Tableau de bord",
     "admin": "Admin",
     "errorOrganization": "Une erreur s'est produite, aucune organisation n'a été trouvée. Veuillez contacter l'administrateur.",
+    "create": {
+      "title": "Créer",
+      "description": "Créer un nouvel élément",
+      "action": "Créer",
+      "success": "Créé avec succès",
+      "error": "Une erreur s'est produite lors de la création. <code>Erreur {error}</code>"
+    },
+    "edit": {
+      "title": "Modifier",
+      "description": "Modifier un élément existant",
+      "action": "Modifier",
+      "success": "Modifié avec succès",
+      "error": "Une erreur s'est produite lors de la modification. <code>Erreur {error}</code>"
+    },
     "emailPlaceholder": "ex: jean@dupont.fr",
     "actions": {
       "addTag": "Tapez un mot et appuyez sur Entrée",
       "submit": "Envoyer",
       "cancel": "Annuler",
       "save": "Enregistrer",
+      "delete": "Supprimer",
       "reset": "Réinitialiser",
       "update": "Mettre à jour",
       "signIn": "Se connecter",
@@ -99,6 +142,9 @@
       "onLine": "En ligne",
       "create": "Créer",
       "open": "Ouvrir",
+      "clear": "Effacer",
+      "clearFilters": "Effacer les filtres",
+      "search": "Rechercher",
       "pickADate": "Choisir une date",
       "pickRangeDate": "Choisir une période"
     }
@@ -115,17 +161,26 @@
     "placeholders": {
       "name": "ex: ACME"
     },
+    "labels": {
+      "name": "Nom de l'organisation",
+      "department": "Département"
+    },
+    "helpers": {
+      "name": "Nom de l'organisation"
+    },
     "create": {
       "title": "Créer une organisation",
-      "description": "Créez une organisation pour gérer vos établissements.",
-      "submit": "Créer",
-      "labels": {
-        "name": "Nom de l'organisation",
-        "department": "Département"
-      },
-      "helpers": {
-        "name": "Nom de l'organisation"
-      }
+      "description": "Créer une nouvelle organisation",
+      "action": "Créer",
+      "success": "Organisation créée avec succès",
+      "error": "Une erreur s'est produite lors de la création de l'organisation. <code>Erreur {error}</code>"
+    },
+    "edit": {
+      "title": "Modifier l'organisation",
+      "description": "Modifier une organisation existante",
+      "action": "Modifier",
+      "success": "Organisation mise à jour avec succès",
+      "error": "Une erreur s'est produite lors de la mise à jour de l'organisation. <code>Erreur {error}</code>"
     },
     "organizationSubdomainName": "Nom du sous-domaine de l'organisation"
   },
@@ -188,6 +243,7 @@
       "read": "Lecture",
       "write": "Création/Modification",
       "all": "Toutes les ressources",
+      "route": "Route",
       "mandatoryPermissions": "Droits",
       "menu": {
         "menuManagement": "Gestion des menus",
@@ -366,6 +422,34 @@
       "error": "Une erreur s'est produite lors de la réactivation du compte. <code>Erreur {error}</code>"
     }
   },
+  "StructureSection": {
+    "title": "Structure",
+    "description": "Gestion de la structure",
+    "labels": {
+      "name": "Nom structure",
+      "description": "Description",
+      "type": "Type",
+      "capacity": "Capacité",
+      "occupancy": "Occupation",
+      "address": "Adresse",
+      "contact": "Contact",
+      "teams": "Équipes"
+    },
+    "create": {
+      "title": "Créer une structure",
+      "description": "Créer une nouvelle structure",
+      "action": "Créer",
+      "success": "Structure créée avec succès",
+      "error": "Une erreur s'est produite lors de la création de la structure. <code>Erreur {error}</code>"
+    },
+    "edit": {
+      "title": "Modifier la structure",
+      "description": "Modifier une structure existante",
+      "action": "Modifier",
+      "success": "Structure mise à jour avec succès",
+      "error": "Une erreur s'est produite lors de la mise à jour de la structure. <code>Erreur {error}</code>"
+    }
+  },
   "TableSection": {
     "noResults": "Aucun résultat trouvé",
     "clearFilter": "Effacer le filtre",
@@ -382,6 +466,10 @@
     "title": "Utilisateurs",
     "columns": "Colonnes",
     "user": "Utilisateur",
+    "labels": {
+      "firstName": "Prénom",
+      "lastName": "Nom"
+    },
     "create": {
       "title": "Créer un utilisateur",
       "description": "Créer un nouvel utilisateur",
@@ -390,7 +478,33 @@
       "error": "Une erreur s'est produite lors de la création de l'utilisateur. <code>Erreur {error}</code>"
     }
   },
+  "TeamSection": {
+    "title": "Équipes",
+    "description": "Gestion des équipes",
+    "createTeam": "Créer une équipe",
+    "labels": {
+      "name": "Nom de l'équipe",
+      "description": "Description",
+      "members": "Membres",
+      "leader": "Chef d'équipe"
+    },
+    "create": {
+      "title": "Créer une équipe",
+      "description": "Créer une nouvelle équipe",
+      "action": "Créer",
+      "success": "Équipe créée avec succès",
+      "error": "Une erreur s'est produite lors de la création de l'équipe. <code>Erreur {error}</code>"
+    },
+    "edit": {
+      "title": "Modifier l'équipe",
+      "description": "Modifier une équipe existante",
+      "action": "Modifier",
+      "success": "Équipe mise à jour avec succès",
+      "error": "Une erreur s'est produite lors de la mise à jour de l'équipe. <code>Erreur {error}</code>"
+    }
+  },
   "TemplateSection": {
+    "selectCollection": "Sélectionner une collection",
     "template": "modèle",
     "generate": "Générer",
     "askAiToCreateTemplate": "Demander à l'IA de créer un modèle",
@@ -465,12 +579,19 @@
       "toConfirm": "Saisissez \"<code>{templateName}</code>\" ci-dessous pour continuer.",
       "error": "Une erreur s'est produite lors de la suppression du modèle. <code>Erreur {error}</code>"
     },
-    "save": {
+    "create": {
       "title": "Enregistrer le modèle",
       "description": "Enregistrer un nouveau modèle",
       "action": "Enregistrer le modèle",
       "success": "Modèle enregistré avec succès",
       "error": "Une erreur s'est produite lors de l'enregistrement du modèle.  <code>Error {error}</code>"
+    },
+    "edit": {
+      "title": "Modifier le modèle",
+      "description": "Modifier un modèle existant",
+      "action": "Modifier le modèle",
+      "success": "Modèle mis à jour avec succès",
+      "error": "Une erreur s'est produite lors de la mise à jour du modèle.  <code>Error {error}</code>"
     },
     "publish": {
       "title": "Publier le modèle",
@@ -503,6 +624,22 @@
         "success": "Modèle mis à jour avec succès",
         "error": "Une erreur s'est produite lors de la mise à jour du modèle. <code>Erreur {error}</code>"
       }
+    }
+  },
+  "WebsiteSection": {
+    "create": {
+      "title": "Créer un site web",
+      "description": "Créer un nouveau site web",
+      "action": "Créer un site web",
+      "success": "Site web créé avec succès",
+      "error": "Une erreur s'est produite lors de la création du site web. <code>Erreur {error}</code>"
+    },
+    "edit": {
+      "title": "Modifier le site web",
+      "description": "Modifier un site web existant",
+      "action": "Modifier le site web",
+      "success": "Site web mis à jour avec succès",
+      "error": "Une erreur s'est produite lors de la mise à jour du site web. <code>Erreur {error}</code>"
     }
   },
   "clerk": {

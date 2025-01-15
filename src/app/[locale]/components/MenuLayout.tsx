@@ -8,7 +8,7 @@ type Props = {
 function MenuLayout({ menus, className }: Props) {
   return (
     <aside
-      className={`w-64 m-2 ${className || ''}`}
+      className={`w-44 m-2 ${className || ''}`}
       style={{
         gridArea: 'menu'
       }}>

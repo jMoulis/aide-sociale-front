@@ -11,6 +11,4 @@ const generateToken = () => {
     .sign(secretKey);
 };
 
-const token = await generateToken();
-
-export default token;
+export default generateToken;

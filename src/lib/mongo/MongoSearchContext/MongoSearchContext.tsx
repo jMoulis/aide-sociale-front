@@ -18,7 +18,11 @@ type MongoSearchContextType<T> = {
   onAutocompleteTermChange: Dispatch<SetStateAction<string>>;
   onFetchFacets: () => void;
   onInputSearch: (e: React.ChangeEvent<HTMLInputElement>) => void;
-  onFacetFilter: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  onFacetFilter: (
+    e:
+      | React.ChangeEvent<HTMLInputElement>
+      | { target: { name?: string; value?: string; checked?: boolean } }
+  ) => void;
   onFetchData: () => void;
   onSuggestionsInit: (index: string, path: string) => void;
   onClearFilters: () => void;
@@ -76,8 +80,13 @@ const defaultStatus = {
 type Props = {
   children: React.ReactNode;
   collection: string | any;
+  searchFilters?: { [key: string]: string };
 };
-function MongoSearchProvider<T>({ children, collection }: Props) {
+function MongoSearchProvider<T>({
+  children,
+  collection,
+  searchFilters
+}: Props) {
   const [autocompleteTerm, setAutocompleteTerm] = useState<string>('');
   const [suggestions, setSuggestions] = useState<T[]>([]);
   const [facets, setFacets] = useState<IFacets[]>([]);
@@ -174,10 +183,16 @@ function MongoSearchProvider<T>({ children, collection }: Props) {
   );
 
   const onFacetFilter = useCallback(
-    (e: React.ChangeEvent<HTMLInputElement>) => {
+    (
+      e:
+        | React.ChangeEvent<HTMLInputElement>
+        | { target: { name?: string; value?: string; checked?: boolean } }
+    ) => {
       const { name, value, checked } = e.target;
+      if (!name || !value) return;
       const path = name.replace('Facet', '');
       setInitFilterStatus('set');
+
       if (checked) {
         setFilters((prevFilters) => {
           const prevFilter = prevFilters[path] || [];
@@ -205,22 +220,28 @@ function MongoSearchProvider<T>({ children, collection }: Props) {
         status: true,
         error: null
       });
-      const { data, error } = await client.list<T>(collection);
-      if (error) {
-        throw new Error(error);
-      }
-      setHits(data || []);
-      setHitsStatus({
-        status: false,
-        error: null
+      client.onSnapshotList<T>(collection, searchFilters ?? {}, (data) => {
+        setHits(data || []);
+        setHitsStatus({
+          status: false,
+          error: null
+        });
       });
+      // if (error) {
+      //   throw new Error(error);
+      // }
+      // setHits(data || []);
+      // setHitsStatus({
+      //   status: false,
+      //   error: null
+      // });
     } catch (error: any) {
       setHitsStatus({
         status: false,
         error: error.message
       });
     }
-  }, [collection]);
+  }, [collection, searchFilters]);
 
   const initFacets = useCallback((config: any, facetIndex: string) => {
     setFacetsConfig({ config, index: facetIndex });
@@ -295,7 +316,6 @@ function MongoSearchProvider<T>({ children, collection }: Props) {
         }
       ];
     }, []);
-
     if (compoundFilters.length === 0) {
       onFetchData();
       return;
@@ -304,7 +324,7 @@ function MongoSearchProvider<T>({ children, collection }: Props) {
     const query = [
       {
         $search: {
-          index: 'default',
+          index: searchIndex || 'default',
           compound: {
             filter: compoundFilters
           }
@@ -313,7 +333,7 @@ function MongoSearchProvider<T>({ children, collection }: Props) {
     ];
     client.search(collection, query).then(({ data }) => setHits(data || []));
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [filters, collection]);
+  }, [filters, collection, searchIndex]);
 
   useEffect(() => {
     if (hitsIndex) {

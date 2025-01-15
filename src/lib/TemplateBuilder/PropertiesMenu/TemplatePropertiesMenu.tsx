@@ -5,7 +5,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { useTemplateBuilder } from '../TemplateBuilderContext';
 import { useTranslations } from 'next-intl';
 import { CheckedState } from '@radix-ui/react-checkbox';
-import { FormEvent, useMemo, useState } from 'react';
+import { FormEvent, useEffect, useMemo, useState } from 'react';
 import { IDraftAlert, IFormData } from '../interfaces';
 import ExistingDraftAlert from './ExistingDraftAlert';
 import DeleteButtonWithConfirmation from '@/components/buttons/DeleteButtonWithConfirmation';
@@ -24,11 +24,19 @@ import ConfirmationDeleteContent from './ConfirmationDeleteContent';
 import { ENUM_COLLECTIONS } from '@/lib/mongo/interfaces';
 import { ENUM_APP_ROUTES } from '@/lib/interfaces/enums';
 import { usePublishedTemplate } from '../usePublishedTemplate';
-import DataTemplateConnexionMenu from './DataConnexionTemplateMenu/DataTemplateConnexionMenu';
+import DataConnexionSelect from './DataConnexionTemplateMenu/DataConnexionSelect';
+import { ICollection } from '@/lib/interfaces/interfaces';
 
 function TemplatePropertiesMenu() {
-  const { onPublish, template, setTemplate, onCreateNewVersion, isEditable } =
-    useTemplateBuilder();
+  const {
+    onPublish,
+    template,
+    setTemplate,
+    onCreateNewVersion,
+    isEditable,
+    onSelectGlobalConnexion,
+    selectedGlobalCollection
+  } = useTemplateBuilder();
   const [draftAlert, setDraftAlert] = useState<IDraftAlert | null>(null);
   const [relatedDocuments, setRelatedDocuments] = useState<IFormData[]>([]);
   const tGlobal = useTranslations('GlobalSection');
@@ -36,13 +44,32 @@ function TemplatePropertiesMenu() {
   const [confirmString, setConfirmString] = useState('');
   const [canDelete, setCanDelete] = useState(false);
   const user = useMongoUser();
-  const { publishedTemplate } = usePublishedTemplate(template.masterId);
+  const { getPublishedTemplate } = usePublishedTemplate(template.masterId);
   const router = useRouter();
   const [deleting, setDeleting] = useState(false);
+
   const confirmationStringPattern = useMemo(
     () => `${template.title}-${template.version}`,
     [template.title, template.version]
   );
+  useEffect(() => {
+    if (template.globalCollectionName && !selectedGlobalCollection) {
+      client
+        .get<ICollection>(ENUM_COLLECTIONS.COLLECTIONS, {
+          name: template.globalCollectionName
+        })
+        .then(({ data }) => {
+          if (data) {
+            onSelectGlobalConnexion(data);
+          }
+        });
+    }
+  }, [
+    onSelectGlobalConnexion,
+    selectedGlobalCollection,
+    template.globalCollectionName
+  ]);
+
   const handleForceUpdate = (checked: CheckedState) => {
     setTemplate({
       ...template,
@@ -79,6 +106,7 @@ function TemplatePropertiesMenu() {
       await client.delete(ENUM_COLLECTIONS.TEMPLATES, template._id);
       setDeleting(false);
       setConfirmString('');
+      const publishedTemplate = await getPublishedTemplate();
       if (!publishedTemplate) return;
 
       if (publishedTemplate._id === template._id) {
@@ -110,7 +138,6 @@ function TemplatePropertiesMenu() {
       throw new Error('Invalid confirmation string');
     }
   };
-
   const handleFetchRelatedDocuments = async (open: boolean) => {
     if (open) {
       const { data: documents } = await client.list<IFormData>(
@@ -122,7 +149,6 @@ function TemplatePropertiesMenu() {
       setRelatedDocuments(documents || []);
     }
   };
-
   const handleConfirmString = (e: FormEvent<HTMLInputElement>) => {
     const { value } = e.currentTarget;
     setConfirmString(value);
@@ -132,7 +158,9 @@ function TemplatePropertiesMenu() {
       setCanDelete(false);
     }
   };
-
+  const handleSelectCollection = (collection: ICollection | null) => {
+    onSelectGlobalConnexion(collection);
+  };
   return (
     <>
       <div className='p-2 space-y-2'>
@@ -177,11 +205,14 @@ function TemplatePropertiesMenu() {
             {tGlobal('actions.publish')}
           </Button>
         ) : null}
-        <DataTemplateConnexionMenu />
+        <DataConnexionSelect
+          onSelectCollection={handleSelectCollection}
+          selectedCollection={selectedGlobalCollection}
+        />
         <DeleteButtonWithConfirmation
           onDelete={handleDelete}
           title={t('delete.title')}
-          disabled={publishedTemplate?._id === template._id}
+          // disabled={publishedTemplate?._id === template._id}
           buttonActionText={
             <div>
               <FontAwesomeIcon icon={faTrash} />

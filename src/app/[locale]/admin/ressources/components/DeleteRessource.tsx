@@ -1,6 +1,6 @@
 import client from '@/lib/mongo/initMongoClient';
 import { ENUM_COLLECTIONS } from '@/lib/mongo/interfaces';
-import { FormEvent, memo, useCallback } from 'react';
+import { memo, useCallback } from 'react';
 import { toast } from '@/lib/hooks/use-toast';
 import { useTranslations } from 'next-intl';
 import DeleteButtonWithConfirmation from '@/components/buttons/DeleteButtonWithConfirmation';
@@ -9,18 +9,14 @@ import { toastError } from '@/lib/toast/toastError';
 
 type Props = {
   ressource: IRessource;
+  onSuccess?: () => void;
 };
 
-const DeleteRessource = memo(({ ressource }: Props) => {
+const DeleteRessource = memo(({ ressource, onSuccess }: Props) => {
   const t = useTranslations('RoleSection.ressource');
 
   const handleDelete = useCallback(
-    async (
-      event:
-        | React.MouseEvent<HTMLSpanElement, MouseEvent>
-        | FormEvent<HTMLFormElement>
-    ) => {
-      event.stopPropagation();
+    async () => {
       if (ressource._id) {
         try {
           await client.delete(ENUM_COLLECTIONS.RESSOURCES, ressource._id);
@@ -29,6 +25,7 @@ const DeleteRessource = memo(({ ressource }: Props) => {
             description: t('delete.success'),
             variant: 'success'
           });
+          onSuccess?.();
         } catch (error: any) {
           toast(toastError(t, 'delete.action', 'delete.error', error));
         }

@@ -90,3 +90,6 @@ body {
   grid-template-rows: 50px 1fr;
   flex: 1;
 }
+.pac-container {
+  z-index: 10000;
+}

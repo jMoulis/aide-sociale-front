@@ -68,8 +68,8 @@ function Selectbox({
             className
           )}>
           <option value=''>{placeholder || t('select')}</option>
-          {options.map((option) => (
-            <option key={option.value} value={option.value}>
+          {options.map((option, index) => (
+            <option key={index} value={option.value}>
               {option.label}
             </option>
           ))}

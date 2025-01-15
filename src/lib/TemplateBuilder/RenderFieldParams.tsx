@@ -12,6 +12,7 @@ import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Slider } from '@/components/ui/slider';
 import { Switch } from '@/components/ui/switch';
 import { TimePicker } from '@/components/form/Date/TimePicker/TimePicker';
+import Form from '@/components/form/Form';
 
 interface RenderFieldParams {
   field: IFormField;
@@ -47,11 +48,13 @@ export function renderField({
 
   // 2. Otherwise, render based on field.type
   //    If readOnly === true, we disable interactions or omit onChange
-  const value = formData?.data[field.name] || '';
+
+  const value = formData?.data[field.valueField || ''] || '';
+
   const disabledClasses = readOnly ? 'pointer-events-none' : '';
   const handleFieldChange = (val: any) => {
-    if (!readOnly && onChange) {
-      onChange(field.name, val);
+    if (!readOnly && onChange && field.labelField) {
+      onChange(field.labelField, val);
     }
   };
 
@@ -401,6 +404,15 @@ export function renderField({
             })}
           </div>
         </>
+      );
+    }
+    case ENUM_FIELD_TYPE.FORM: {
+      return (
+        <Form>
+          {field.blocks?.map((block) =>
+            block.fields.map((subField) => renderField({ field: subField }))
+          )}
+        </Form>
       );
     }
     default:

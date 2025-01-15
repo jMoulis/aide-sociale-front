@@ -56,6 +56,7 @@ export default async function TemplatePage({ params }: Props) {
         masterTemplate={masterTemplate}
         user={user}
         organizationId={organizationId}
+        onSelect={() => {}}
       />
       <div className='flex flex-wrap'>
         {sortArray(templateVersions || [], 'version', false).map(

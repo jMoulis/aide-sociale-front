@@ -3,16 +3,18 @@ import CancelButton from '@/components/buttons/CancelButton';
 import FormFooterAction from '@/components/dialog/FormFooterAction';
 import Input from '@/components/form/Input';
 import { ENUM_APP_ROUTES } from '@/lib/interfaces/enums';
-import { IMenuEntry, IRole } from '@/lib/interfaces/interfaces';
+import { IMenuEntry, IRessource, IRole } from '@/lib/interfaces/interfaces';
 import { sortArray } from '@/lib/utils/utils';
 import { useTranslations } from 'next-intl';
-import { ChangeEvent, FormEvent, useRef, useState } from 'react';
+import { ChangeEvent, FormEvent, useEffect, useRef, useState } from 'react';
 import Selectbox from '@/components/form/Selectbox';
 import FormField from '@/components/form/FormField';
 import FormLabel from '@/components/form/FormLabel';
 import Form from '@/components/form/Form';
 import { Checkbox } from '@/components/ui/checkbox';
 import { CheckedState } from '@radix-ui/react-checkbox';
+import client from '@/lib/mongo/initMongoClient';
+import { ENUM_COLLECTIONS } from '@/lib/mongo/interfaces';
 
 type Props = {
   initEntry?: IMenuEntry;
@@ -26,15 +28,31 @@ function MenuEntryForm({ initEntry, onSubmit, onCancel, roles }: Props) {
     uri: '',
     roles: []
   };
-  const routes = useRef<{ label: string; value: string }[]>(
-    sortArray(
-      Object.entries(ENUM_APP_ROUTES).map(([key, value]) => ({
-        label: key,
-        value
-      })),
-      'label'
-    )
-  );
+  const [routes, setRoutes] = useState<{ label: string; value: string }[]>([]);
+
+  useEffect(() => {
+    client.list<IRessource>(ENUM_COLLECTIONS.RESSOURCES).then(({ data }) => {
+      if (!data) return;
+      setRoutes(
+        sortArray(
+          data.map((ressource) => ({
+            label: ressource.name,
+            value: ressource.route
+          })),
+          'label'
+        )
+      );
+    });
+  });
+  // const routes = useRef<{ label: string; value: string }[]>(
+  //   sortArray(
+  //     Object.entries(ENUM_APP_ROUTES).map(([key, value]) => ({
+  //       label: key,
+  //       value
+  //     })),
+  //     'label'
+  //   )
+  // );
   const [entry, setEntry] = useState<IMenuEntry>(initEntry || defaultEntry);
   const t = useTranslations('GlobalSection.actions');
   const tMenu = useTranslations('RoleSection.ressource.menu');
@@ -82,7 +100,7 @@ function MenuEntryForm({ initEntry, onSubmit, onCancel, roles }: Props) {
         <Selectbox
           name='uri'
           required
-          options={routes.current}
+          options={routes}
           value={entry.uri}
           onChange={handleInputChange}
         />
@@ -94,11 +112,14 @@ function MenuEntryForm({ initEntry, onSubmit, onCancel, roles }: Props) {
             <li key={role._id}>
               <FormField className='flex-row items-center'>
                 <Checkbox
+                  id={`menu-entry-${role._id}`}
                   onCheckedChange={(state) => handleChangeRole(state, role._id)}
                   value={role._id}
                   checked={entry.roles.includes(role._id)}
                 />
-                <FormLabel className='mb-0'>{role.name}</FormLabel>
+                <FormLabel htmlFor={`menu-entry-${role._id}`} className='mb-0'>
+                  {role.name}
+                </FormLabel>
               </FormField>
             </li>
           ))}

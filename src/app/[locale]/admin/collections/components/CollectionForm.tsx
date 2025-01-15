@@ -36,7 +36,8 @@ function CollectionForm({
     organizationId,
     createdBy: user,
     createdAt: new Date(),
-    fields: []
+    fields: [],
+    templates: []
   };
   const [collection, setCollection] = useState<ICollection>(
     initialCollection || defaultCollection

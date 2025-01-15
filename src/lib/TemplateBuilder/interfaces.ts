@@ -19,6 +19,7 @@ export enum ENUM_FIELD_TYPE {
   DATERANGE = 'daterange',
   RATING = 'rating',
   TIME = 'time',
+  FORM = 'form',
 }
 export type OptionsSourceType = 'static' | 'database' | 'template';
 
@@ -45,11 +46,13 @@ export interface IFormField {
   // If optionsSourceType === 'database', we might specify:
   collectionName?: string;
   labelField?: string;
+  valueField?: string;
   connectedFieldId?: string;
   connectedTemplateId?: string;
   max?: number;
   min?: number;
   step?: number;
+  blocks?: IFormBlock[];
 }
 
 export type BlockLayout = 'single-column' | 'two-column' | 'three-column'
@@ -70,12 +73,12 @@ export interface IFormTemplate {
   summaryAiAction?: string;
   masterId?: string;
   version: number;
-  collection?: string;
+  globalCollectionName?: string;
   title: string;
   blocks: IFormBlock[];
   createdBy: IUserSummary | null;
   createdAt: Date;
-  organizationId: string;
+  organizationId?: string;
   updatedAt?: Date;
   changedBy?: IUserSummary | null;
   diff?: TemplateDiff;

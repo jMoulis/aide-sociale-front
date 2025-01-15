@@ -31,13 +31,18 @@ export interface IUser {
   organizationId: string;
   super_admin?: boolean;
   authId?: string;
-  institutionId?: string;
+  structureId?: string;
   teams?: ITeamSummary[];
   dateOfBirth?: Date;
   createdAt: Date;
   updatedAt?: Date;
   gender?: string;
 }
+
+export interface IEmployee extends IUser {
+  entryDate?: Date;
+}
+
 export interface IMenuEntry {
   label: string;
   uri: string;
@@ -56,6 +61,7 @@ export interface ICollection {
   createdAt: Date;
   organizationId: string;
   fields: string[];
+  templates: string[];
 }
 export interface IRessource {
   _id: string;
@@ -63,7 +69,12 @@ export interface IRessource {
   description: string;
   mandatoryPermissions: ActionKey[];
   organizationId?: string;
-  menus: IMenu[]
+  menus: IMenu[],
+  route: string;
+  templateId?: string;
+  createdAt: Date;
+  updatedAt?: Date;
+  createdBy?: IUserSummary;
 }
 export interface IRole {
   _id: string;
@@ -116,11 +127,12 @@ export interface ITeam {
   name: string;
   description: string;
   organizationId: string;
-  institutionId: string;
+  institutionId?: string;
   members: IUserSummary[];
   projects: IProjectSummary[];
   createdAt: Date;
   updatedAt?: Date;
+  createdBy?: IUserSummary;
 }
 
 
@@ -155,16 +167,18 @@ export interface ITask {
   modifications?: IModification[]; // History of changes
 }
 export interface IStructure {
-  id: string;
+  _id: string;
   name: string; // Structure name
-  type: "family" | "foster_home" | "specialized_center"; // Type of structure
+  description: string; // Description of the structure
+  type?: "family" | "foster_home" | "specialized_center"; // Type of structure
   capacity: number; // Total capacity of the structure
-  occupied: number; // Number of occupied places
+  occupancy: number; // Number of occupied places
   organizationId: string; // Linked organization
   departmentId: string; // Department overseeing the structure
   placements: IPlacementHistory[]; // Placement history for the structure
   tasks: ITask[]; // Tasks associated with the structure
   modifications?: IModification[]; // History of changes
+  createdAt: Date; // Date of creation
 }
 export interface IOrganization {
   _id: string;
@@ -173,4 +187,48 @@ export interface IOrganization {
   department: string; // Department overseeing the organization
   createdAt: Date; // Date of creation
   modifications?: IModification[]; // History of changes
+  addresses: IAddress[];
+  contactsInfo: IContactInfo[];
 }
+
+export interface IPage {
+  _id: string;
+  name: string;
+  organizationId: string;
+  subPages: IPage[];
+  createdAt: Date;
+  updatedAt?: Date;
+  masterTemplates: string[];
+  route: string;
+  websiteId: string;
+  roles: string[];
+}
+export interface IWebsite {
+  _id: string;
+  name: string;
+  organizationId: string;
+  createdAt: Date;
+  updatedAt?: Date;
+  pages: IPage[];
+}
+
+export interface IAddress {
+  _id: string;
+  label?: string;
+  street?: string;
+  city?: string;
+  zipCode?: string;
+  country?: string;
+  coords?: {
+    latitude: number;
+    longitude: number;
+  }
+}
+
+export interface IContactInfo {
+  _id: string;
+  label: string;
+  value: string;
+  type: string;
+}
+

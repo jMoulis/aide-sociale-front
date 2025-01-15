@@ -1,6 +1,6 @@
 'use server';
 
-import { clerkClient, currentUser } from '@clerk/nextjs/server';
+import { clerkClient, currentUser, User } from '@clerk/nextjs/server';
 import { getTranslations } from 'next-intl/server';
 
 import clientMongoServer from '@/lib/mongo/initMongoServer';
@@ -11,6 +11,7 @@ import {
 } from '@/lib/utils/auth/serverUtils';
 import { ENUM_COLLECTIONS } from '@/lib/mongo/interfaces';
 import { IUser, UserExcerpt } from '@/lib/interfaces/interfaces';
+import { sortArray } from '@/lib/utils/utils';
 
 export async function updateUserPassword(userId: string, password: string) {
   const tError = await getTranslations('ErrorSection');
@@ -155,7 +156,16 @@ export async function getUserList() {
   try {
     const client = await clerkClient();
     const { data } = await client.users.getUserList();
-    const users: UserExcerpt[] = await getUsersListExcerpt(data);
+    const organizationId = await getServerSideCurrentUserOrganizationId();
+    const filteredUsersByOrganization = sortArray(
+      data.filter((user: User) => {
+        return user.publicMetadata?.organizationId === organizationId;
+      }),
+      'firstName'
+    );
+    const users: UserExcerpt[] = await getUsersListExcerpt(
+      filteredUsersByOrganization
+    );
 
     return {
       data: users

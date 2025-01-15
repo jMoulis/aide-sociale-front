@@ -9,16 +9,18 @@ type Props = {
   masterTemplate: IMasterTemplate;
   user: IUserSummary;
   organizationId: string;
+  onSelect: (masterTemplate: IMasterTemplate) => void;
 };
 function MasterTemplateListItem({
   masterTemplate,
   user,
-  organizationId
+  organizationId,
+  onSelect
 }: Props) {
   const [template, setTemplate] = useState<IMasterTemplate>(masterTemplate);
   return (
     <div className='flex mb-2'>
-      <span>{template.title}</span>
+      <span onClick={() => onSelect(template)}>{template.title}</span>
       <MasterTemplateForm
         initialMasterTemplate={template}
         onSubmit={(template) => setTemplate(template)}

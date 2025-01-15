@@ -11,6 +11,7 @@ import {
   faListDropdown,
   faListRadio,
   faStar,
+  faTableList,
   faText,
   faToggleOn
 } from '@awesome.me/kit-8441d3fdf2/icons/classic/solid';
@@ -105,5 +106,10 @@ export const fieldTypes = [
     icon: faClock,
     value: ENUM_FIELD_TYPE.TIME,
     label: 'Time'
+  },
+  {
+    icon: faTableList,
+    value: ENUM_FIELD_TYPE.FORM,
+    label: 'Form'
   }
 ];

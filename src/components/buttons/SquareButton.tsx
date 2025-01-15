@@ -11,7 +11,7 @@ const SquareButton = forwardRef<HTMLButtonElement, Props>(
   ({ loading, children, ...props }, ref) => {
     return (
       <Button
-        className='w-8 h-8 flex items-center justify-center'
+        className='w-6 h-6 flex items-center justify-center'
         loading={loading}
         ref={ref}
         {...props}>

@@ -33,12 +33,28 @@ function Dialog({
       <DialogTrigger asChild={Boolean(Trigger)}>
         {Trigger ? Trigger : triggerText ?? 'Open Dialog'}
       </DialogTrigger>
-      <DialogContent className={`${contentClassname}`} style={contentStyle}>
+      <DialogContent
+        className={`${contentClassname}`}
+        style={contentStyle}
+        onInteractOutside={(e) => {
+          const hasPacContainer = e.composedPath().some((el: EventTarget) => {
+            if ('classList' in el) {
+              return Array.from((el as Element).classList).includes(
+                'pac-container'
+              );
+            }
+            return false;
+          });
+
+          if (hasPacContainer) {
+            e.preventDefault();
+          }
+        }}>
         <DialogHeader>
           <DialogTitle>{title}</DialogTitle>
           <DialogDescription className='hidden'>{title}</DialogDescription>
-          {children}
         </DialogHeader>
+        {children}
       </DialogContent>
     </DialogComponent>
   );

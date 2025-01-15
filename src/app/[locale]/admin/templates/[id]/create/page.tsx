@@ -1,6 +1,4 @@
 import { IFormTemplate } from '@/lib/TemplateBuilder/interfaces';
-import TemplateBuilder from '@/lib/TemplateBuilder/TemplateBuilder';
-import { TemplateBuilderProvider } from '@/lib/TemplateBuilder/TemplateBuilderContext';
 import {
   getMongoUser,
   getServerSideCurrentUserOrganizationId
@@ -20,7 +18,7 @@ export default async function TemplatePage({ params }: Props) {
   const excerptUser = getUserSummary(mongoUser);
 
   const newVersionTemplateId = v4();
-  const template: IFormTemplate = {
+  const _template: IFormTemplate = {
     _id: newVersionTemplateId,
     version: 1,
     published: false,
@@ -36,11 +34,13 @@ export default async function TemplatePage({ params }: Props) {
     templateListItem: null
   };
   return (
-    <TemplateBuilderProvider
-      organizationId={organizationId}
-      excerptUser={excerptUser}
-      initialTemplate={template}>
-      <TemplateBuilder />
-    </TemplateBuilderProvider>
+    <>
+      {/* <TemplateBuilderProvider
+       organizationId={organizationId}
+       excerptUser={excerptUser}
+       initialTemplate={template}>
+       <TemplateBuilder />
+     </TemplateBuilderProvider> */}
+    </>
   );
 }

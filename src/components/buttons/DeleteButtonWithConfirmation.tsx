@@ -1,18 +1,13 @@
 import { useTranslations } from 'next-intl';
 import Dialog from '../dialog/Dialog';
 import FormFooterAction from '../dialog/FormFooterAction';
-
-import { FormEvent, useState } from 'react';
+import { useState } from 'react';
 import CancelButton from './CancelButton';
 import Form from '../form/Form';
 import Button from './Button';
 
 type Props = {
-  onDelete: (
-    event:
-      | FormEvent<HTMLFormElement>
-      | React.MouseEvent<HTMLSpanElement, MouseEvent>
-  ) => Promise<void>;
+  onDelete: () => Promise<void>;
   title: string;
   buttonActionText: React.ReactNode;
   deleteDescription?: string;
@@ -39,10 +34,9 @@ function DeleteButtonWithConfirmation({
   const tGlobal = useTranslations('GlobalSection');
   const [open, setOpen] = useState(false);
 
-  const handleDelete = async (event: FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
+  const handleDelete = async () => {
     try {
-      await onDelete(event);
+      await onDelete();
       setOpen(false);
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (error) {
@@ -80,8 +74,8 @@ function DeleteButtonWithConfirmation({
         {children ?? deleteDescription}
         <FormFooterAction>
           <Button
-            className='bg-red-500 flex justify-start cursor-pointer text-white'
-            type='submit'>
+            onClick={handleDelete}
+            className='bg-red-500 flex justify-start cursor-pointer text-white'>
             {deleteActionText}
           </Button>
           <CancelButton onClick={handleCancel} type='button'>

@@ -1,5 +1,5 @@
 import FormField from '@/components/form/FormField';
-import { ENUM_FIELD_TYPE, IFormField } from '../../interfaces';
+import { IFormField } from '../../interfaces';
 import { useTemplateBuilder } from '../../TemplateBuilderContext';
 import FormLabel from '@/components/form/FormLabel';
 import { useTranslations } from 'next-intl';
@@ -8,14 +8,6 @@ import DatabaseConnexion from './DatabaseConnexion';
 import StaticDataOptions from './StaticDataOptions';
 import { useMemo } from 'react';
 import TemplateConnexion from './TemplateConnexion';
-
-const _dataConnectableFields = [
-  ENUM_FIELD_TYPE.SELECT,
-  ENUM_FIELD_TYPE.RADIO,
-  ENUM_FIELD_TYPE.CHECKBOX,
-  ENUM_FIELD_TYPE.TEXT,
-  ENUM_FIELD_TYPE.MULTISELECT
-];
 
 type Props = {
   field: IFormField;
@@ -42,9 +34,7 @@ function DataMenu({ field, blockId }: Props) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
     []
   );
-  // if (!dataConnectableFields.includes(field.type)) {
-  //   return null;
-  // }
+
   return (
     <div>
       <div className=''>

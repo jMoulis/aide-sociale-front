@@ -152,13 +152,16 @@ function MenuForm({ menu, onSubmit, onCancel }: Props) {
                   <li key={role._id}>
                     <FormField className='flex-row items-center'>
                       <Checkbox
+                        id={role._id}
                         onCheckedChange={(state) =>
                           handleChangeRole(state, role._id)
                         }
                         value={role._id}
                         checked={updatedMenu.roles.includes(role._id)}
                       />
-                      <FormLabel className='mb-0'>{role.name}</FormLabel>
+                      <FormLabel htmlFor={role._id} className='mb-0'>
+                        {role.name}
+                      </FormLabel>
                     </FormField>
                   </li>
                 ))}

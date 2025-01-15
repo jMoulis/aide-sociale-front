@@ -1,9 +1,5 @@
 import { useMongoUser } from '@/lib/mongo/MongoUserContext/MongoUserContext';
-import {
-  TemplateBuilderProvider,
-  useTemplateBuilder
-} from '../../TemplateBuilderContext';
-import TemplateBuilder from '../../TemplateBuilder';
+import { useTemplateBuilder } from '../../TemplateBuilderContext';
 import { IFormTemplate } from '../../interfaces';
 import { v4 } from 'uuid';
 import { useEffect, useMemo, useState } from 'react';
@@ -13,7 +9,7 @@ import { getUserSummary } from '@/lib/utils/utils';
 
 function Subform() {
   const user = useMongoUser();
-  const [subform, setSubform] = useState<IFormTemplate | null>(null);
+  const [_subform, setSubform] = useState<IFormTemplate | null>(null);
   const organizationId = user?.organizationId || '';
   const { template, setTemplate } = useTemplateBuilder();
   const excerptUser = useMemo(
@@ -61,7 +57,7 @@ function Subform() {
     organizationId
   ]);
 
-  const handleSave = async (upsertedTemplate: IFormTemplate | void) => {
+  const _handleSave = async (upsertedTemplate: IFormTemplate | null) => {
     if (!upsertedTemplate) return;
     setTemplate((prev) => ({
       ...prev,
@@ -73,24 +69,25 @@ function Subform() {
     }));
   };
 
-  const availableFields = useMemo(
+  const _availableFields = useMemo(
     () => template.blocks.flatMap((block) => block.fields),
     [template.blocks]
   );
 
   if (!excerptUser) return null;
 
-  return (
-    <TemplateBuilderProvider
-      organizationId={organizationId}
-      excerptUser={excerptUser}
-      initialTemplate={subform}
-      mode='light'
-      availableFields={availableFields}>
-      <div className='h-[80vh] w-[90vw]'>
-        <TemplateBuilder onSave={handleSave} formId='sub-form-template' />
-      </div>
-    </TemplateBuilderProvider>
-  );
+  return <span>Subform</span>;
+  // return (
+  //   <TemplateBuilderProvider
+  //     organizationId={organizationId}
+  //     excerptUser={excerptUser}
+  //     initialTemplate={subform}
+  //     mode='light'
+  //     availableFields={availableFields}>
+  //     <div className='h-[80vh] w-[90vw]'>
+  //       <TemplateBuilder onSave={handleSave} formId='sub-form-template' />
+  //     </div>
+  //   </TemplateBuilderProvider>
+  // );
 }
 export default Subform;

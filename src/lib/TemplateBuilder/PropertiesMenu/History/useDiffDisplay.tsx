@@ -11,7 +11,7 @@ import { usePublishedTemplate } from '../../usePublishedTemplate';
 
 export const useDiffDisplay = () => {
   const { template } = useTemplateBuilder();
-  const { publishedTemplate } = usePublishedTemplate(template.masterId);
+  const { getPublishedTemplate } = usePublishedTemplate(template.masterId);
   const [diff, setDiff] = useState<{
     [key: string]: CustomDiffResult[];
   } | null>(null);
@@ -20,7 +20,8 @@ export const useDiffDisplay = () => {
     ITrackChangeItem[] | null
   >(null);
 
-  const buildDiff = useCallback(() => {
+  const buildDiff = useCallback(async () => {
+    const publishedTemplate = await getPublishedTemplate();
     if (!publishedTemplate) return;
 
     const diffTemplate = diffTemplates(template, publishedTemplate);
@@ -34,7 +35,7 @@ export const useDiffDisplay = () => {
     } else {
       setDiff(null);
     }
-  }, [publishedTemplate, template]);
+  }, [getPublishedTemplate, template]);
 
   const getDiff = (diffTemplate: TemplateDiff) => {
     const fieldsChanges: {
