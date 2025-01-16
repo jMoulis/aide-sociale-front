@@ -1,8 +1,4 @@
-type Props = {
-  params: Promise<{ pageId: string }>;
-};
-export default async function PageBuilder({ params }: Props) {
-  const { pageId } = await params;
+export default async function PageBuilder() {
   return (
     <>
       <h1>My website</h1>

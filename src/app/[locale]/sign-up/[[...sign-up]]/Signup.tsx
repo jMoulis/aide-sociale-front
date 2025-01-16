@@ -106,7 +106,7 @@ export default function SignupForm() {
       // If verification was completed, set the session to active
       // and redirect the user
       if (signUpAttempt.status === 'complete') {
-        console.log('Add orgnization attachment logic on successful sign up');
+        // TODO 'Add orgnization attachment logic on successful sign up');
         const mainFormValues = form.getValues();
         const signupApiBody: ISignupApiBody = {
           authId: signUpAttempt.createdUserId as string,
