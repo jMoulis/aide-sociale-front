@@ -16,18 +16,17 @@ export default async function RootLayout({
     slug: string[];
   }>;
 }>) {
-  try {
-    const { slug } = await params;
-    const { publishedTemplateVersion, page } =
-      await getPublishedTemplateVersion({ slug });
-    return (
-      <>
-        <style>{page.props?.style}</style>
-        <DynamicPage page={publishedTemplateVersion} />
-      </>
-    );
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  } catch (error) {
-    return notFound();
+  const { slug } = await params;
+  const { publishedTemplateVersion, page } = await getPublishedTemplateVersion({
+    slug
+  });
+  if (!publishedTemplateVersion) {
+    notFound();
   }
+  return (
+    <>
+      <style>{page.props?.style}</style>
+      <DynamicPage page={publishedTemplateVersion} />
+    </>
+  );
 }
