@@ -281,42 +281,53 @@ export interface Modification {
       - route.ts            // API pour les tâches
     /notifications/
       - route.ts            // API pour les notifications
-    /structures/
-      - route.ts            // API pour les structures
-      - available.ts        // Recherche des places disponibles
     /organizations/
       - route.ts            // API pour les organisations
+      /[id]/
+        - route.ts          // Détails d’une organisation
+        /structures/
+          - route.ts        // API pour les structures d'une organisation
+          /[structureId]/
+            - route.ts      // API pour les détails d’une structure
     /departments/
       - route.ts            // API pour les départements
     /placements/
       - route.ts            // API pour les placements
+    /structures/
+      - available.ts        // Recherche des places disponibles (globale)
   /dashboard
     - layout.tsx            // Layout principal du dashboard
     - page.tsx              // Page d'accueil du dashboard
     /reports/
       - page.tsx            // Liste des signalements
-      - details.tsx         // Détails d’un signalement
+      - [id]/
+        - page.tsx          // Détails d’un signalement
     /youth-cases/
       - page.tsx            // Liste des dossiers jeunes
-      - details.tsx         // Détails d’un dossier jeune
+      - [id]/
+        - page.tsx          // Détails d’un dossier jeune
     /tasks/
       - page.tsx            // Liste des tâches
-      - details.tsx         // Détails d’une tâche
+      - [id]/
+        - page.tsx          // Détails d’une tâche
     /notifications/
       - page.tsx            // Liste des notifications
-    /structures/
-      - page.tsx            // Liste des structures
-      - details.tsx         // Détails d’une structure
-      - available.tsx       // Recherche des places disponibles
     /organizations/
       - page.tsx            // Liste des organisations
-      - details.tsx         // Détails d’une organisation
+      - [id]/
+        - page.tsx          // Détails d’une organisation
+        /structures/
+          - page.tsx        // Liste des structures d'une organisation
+          - [structureId]/
+            - page.tsx      // Détails d’une structure spécifique
     /departments/
       - page.tsx            // Liste des départements
-      - details.tsx         // Détails d’un département
+      - [id]/
+        - page.tsx          // Détails d’un département
     /placements/
       - page.tsx            // Liste des placements
-      - details.tsx         // Détails d’un placement
+      - [id]/
+        - page.tsx          // Détails d’un placement
   /form
     /report/
       - page.tsx            // Formulaire pour un signalement
@@ -324,14 +335,14 @@ export interface Modification {
       - page.tsx            // Formulaire pour une tâche
     /youth-case/
       - page.tsx            // Formulaire pour un dossier jeune
-    /structure/
-      - page.tsx            // Formulaire pour une structure
     /organization/
       - page.tsx            // Formulaire pour une organisation
+    /organization/[id]/structure/
+      - page.tsx            // Formulaire pour créer une structure dans une organisation
     /department/
       - page.tsx            // Formulaire pour un département
   /not-found/
-    - page.tsx              // Page 404 pour les ressources introuvables
+    - page.tsx              // Page pour les ressources introuvables
   /error/
     - page.tsx
 ```
