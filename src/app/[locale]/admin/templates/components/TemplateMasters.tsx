@@ -40,6 +40,7 @@ function TemplateMasters({
       );
       setMasterTemplates(updatedMasterTemplates);
     }
+    console.log(updatedMasterTemplates);
     onSubmit(updatedMasterTemplates);
   };
   return (

@@ -87,20 +87,33 @@ function WebsiteForm({ initialWebsite, organizationId, create, user }: Props) {
     handleSave(website, create || false);
   };
 
-  const handleUpsertPage = async (page: IPage) => {
-    const prevPage = website.pages.find((p) => p._id === page._id);
-    let updatedWebpage: IWebsite = website;
-    if (prevPage) {
-      updatedWebpage = {
-        ...website,
-        pages: website.pages.map((p) => (p._id === page._id ? page : p))
-      };
-    } else {
-      updatedWebpage = {
-        ...website,
-        pages: [...website.pages, page]
-      };
-    }
+  const handleUpsertPage = async (updatedPage: IPage) => {
+    const updatePages = (pages: IPage[]): IPage[] =>
+      pages.map((page) => {
+        if (page._id === updatedPage._id) {
+          // Update the matching page
+          return updatedPage;
+        }
+        if (page._id === updatedPage.parentId) {
+          // Update the parent page with the updated subpage
+          return {
+            ...page,
+            subPages: updatePages(page.subPages || [])
+          };
+        }
+        // Recursively check and update subpages
+        return {
+          ...page,
+          subPages: updatePages(page.subPages || [])
+        };
+      });
+    const updatedWebpage: IWebsite = {
+      ...website,
+      pages: updatedPage.parentId
+        ? updatePages(website.pages)
+        : [...website.pages, updatedPage] // Add new page if no parentId
+    };
+
     setWebsite(updatedWebpage);
     await handleSave(updatedWebpage, false);
     setOpen(false);

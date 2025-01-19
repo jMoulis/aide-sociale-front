@@ -198,6 +198,7 @@ export interface IPage {
   name: string;
   organizationId: string;
   subPages: IPage[];
+  parentId?: string;
   createdAt: Date;
   updatedAt?: Date;
   masterTemplates: string[];
@@ -207,7 +208,6 @@ export interface IPage {
   props?: {
     style?: string;
   };
-
 }
 export interface IPageTemplateVersion {
   _id: string;

@@ -76,3 +76,76 @@ export const generateTailwind = async (tailwindScript: string, savePath: string)
   });
 
 }
+
+/**
+ * export default {
+  darkMode: ["class"],
+  content: [],
+    prefix: "u-",
+  safelist: [
+      // Spacing (margin + padding).
+    // e.g.: m-0, mt-2, mx-4, p-5, px-2, etc.
+    { pattern: /^m([trblxy]?)-(\d+|auto|px)$/ },
+    { pattern: /^p([trblxy]?)-(\d+|auto|px)$/ },
+
+    // Flexbox.
+    // e.g.: flex, inline-flex, flex-col, items-center, justify-between, gap-2, etc.
+    { pattern: /^(flex|inline-flex)$/ },
+    { pattern: /^flex-(row|col|wrap|nowrap|wrap-reverse)$/ },
+    { pattern: /^items-(start|center|end|baseline|stretch)$/ },
+    { pattern: /^justify-(start|center|end|between|around|evenly)$/ },
+    { pattern: /^gap-(\d+|px)$/ },
+    { pattern: /^flex-(\d)$/ },
+
+    // Display / Position.
+    { pattern: /^(block|inline-block|inline|grid|inline-grid)$/ },
+    { pattern: /^(absolute|relative|fixed|sticky)$/ },
+
+    // Width / Height / Min / Max (limited numeric scale example).
+    { pattern: /^w-(\d+|auto|px|full|screen)$/ },
+    { pattern: /^h-(\d+|auto|px|full|screen)$/ },
+    { pattern: /^(min-w|min-h|max-w|max-h)-(\d+|full|screen)$/ },
+
+    // Typography: text-size, font-weight, leading, etc.
+    { pattern: /^text-(xs|sm|base|lg|xl|2xl|3xl|4xl|5xl|6xl)$/ },
+    { pattern: /^font-(thin|extralight|light|normal|medium|semibold|bold|black)$/ },
+    { pattern: /^leading-(none|tight|snug|normal|relaxed|loose)$/ },
+
+    // Borders / Roundness.
+    { pattern: /^border(-\d+)?$/ },
+    { pattern: /^border-(solid|dashed|dotted|double|none)$/ },
+    { pattern: /^border-(\w+)-(\d+)$/ }, // e.g. border-red-500 (depends on your color scale)
+    { pattern: /^rounded(-(none|sm|md|lg|xl|2xl|3xl|full))?$/ },
+
+    // Shadows.
+    { pattern: /^shadow(-(sm|md|lg|xl|2xl|inner))?$/ },
+
+    // Background colors (limited to certain palette slices).
+    {
+      pattern: /^bg-(red|green|blue|gray|indigo|yellow)-(100|200|300|400|500|600|700|800|900)$/,
+    },
+
+    // Text colors (similarly limited).
+    {
+      pattern: /^text-(red|green|blue|gray|indigo|yellow)-(100|200|300|400|500|600|700|800|900)$/,
+    },
+
+    // (Optional) Hover/focus states for some categories
+    // e.g. hover:bg-blue-500, focus:bg-blue-500
+    {
+      pattern: /^hover:(bg|text)-(red|green|blue|gray|indigo|yellow)-(100|200|300|400|500|600|700|800|900)$/,
+    },
+    {
+      pattern: /^focus:(bg|text)-(red|green|blue|gray|indigo|yellow)-(100|200|300|400|500|600|700|800|900)$/,
+    },
+  ],
+  plugins: [
+    require('@tailwindcss/typography'),
+    require('@tailwindcss/forms'),
+    require('@tailwindcss/line-clamp'),
+    require('@tailwindcss/aspect-ratio'),
+    require('tailwindcss-animate'), // 3rd party
+  ],
+}
+
+ */
