@@ -1,4 +1,6 @@
+import { IVDOMNode } from "@/app/[locale]/my-app/components/interfaces";
 import { ActionKey, ENUM_ACTIONS } from "./enums";
+import { TemplateDiff } from "../TemplateBuilder/interfaces";
 
 export type UserExcerpt = {
   id: string;
@@ -202,6 +204,24 @@ export interface IPage {
   route: string;
   websiteId: string;
   roles: string[];
+  props?: {
+    style?: string;
+  };
+
+}
+export interface IPageTemplateVersion {
+  _id: string;
+  summaryAiAction?: string;
+  masterTemplateId: string;
+  version: number;
+  vdom: IVDOMNode;
+  createdAt: Date;
+  createdBy: IUserSummary | null;
+  changedBy?: IUserSummary;
+  diff: TemplateDiff;
+  published: boolean;
+  hasBeenPublished: boolean;
+  forceUpdate?: boolean;
 }
 export interface IWebsite {
   _id: string;
@@ -210,6 +230,7 @@ export interface IWebsite {
   createdAt: Date;
   updatedAt?: Date;
   pages: IPage[];
+  tailwindConfig?: string;
 }
 
 export interface IAddress {

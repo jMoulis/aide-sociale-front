@@ -1,209 +1,123 @@
-import Button from '@/components/buttons/Button';
-import {
-  IPage,
-  IRole,
-  IUserSummary,
-  IWebsite
-} from '@/lib/interfaces/interfaces';
-import {
-  Dispatch,
-  SetStateAction,
-  useCallback,
-  useEffect,
-  useState
-} from 'react';
-import PageForm from './PageForm';
+import React, { useEffect } from 'react';
+import LeftPanel from './LeftPanel';
+import RightPanel from './RightPanel';
+import Preview from './Preview';
+import { usePageBuilderStore } from './usePageBuilderStore';
+import PageBuilderDesignStyle from './PageBuilderDesignStyle';
+import SaveButton from '@/components/buttons/SaveButton';
+import { IPageTemplateVersion } from '@/lib/interfaces/interfaces';
 import client from '@/lib/mongo/initMongoClient';
 import { ENUM_COLLECTIONS } from '@/lib/mongo/interfaces';
-import { sortArray } from '@/lib/utils/utils';
-import FormField from '@/components/form/FormField';
-import FormLabel from '@/components/form/FormLabel';
-import { Checkbox } from '@/components/ui/checkbox';
-import { CheckedState } from '@radix-ui/react-checkbox';
-import Templates from '../../admin/ressources/[id]/components/Templates';
+import { generatePageVersion } from './generators';
 
 type Props = {
-  initialPage: IPage;
-  onUpdateWebsite: Dispatch<SetStateAction<IWebsite>>;
-  user: IUserSummary;
+  initialPageVersion: IPageTemplateVersion;
+  organizationId: string;
+  websiteId: string;
 };
-function PageBuilder({ initialPage, onUpdateWebsite, user }: Props) {
-  const [page, setPage] = useState(initialPage);
-  const [selectedTab, setSelectedTab] = useState('config');
-  const [roles, setRoles] = useState<IRole[]>([]);
-
-  useEffect(() => {
-    setPage(initialPage);
-  }, [initialPage]);
-
-  useEffect(() => {
-    if (!page.organizationId) return;
-    client
-      .list<IRole>(ENUM_COLLECTIONS.ROLES, {
-        organizationId: page.organizationId
-      })
-      .then(({ data }) => {
-        if (!data) return;
-        setRoles(sortArray(data, 'name'));
-      });
-  }, [page.organizationId]);
-
-  const handleSubmit = (updatedPage: IPage) => {
-    onUpdateWebsite((prev) => {
-      return {
-        ...prev,
-        pages: prev.pages.map((p) => {
-          if (p._id === updatedPage._id) {
-            return updatedPage;
-          }
-          return p;
-        })
-      };
-    });
-  };
-
-  const handleChangeRole = (state: CheckedState, roleId: string) => {
-    if (typeof state !== 'boolean') return;
-    const updatedPage = {
-      ...page,
-      roles: state
-        ? [...page.roles, roleId]
-        : page.roles.filter((role) => role !== roleId)
-    };
-    setPage(updatedPage);
-    onUpdateWebsite((prev) => {
-      return {
-        ...prev,
-        pages: prev.pages.map((p) => {
-          if (p._id === updatedPage._id) {
-            return updatedPage;
-          }
-          if (p.subPages.length) {
-            return {
-              ...p,
-              subPages: p.subPages.map((sp) => {
-                if (sp._id === updatedPage._id) {
-                  return updatedPage;
-                }
-                return sp;
-              })
-            };
-          }
-          return p;
-        })
-      };
-    });
-  };
-  const handleUpdatePage = useCallback(
-    (updatedPage: IPage) => {
-      setPage(updatedPage);
-      onUpdateWebsite((prev) => {
-        return {
-          ...prev,
-          pages: prev.pages.map((p) => {
-            if (p._id === updatedPage._id) {
-              return updatedPage;
-            }
-            if (p.subPages.length) {
-              return {
-                ...p,
-                subPages: p.subPages.map((sp) => {
-                  if (sp._id === updatedPage._id) {
-                    return updatedPage;
-                  }
-                  return sp;
-                })
-              };
-            }
-            return p;
-          })
-        };
-      });
-    },
-    [onUpdateWebsite]
+export const PageBuilderEditor = ({
+  initialPageVersion,
+  organizationId,
+  websiteId
+}: Props) => {
+  const fetchElements = usePageBuilderStore(
+    (state) => state.fetchElementsConfig
   );
+  const onInitPageVersion = usePageBuilderStore(
+    (state) => state.onInitPageVersion
+  );
+  const pageVersion = usePageBuilderStore((state) => state.pageVersion);
+  const onPublish = usePageBuilderStore((state) => state.onPublish);
+
+  useEffect(() => {
+    fetchElements();
+  }, [fetchElements]);
+
+  const initCustomCssLink = (selector: string, title: string, href: string) => {
+    // const prevLink = document.querySelector(selector);
+    // if (prevLink) {
+    //   document.head.removeChild(prevLink);
+    // }
+    const link = document.createElement('link');
+    link.title = title;
+    link.rel = 'stylesheet';
+    link.href = `/styles/${href}`;
+    document.head.appendChild(link);
+    return link;
+  };
+  useEffect(() => {
+    if (!pageVersion?._id || !organizationId) return;
+    // const customLink = initCustomCssLink(
+    //   'link[title="dynamic-css"]',
+    //   'dynamic-css',
+    //   `${organizationId}/page-${pageVersion._id}.css`
+    // );
+    const tailwindLink = initCustomCssLink(
+      'link[title="tailwind"]',
+      'tailwind',
+      `${organizationId}/tailwind.css`
+    );
+    return () => {
+      // if (customLink) {
+      //   document.head.removeChild(customLink);
+      // }
+      if (tailwindLink) {
+        document.head.removeChild(tailwindLink);
+      }
+    };
+  }, [pageVersion?._id, organizationId, websiteId]);
+
+  useEffect(() => {
+    if (initialPageVersion && organizationId) {
+      onInitPageVersion(initialPageVersion, organizationId);
+    }
+  }, [initialPageVersion, onInitPageVersion, organizationId]);
+
+  const handleSave = async () => {
+    if (pageVersion) {
+      await client.update(
+        ENUM_COLLECTIONS.PAGE_TEMPLATES,
+        {
+          _id: pageVersion._id
+        },
+        {
+          $set: pageVersion
+        }
+      );
+    }
+  };
+
+  const handleCopy = async () => {
+    if (!pageVersion?.masterTemplateId) return;
+    const newVersion = pageVersion.version + 1;
+    const generateDefaultPageVersion = generatePageVersion(
+      pageVersion.masterTemplateId,
+      newVersion
+    );
+    const newPageVersion: IPageTemplateVersion = {
+      ...generateDefaultPageVersion,
+      vdom: pageVersion.vdom
+    };
+    await client.create<IPageTemplateVersion>(
+      ENUM_COLLECTIONS.PAGE_TEMPLATES,
+      newPageVersion
+    );
+  };
+
   return (
     <div className='flex-1'>
-      <h2>{page.name}</h2>
-      <h1>PageBuilder</h1>
-      <div className='flex flex-1'>
-        <ul>
-          <li>
-            <Button
-              className={`${
-                selectedTab === 'config' ? 'bg-black text-white' : ''
-              }`}
-              onClick={() => setSelectedTab('config')}>
-              Page config
-            </Button>
-          </li>
-          <li>
-            <Button
-              className={`${
-                selectedTab === 'design' ? 'bg-black text-white' : ''
-              }`}
-              onClick={() => setSelectedTab('design')}>
-              Design
-            </Button>
-          </li>
-          <li>
-            <Button
-              className={`${
-                selectedTab === 'roles' ? 'bg-black text-white' : ''
-              }`}
-              onClick={() => setSelectedTab('roles')}>
-              Roles
-            </Button>
-          </li>
-        </ul>
-        <div className='flex-1'>
-          {selectedTab === 'config' && (
-            <PageForm
-              initialPage={page}
-              organizationId={page.organizationId}
-              onSubmit={handleSubmit}
-              websiteId={page.websiteId}
-            />
-          )}
-          {selectedTab === 'roles' ? (
-            <FormField>
-              <FormLabel required>{'labels.roles'}</FormLabel>
-              <ul>
-                {roles.map((role) => (
-                  <li key={role._id}>
-                    <FormField className='flex-row items-center'>
-                      <Checkbox
-                        onCheckedChange={(state) =>
-                          handleChangeRole(state, role._id)
-                        }
-                        value={role._id}
-                        checked={page.roles.includes(role._id)}
-                      />
-                      <FormLabel className='mb-0'>{role.name}</FormLabel>
-                    </FormField>
-                  </li>
-                ))}
-              </ul>
-            </FormField>
-          ) : null}
-          {selectedTab === 'design' ? (
-            <Templates
-              page={page}
-              organizationId={page.organizationId}
-              user={user}
-              onUpdatePage={handleUpdatePage}
-            />
-          ) : null}
-        </div>
+      <header className='flex items-center p-4 bg-white'>
+        <h1>Page builder - {pageVersion?.version}</h1>
+        <SaveButton onClick={handleSave} />
+        <SaveButton onClick={handleCopy}>Duplicate</SaveButton>
+        <SaveButton onClick={onPublish}>Publish</SaveButton>
+      </header>
+      <div className='flex w-full h-screen'>
+        <PageBuilderDesignStyle />
+        <LeftPanel />
+        <Preview />
+        <RightPanel />
       </div>
-
-      {/* {selectedTab === 'design' ?
-      <TemplateBuilderProvider initialTemplate={null} onSave={} user={user}>
-        <TemplateBuilder />
-      </TemplateBuilderProvider>
-    : null
-    } */}
     </div>
   );
-}
-export default PageBuilder;
+};

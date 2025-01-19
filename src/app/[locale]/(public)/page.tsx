@@ -1,16 +1,11 @@
 import { notFound } from 'next/navigation';
-import DynamicPage from './components/DynamicPage';
 import MainLayout from '../components/MainLayout';
-import { getPublishedTemplateVersion } from './utils';
 
 export default async function RootLayout() {
   try {
-    const { publishedTemplateVersion, page } =
-      await getPublishedTemplateVersion({ slug: ['/'] });
     return (
       <MainLayout>
-        <style>{page.props?.style}</style>
-        <DynamicPage page={publishedTemplateVersion} />
+        <h1>Page</h1>
       </MainLayout>
     );
   } catch (error) {

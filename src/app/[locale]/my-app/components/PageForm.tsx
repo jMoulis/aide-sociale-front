@@ -8,6 +8,11 @@ import { IPage } from '@/lib/interfaces/interfaces';
 import { slugifyFunction } from '@/lib/utils/utils';
 import { useEffect, useState } from 'react';
 import { v4 } from 'uuid';
+import CssEditor from './Properties/CssEditor';
+import { Drawer } from '@/components/drawer/Drawer';
+import Dialog from '@/components/dialog/Dialog';
+import MasterTemplateForm from '../../admin/templates/components/MasterTemplateForm';
+import { useMongoUser } from '@/lib/mongo/MongoUserContext/MongoUserContext';
 
 type Props = {
   onSubmit: (page: IPage) => void;
@@ -16,6 +21,8 @@ type Props = {
   websiteId: string;
 };
 function PageForm({ onSubmit, organizationId, initialPage, websiteId }: Props) {
+  const user = useMongoUser();
+
   const defaultPage: IPage = {
     _id: v4(),
     name: '',
@@ -25,15 +32,41 @@ function PageForm({ onSubmit, organizationId, initialPage, websiteId }: Props) {
     subPages: [],
     route: '',
     roles: [],
-    masterTemplates: []
+    masterTemplates: [],
+    props: {}
   };
   const [page, setPage] = useState<IPage>(initialPage || defaultPage);
+  const [open, setOpen] = useState(false);
+  const [openMasterForm, setOpenMasterForm] = useState(false);
+
+  const initializeCustomStyle = (incomingPage: IPage) => {
+    const prevStyleTag = document.querySelector('style[data-page-style]');
+    if (prevStyleTag) {
+      document.head.removeChild(prevStyleTag);
+    }
+    const styleTag = document.createElement('style');
+    styleTag.innerHTML = incomingPage.props?.style || '';
+    document.head.appendChild(styleTag);
+    return styleTag;
+  };
+
+  useEffect(() => {
+    if (initialPage) {
+      const styleTag = initializeCustomStyle(initialPage);
+      return () => {
+        if (styleTag) {
+          document.head.removeChild(styleTag);
+        }
+      };
+    }
+  }, [initialPage]);
 
   useEffect(() => {
     if (initialPage) {
       setPage(initialPage);
     }
   }, [initialPage]);
+
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     if (name === 'name') {
@@ -48,6 +81,19 @@ function PageForm({ onSubmit, organizationId, initialPage, websiteId }: Props) {
     onSubmit(page);
   };
 
+  const handleSubmitCss = async () => {
+    setOpen(false);
+  };
+
+  const handleChangeStyle = (value: string) => {
+    const updatedPage = {
+      ...page,
+      props: { ...page.props, style: value }
+    };
+    setPage(updatedPage);
+    initializeCustomStyle(updatedPage);
+  };
+
   return (
     <Form onSubmit={handleSubmit}>
       <FormField>
@@ -57,7 +103,6 @@ function PageForm({ onSubmit, organizationId, initialPage, websiteId }: Props) {
       <FormField>
         <FormLabel>route</FormLabel>
         <div>
-          {/* <span className='bg-slate-300 px-2 rounded'>{parent?.route}/</span> */}
           <Input
             name='route'
             value={page.route}
@@ -66,6 +111,31 @@ function PageForm({ onSubmit, organizationId, initialPage, websiteId }: Props) {
           />
         </div>
       </FormField>
+      <Dialog
+        open={openMasterForm}
+        onOpenChange={setOpenMasterForm}
+        Trigger={<Button>Add master template</Button>}>
+        {user ? (
+          <MasterTemplateForm
+            organizationId={organizationId}
+            user={user}
+            onSubmit={() => {}}
+          />
+        ) : null}
+      </Dialog>
+      <Drawer
+        side='left'
+        open={open}
+        onOpenChange={setOpen}
+        Trigger={<Button>CSS</Button>}>
+        <CssEditor
+          value={page.props?.style || ''}
+          onUpdate={handleChangeStyle}
+        />
+        <FormFooterAction>
+          <Button onClick={handleSubmitCss}>Save</Button>
+        </FormFooterAction>
+      </Drawer>
       <FormFooterAction>
         <Button type='submit'>Save</Button>
       </FormFooterAction>

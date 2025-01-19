@@ -1,7 +1,6 @@
 import type { Metadata } from 'next';
-import Link from 'next/link';
-import { getTranslations } from 'next-intl/server';
-import { ENUM_APP_ROUTES } from '@/lib/interfaces/enums';
+import DefaultLayoutRender from '../defaultLayoutRender';
+import MainLayout from '../components/MainLayout';
 
 export const metadata: Metadata = {
   title: 'Profile',
@@ -13,25 +12,9 @@ export default async function ProfileLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const t = await getTranslations('ProfileSection');
-
   return (
-    <>
-      <aside>
-        <nav>
-          <ul>
-            <li>
-              <Link href={ENUM_APP_ROUTES.PROFILE}>{t('account')}</Link>
-            </li>
-            <li>
-              <Link href={ENUM_APP_ROUTES.PROFILE_SECURITY}>
-                {t('security')}
-              </Link>
-            </li>
-          </ul>
-        </nav>
-      </aside>
-      <main>{children}</main>
-    </>
+    <DefaultLayoutRender>
+      <MainLayout>{children}</MainLayout>
+    </DefaultLayoutRender>
   );
 }

@@ -1,5 +1,6 @@
 import { currentUser } from '@clerk/nextjs/server';
 import { redirect } from 'next/navigation';
+import DefaultLayoutRender from '../../defaultLayoutRender';
 
 type Props = {
   children: React.ReactNode;
@@ -9,7 +10,7 @@ async function Layout({ children }: Props) {
   if (user) {
     redirect('/');
   }
-  return <>{children}</>;
+  return <DefaultLayoutRender>{children}</DefaultLayoutRender>;
 }
 
 export default Layout;

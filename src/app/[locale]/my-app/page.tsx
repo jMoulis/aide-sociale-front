@@ -19,6 +19,7 @@ export default async function TemplatePage() {
       organizationId
     }
   );
+
   return (
     <>
       <h1>My website</h1>

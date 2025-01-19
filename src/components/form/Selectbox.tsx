@@ -60,11 +60,11 @@ function Selectbox({
           required={required}
           disabled={disabled}
           className={cn(
-            `block w-full text-sm px-4 py-2 border ${
+            `flex h-9 w-full items-center justify-between shadow-sm rounded-md border border-input bg-background px-3 py-1 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-blue-300 focus:border-blue-400 focus:ring-offset-0 disabled:cursor-not-allowed disabled:opacity-50 [&>span]:line-clamp-1 ${
               touched && required && !value
                 ? 'border-red-500'
                 : 'border-gray-300'
-            } rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500`,
+            }`,
             className
           )}>
           <option value=''>{placeholder || t('select')}</option>

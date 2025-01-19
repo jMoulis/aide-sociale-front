@@ -1,24 +1,39 @@
-import { routeSecurityMiddleware } from '@/lib/auth/routeSecurityMiddleware';
-import { ENUM_RESSOURCES } from '@/lib/interfaces/enums';
-import MenuLayout from '../components/MenuLayout';
-import MainLayout from '../components/MainLayout';
+import type { Metadata } from 'next';
+import { readdir } from 'fs/promises';
+import { join } from 'path';
+import DefaultLayoutRender from '../defaultLayoutRender';
+import { getServerSideCurrentUserOrganizationId } from '@/lib/utils/auth/serverUtils';
 
-type Props = {
-  children: React.ReactNode;
-};
-async function DashboardLayout({ children }: Props) {
-  return routeSecurityMiddleware(
-    ENUM_RESSOURCES.DASHBOARD,
-    true,
-    ({ menus }) => {
-      return (
-        <>
-          <MenuLayout menus={menus} />
-          <MainLayout>{children}</MainLayout>
-        </>
-      );
-    }
-  );
+async function getFiles(subPath: string): Promise<string[]> {
+  try {
+    const directory = join(process.cwd(), 'public', subPath);
+    const files = await readdir(directory);
+    return files.map((file) => join('/', subPath, file));
+  } catch (err) {
+    // eslint-disable-next-line no-console
+    console.error('Error reading directory:', err);
+    return [];
+  }
 }
 
-export default DashboardLayout;
+export const metadata: Metadata = {
+  title: "Aide sociale à l'enfance - page d'accueil",
+  description: "Bienvenue sur la page d'accueil de l'Aide sociale à l'enfance"
+};
+
+export default async function RootLayout({
+  children
+}: Readonly<{
+  children: React.ReactNode;
+}>) {
+  const organizationId = await getServerSideCurrentUserOrganizationId();
+  const files = await getFiles(`styles/${organizationId}`);
+  const customHeaders = files.map((file) => (
+    <link key={file} rel='stylesheet' href={file} />
+  ));
+  return (
+    <DefaultLayoutRender headers={customHeaders}>
+      {children}
+    </DefaultLayoutRender>
+  );
+}

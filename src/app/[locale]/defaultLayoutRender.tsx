@@ -4,11 +4,13 @@ import './globals.css';
 import { ClerkProvider } from '@clerk/nextjs';
 import { NextIntlClientProvider } from 'next-intl';
 import { getMessages } from 'next-intl/server';
-import Header from './components/Header';
 import { Toaster } from '@/components/ui/toaster';
 import MongoUserProvider from '@/lib/mongo/MongoUserContext/MongoUserContext';
 import '@fortawesome/fontawesome-svg-core/styles.css';
 import { config } from '@fortawesome/fontawesome-svg-core';
+import Header from './components/Header';
+import MainLayout from './components/MainLayout';
+
 config.autoAddCss = false;
 
 const geistSans = Geist({
@@ -26,15 +28,18 @@ export const metadata: Metadata = {
   description: "Bienvenue sur la page d'accueil de l'Aide sociale à l'enfance"
 };
 
-export default async function RootLayout({
-  children
+export default async function DefaultLayoutRender({
+  children,
+  headers
 }: Readonly<{
   children: React.ReactNode;
+  headers?: any;
 }>) {
   const messages = (await getMessages()) as any;
 
   return (
     <html lang='fr'>
+      <head>{headers}</head>
       <ClerkProvider dynamic>
         <body
           className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
@@ -42,7 +47,7 @@ export default async function RootLayout({
             <MongoUserProvider>
               <div className='main-page'>
                 <Header />
-                {children}
+                <MainLayout>{children}</MainLayout>
               </div>
               <Toaster />
             </MongoUserProvider>

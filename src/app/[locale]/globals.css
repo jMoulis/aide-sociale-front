@@ -70,9 +70,6 @@ body {
 }
 
 @layer base {
-  * {
-    @apply border-border;
-  }
   html {
     height: 100%;
   }

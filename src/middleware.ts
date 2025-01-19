@@ -10,6 +10,7 @@ const isProtectedRoute = createRouteMatcher(['/admin(.*)', '/:locale/admin(.*)',
 export default clerkMiddleware(async (auth, request) => {
   const { userId, redirectToSignIn } = await auth();
   if (!userId && isProtectedRoute(request)) {
+    console.log('Protected route');
     return redirectToSignIn();
   }
   const response = intlMiddleware(request);
