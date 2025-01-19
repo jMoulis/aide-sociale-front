@@ -8,14 +8,13 @@ export const metadata: Metadata = {
   description: 'Dashboard'
 };
 
-export default async function RootLayout({
-  params
-}: Readonly<{
+type Props = {
   children: React.ReactNode;
   params: Promise<{
     slug: string[];
   }>;
-}>) {
+};
+export default async function RootLayout({ params }: Props) {
   const { slug } = await params;
   const { publishedTemplateVersion, page } = await getPublishedTemplateVersion({
     slug
