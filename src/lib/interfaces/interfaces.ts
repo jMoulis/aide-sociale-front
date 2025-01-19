@@ -231,6 +231,7 @@ export interface IWebsite {
   updatedAt?: Date;
   pages: IPage[];
   tailwindConfig?: string;
+  stylesheets?: string[];
 }
 
 export interface IAddress {

@@ -1,21 +1,9 @@
 import type { Metadata } from 'next';
-import { readdir } from 'fs/promises';
-import { join } from 'path';
 import DefaultLayoutRender from '../defaultLayoutRender';
 import { getServerSideCurrentUserOrganizationId } from '@/lib/utils/auth/serverUtils';
-
-async function getFiles(subPath: string): Promise<string[]> {
-  try {
-    const directory = join(process.cwd(), 'public', subPath);
-    const files = await readdir(directory);
-    console.log(directory);
-    return files.map((file) => join('/', subPath, file));
-  } catch (err) {
-    // eslint-disable-next-line no-console
-    console.error('Error reading directory:', err);
-    return [];
-  }
-}
+import clientMongoServer from '@/lib/mongo/initMongoServer';
+import { IWebsite } from '@/lib/interfaces/interfaces';
+import { ENUM_COLLECTIONS } from '@/lib/mongo/interfaces';
 
 export const metadata: Metadata = {
   title: "Aide sociale à l'enfance - page d'accueil",
@@ -28,10 +16,20 @@ export default async function RootLayout({
   children: React.ReactNode;
 }>) {
   const organizationId = await getServerSideCurrentUserOrganizationId();
-  const files = await getFiles(`styles/${organizationId}`);
-  console.log(files);
+  const { data: organizationApp } = await clientMongoServer.get<IWebsite>(
+    ENUM_COLLECTIONS.WEBSITES,
+    {
+      organizationId
+    }
+  );
+
+  const files = organizationApp?.stylesheets || [];
   const customHeaders = files.map((file) => (
-    <link key={file} rel='stylesheet' href={file} />
+    <link
+      key={file}
+      rel='stylesheet'
+      href={`/styles/${organizationId}/${file}`}
+    />
   ));
 
   return (
