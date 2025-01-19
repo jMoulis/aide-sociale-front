@@ -3,7 +3,7 @@ import DynamicPage from './components/DynamicPage';
 import MainLayout from '../components/MainLayout';
 import { getPublishedTemplateVersion } from './utils';
 
-export default async function RootLayout() {
+export default async function RooPage() {
   try {
     const { publishedTemplateVersion, page } =
       await getPublishedTemplateVersion({ slug: ['/'] });

@@ -9,7 +9,6 @@ export const metadata: Metadata = {
 };
 
 type Props = {
-  children: React.ReactNode;
   params: Promise<{
     slug: string[];
   }>;
