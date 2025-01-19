@@ -55,7 +55,7 @@ class MongoRealtimeClient {
     }
   }
   // Method to perform upsert
-  async update(collection: ENUM_COLLECTIONS, filter = {}, data: Record<string, any>, updateOptions = {}): Promise<ApiResponse<IUpsertResponse>> {
+  async update<T>(collection: ENUM_COLLECTIONS, filter = {}, data: Record<string, Partial<T>> = {}, updateOptions = {}): Promise<ApiResponse<IUpsertResponse>> {
     return this.request<IUpsertResponse>(`upsert`, {
       method: 'POST',
       body: JSON.stringify({
@@ -67,7 +67,7 @@ class MongoRealtimeClient {
     });
   }
 
-  async create(collection: ENUM_COLLECTIONS, data: Record<string, any>, updateOptions = {}): Promise<ApiResponse<IUpsertResponse>> {
+  async create<T>(collection: ENUM_COLLECTIONS, data: Partial<T> = {}, updateOptions = {}): Promise<ApiResponse<IUpsertResponse>> {
     return this.request<IUpsertResponse>(`upsert`, {
       method: 'POST',
       body: JSON.stringify({

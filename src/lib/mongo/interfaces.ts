@@ -4,7 +4,6 @@ export enum ENUM_COLLECTIONS {
   USERS = 'users',
   RESSOURCES = 'ressources',
   ORGANIZATIONS = 'organizations',
-  INSTITUTIONS = 'institutions',
   BENEFICIARIES = 'beneficiaries',
   TEAMS = 'teams',
   PROJECTS = 'projects',
@@ -12,6 +11,12 @@ export enum ENUM_COLLECTIONS {
   TEMPLATES_MASTER = 'templates_master',
   CATEGORIES = 'categories',
   DOCUMENTS = 'documents',
+  MENUS = 'menus',
+  COLLECTIONS = 'collections',
+  WEBSITES = 'websites',
+  STRUCTURES = 'structures',
+  WEB_APP_ELEMENTS = 'web-app-elements',
+  PAGE_TEMPLATES = 'page-templates',
 }
 
 export interface IAutocompleteResponse<T> {

@@ -1,4 +1,6 @@
+import { format, isToday, isYesterday, Locale } from 'date-fns';
 import slugify from 'slugify';
+import { IProject, IProjectSummary, ITeam, ITeamSummary, IUser, IUserSummary } from '../interfaces/interfaces';
 
 export const slugifyFunction = (value: string) => {
   return slugify(value, {
@@ -50,7 +52,43 @@ export const isValidJSON = (str: string) => {
     JSON.parse(str);
     return true;
 
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
   } catch (e) {
     return false
   }
+}
+
+export function formatTimestamp(timestamp: number, tTime: any, locale: Locale) {
+  const date = new Date(timestamp);
+
+  if (isToday(date)) {
+    return `${tTime('today')} - ${format(date, 'p', { locale })}`;
+  } else if (isYesterday(date)) {
+    return `${tTime('yesterday')} - ${format(date, 'p', { locale })}`;
+  } else {
+    return format(date, 'P p', { locale });
+  }
+}
+
+export function getUserSummary(user: IUser): IUserSummary {
+  return {
+    _id: user._id,
+    firstName: user.firstName,
+    lastName: user.lastName,
+    imageUrl: user.imageUrl
+  };
+}
+
+export function getTeamSummary(team: ITeam): ITeamSummary {
+  return {
+    _id: team._id,
+    name: team.name
+  };
+}
+
+export function getProjectSummary(project: IProject): IProjectSummary {
+  return {
+    _id: project._id,
+    name: project.name
+  };
 }

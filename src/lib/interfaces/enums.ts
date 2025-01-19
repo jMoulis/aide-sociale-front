@@ -10,10 +10,13 @@ export enum ENUM_APP_ROUTES {
   SIGN_IN = '/sign-in',
   SIGN_UP = '/sign-up',
   RESSOURCES = '/admin/ressources',
-  ORGANIZATION = '/dashboard/organization',
-  INSTITUTIONS = '/dashboard/institutions',
-  BENEFICIARIES = `/beneficiaries`,
-  TEMPLATES = "/dashboard/templates",
+  ORGANIZATIONS = '/dashboard/organization',
+  DEPARTMENTS = '/dashboard/departments',
+  TEMPLATES = '/admin/templates',
+  COLLECTIONS = '/admin/collections',
+  MY_APP = '/my-app',
+  STRUCTURES = '/dashboard/structures',
+  EMPLOYEES = 'employees',
 }
 
 export enum ENUM_RESSOURCES {
@@ -25,6 +28,9 @@ export enum ENUM_RESSOURCES {
   BENEFICIARY = 'beneficiary',
   TEAM = 'team',
   PROJECT = 'project',
+  COLLECTIONS = 'collections',
+  DASHBOARD = 'dashboard',
+
 }
 
 export enum ENUM_API_ROUTES {

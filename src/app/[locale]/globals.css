@@ -70,10 +70,23 @@ body {
 }
 
 @layer base {
-  * {
-    @apply border-border;
+  html {
+    height: 100%;
   }
   body {
+    min-height: 100%;
+    display: flex;
     @apply bg-background text-foreground;
   }
+}
+
+.main-page {
+  display: grid;
+  grid-template-areas: 'header header' 'menu main';
+  grid-template-columns: auto 1fr;
+  grid-template-rows: 50px 1fr;
+  flex: 1;
+}
+.pac-container {
+  z-index: 10000;
 }

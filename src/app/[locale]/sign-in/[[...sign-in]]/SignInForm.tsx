@@ -32,7 +32,6 @@ const formSchema = z.object({
 
 export default function SignInForm() {
   const { signIn, setActive } = useSignIn();
-  const t = useTranslations('SecuritySection');
   const tError = useTranslations('ErrorSection');
   const tGlobal = useTranslations('GlobalSection');
   const tSecurity = useTranslations('SecuritySection');

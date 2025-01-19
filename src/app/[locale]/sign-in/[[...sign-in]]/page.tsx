@@ -3,7 +3,6 @@ import SignInForm from './SignInForm';
 
 async function SignInPage() {
   const t = await getTranslations('SecuritySection');
-
   return (
     <div>
       <h1>{t('signIn.title')}</h1>

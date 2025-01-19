@@ -1,5 +1,6 @@
 
 
+import { IUser } from '@/lib/interfaces/interfaces';
 import clientMongoServer from '@/lib/mongo/initMongoServer';
 import { ENUM_COLLECTIONS } from '@/lib/mongo/interfaces';
 import { clerkClient } from '@clerk/nextjs/server';
@@ -11,11 +12,12 @@ export interface ISignupApiBody {
   email: string;
   firstName: string;
   lastName: string;
+  organizationId: string;
 }
 
 export async function POST(req: Request) {
   const payload = await req.json();
-  const { authId, email, firstName, lastName } = payload as ISignupApiBody;
+  const { authId, email, firstName, lastName, organizationId } = payload as ISignupApiBody;
   const client = await clerkClient();
   try {
     const userData = {
@@ -28,7 +30,7 @@ export async function POST(req: Request) {
       email
     }
     const userId = v4();
-    const response = await clientMongoServer.upsertServer(ENUM_COLLECTIONS.USERS, { _id: userId }, { $set: userData });
+    const response = await clientMongoServer.upsertServer<IUser>(ENUM_COLLECTIONS.USERS, { _id: userId }, { $set: userData });
 
     if (response.error) {
       await client.users.deleteUser(authId);
@@ -38,17 +40,17 @@ export async function POST(req: Request) {
     }
 
     if (userId) {
-      // await client.users.updateUserMetadata(authId, {
-      //   publicMetadata: {
-      //     organizationId
-      //   }
-      // });
+      await client.users.updateUserMetadata(authId, {
+        publicMetadata: {
+          organizationId
+        }
+      });
 
-      // await clientMongoServer.upsertServer(ENUM_COLLECTIONS.USERS, { _id: userId }, {
-      //   $set: {
-      //     organizationId,
-      //   }
-      // });
+      await clientMongoServer.upsertServer(ENUM_COLLECTIONS.USERS, { _id: userId }, {
+        $set: {
+          organizationId,
+        }
+      });
     }
     return NextResponse.json({
       message: 'MongoDB user created',

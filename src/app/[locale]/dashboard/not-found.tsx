@@ -1,7 +1,9 @@
-export default async function NotFound() {
+export default function NotFound() {
   return (
     <div>
-      <h2>Not Found</h2>
+      <main>
+        <h1>404 - Page Not Found</h1>
+      </main>
     </div>
   );
 }
