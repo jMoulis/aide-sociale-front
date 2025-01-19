@@ -6,7 +6,7 @@ import { getServerSideCurrentUserOrganizationId } from '@/lib/utils/auth/serverU
 
 async function getFiles(subPath: string): Promise<string[]> {
   try {
-    const directory = join(process.cwd(), 'styles', subPath);
+    const directory = join(process.cwd(), 'public', subPath);
     const files = await readdir(directory);
     console.log(directory);
     return files.map((file) => join('/', subPath, file));
@@ -28,7 +28,7 @@ export default async function RootLayout({
   children: React.ReactNode;
 }>) {
   const organizationId = await getServerSideCurrentUserOrganizationId();
-  const files = await getFiles(`/${organizationId}`);
+  const files = await getFiles(`styles/${organizationId}`);
   console.log(files);
   const customHeaders = files.map((file) => (
     <link key={file} rel='stylesheet' href={file} />
