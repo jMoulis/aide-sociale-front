@@ -1,6 +1,6 @@
 'use server';
 
-import { IPage, IPageTemplateVersion, IWebsite } from "@/lib/interfaces/interfaces";
+import { IPage, IWebsite } from "@/lib/interfaces/interfaces";
 import clientMongoServer from "@/lib/mongo/initMongoServer";
 import { ENUM_COLLECTIONS } from "@/lib/mongo/interfaces";
 import { IMasterTemplate } from "@/lib/TemplateBuilder/interfaces";
@@ -21,13 +21,13 @@ const isDetailPage = (slug: string[]) => {
   };
 };
 
-const findSubRoute = (subRoutes: IPage[], slug: string): IPage | null => {
-  return (
-    subRoutes.find((sr) => sr.route === slug) ||
-    subRoutes.find((sr) => sr.route === '[id]') ||
-    null
-  );
-};
+// const findSubRoute = async (subRoutesId: string[], slug: string): string | null => {
+//   return (
+//     subRoutes.find((subroute) => sr.route === slug) ||
+//     subRoutes.find((sr) => sr.route === '[id]') ||
+//     null
+//   );
+// };
 const fetchTemplateVersion = async (templateId: string) => {
   const { data: template } = await clientMongoServer.get<IMasterTemplate>(
     ENUM_COLLECTIONS.TEMPLATES_MASTER,
@@ -37,20 +37,11 @@ const fetchTemplateVersion = async (templateId: string) => {
     throw { status: 404, message: 'No master template found' };
   }
 
-  if (!template.publishedVersionId) {
+  if (!template.publishedVersion) {
     throw { status: 404, message: 'No published version id found' };
   }
 
-  const { data: version } = await clientMongoServer.get<IPageTemplateVersion>(
-    ENUM_COLLECTIONS.PAGE_TEMPLATES,
-    { _id: template.publishedVersionId }
-  );
-
-  if (!version) {
-    throw { status: 404, message: 'No published template version found' };
-  }
-
-  return version;
+  return template.publishedVersion;
 };
 export async function getPublishedTemplateVersion({ slug }: { slug: string[] }) {
   const { rootRoute, childRoute } = isDetailPage(slug);
@@ -69,7 +60,10 @@ export async function getPublishedTemplateVersion({ slug }: { slug: string[] }) 
         message: 'Organization not found'
       }
     }
-    const page = organizationApp.pages.find((p) => p.route === rootRoute);
+    const { data: pages } = await clientMongoServer.list<IPage>(ENUM_COLLECTIONS.PAGES, {
+      websiteId: organizationApp._id
+    });
+    const page = (pages || []).find((page) => page.route === rootRoute);
     if (!page) {
       throw {
         status: 404,
@@ -83,14 +77,14 @@ export async function getPublishedTemplateVersion({ slug }: { slug: string[] }) 
       }
       return fetchTemplateVersion(masterTemplateId);
     };
-    if (childRoute && page.subPages) {
-      const subRoute = findSubRoute(page.subPages, childRoute);
-      if (!subRoute) {
-        throw { status: 404, message: 'No sub route found' };
-      }
-      const publishedTemplateVersion = await resolveTemplate(subRoute);
-      return { page, publishedTemplateVersion };
-    }
+    // if (childRoute && page.subPages) {
+    //   const subRoute = findSubRoute(page.subPages, childRoute);
+    //   if (!subRoute) {
+    //     throw { status: 404, message: 'No sub route found' };
+    //   }
+    //   const publishedTemplateVersion = await resolveTemplate(subRoute);
+    //   return { page, publishedTemplateVersion };
+    // }
 
     const publishedTemplateVersion = await resolveTemplate(page);
     return { page, publishedTemplateVersion };

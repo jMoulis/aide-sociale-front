@@ -21,20 +21,19 @@ export const useDiffDisplay = () => {
   >(null);
 
   const buildDiff = useCallback(async () => {
-    const publishedTemplate = await getPublishedTemplate();
-    if (!publishedTemplate) return;
-
-    const diffTemplate = diffTemplates(template, publishedTemplate);
-    if (
-      diffTemplate.blocks.added.length ||
-      diffTemplate.blocks.removed.length ||
-      diffTemplate.blocks.changed.length
-    ) {
-      const fieldChanges = getDiff(diffTemplate);
-      setDiff(fieldChanges);
-    } else {
-      setDiff(null);
-    }
+    // const publishedTemplate = await getPublishedTemplate();
+    // if (!publishedTemplate) return;
+    // const diffTemplate = diffTemplates(template, publishedTemplate);
+    // if (
+    //   diffTemplate.blocks.added.length ||
+    //   diffTemplate.blocks.removed.length ||
+    //   diffTemplate.blocks.changed.length
+    // ) {
+    //   const fieldChanges = getDiff(diffTemplate);
+    //   setDiff(fieldChanges);
+    // } else {
+    //   setDiff(null);
+    // }
   }, [getPublishedTemplate, template]);
 
   const getDiff = (diffTemplate: TemplateDiff) => {

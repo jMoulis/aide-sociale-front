@@ -9,25 +9,20 @@ import { IPageTemplateVersion } from '@/lib/interfaces/interfaces';
 import client from '@/lib/mongo/initMongoClient';
 import { ENUM_COLLECTIONS } from '@/lib/mongo/interfaces';
 import { generatePageVersion } from './generators';
+import Button from '@/components/buttons/Button';
 
-type Props = {
-  initialPageVersion: IPageTemplateVersion;
-  organizationId: string;
-  websiteId: string;
-};
-export const PageBuilderEditor = ({
-  initialPageVersion,
-  organizationId,
-  websiteId
-}: Props) => {
+export const PageBuilderEditor = () => {
   const fetchElements = usePageBuilderStore(
     (state) => state.fetchElementsConfig
   );
-  const onInitPageVersion = usePageBuilderStore(
-    (state) => state.onInitPageVersion
-  );
+
   const pageVersion = usePageBuilderStore((state) => state.pageVersion);
   const onPublish = usePageBuilderStore((state) => state.onPublish);
+  const setSelectedVersionPage = usePageBuilderStore(
+    (state) => state.setSelectedVersionPage
+  );
+  const organizationId = usePageBuilderStore((state) => state.organizationId);
+  const websiteId = usePageBuilderStore((state) => state.website?._id);
 
   useEffect(() => {
     fetchElements();
@@ -67,12 +62,6 @@ export const PageBuilderEditor = ({
     };
   }, [pageVersion?._id, organizationId, websiteId]);
 
-  useEffect(() => {
-    if (initialPageVersion && organizationId) {
-      onInitPageVersion(initialPageVersion, organizationId);
-    }
-  }, [initialPageVersion, onInitPageVersion, organizationId]);
-
   const handleSave = async () => {
     if (pageVersion) {
       await client.update(
@@ -104,19 +93,23 @@ export const PageBuilderEditor = ({
     );
   };
 
+  if (!pageVersion) return null;
   return (
     <div className='flex-1'>
-      <header className='flex items-center p-4 bg-white'>
-        <h1>Page builder - {pageVersion?.version}</h1>
-        <SaveButton onClick={handleSave} />
-        <SaveButton onClick={handleCopy}>Duplicate</SaveButton>
-        <SaveButton onClick={onPublish}>Publish</SaveButton>
-      </header>
-      <div className='flex w-full h-screen'>
-        <PageBuilderDesignStyle />
-        <LeftPanel />
-        <Preview />
-        <RightPanel />
+      <Button onClick={() => setSelectedVersionPage(null)}>Back</Button>
+      <div className='flex-1'>
+        <header className='flex items-center p-4 bg-white'>
+          <h1>Page builder - {pageVersion?.version}</h1>
+          <SaveButton onClick={handleSave} />
+          <SaveButton onClick={handleCopy}>Duplicate</SaveButton>
+          <SaveButton onClick={onPublish}>Publish</SaveButton>
+        </header>
+        <div className='flex w-full h-screen'>
+          <PageBuilderDesignStyle />
+          <LeftPanel />
+          <Preview />
+          <RightPanel />
+        </div>
       </div>
     </div>
   );

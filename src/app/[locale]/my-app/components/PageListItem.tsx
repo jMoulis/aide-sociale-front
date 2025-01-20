@@ -1,53 +1,28 @@
 import Button from '@/components/buttons/Button';
 import Dialog from '@/components/dialog/Dialog';
-import { Dispatch, SetStateAction, useState } from 'react';
+import { useState } from 'react';
 import PageForm from './PageForm';
-import { IPage, IWebsite } from '@/lib/interfaces/interfaces';
+import { ITreePage } from '@/lib/interfaces/interfaces';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faAdd } from '@awesome.me/kit-8441d3fdf2/icons/classic/solid';
+import { usePageBuilderStore } from './usePageBuilderStore';
 
 type Props = {
-  organizationId: string;
-  websiteId: string;
-  onUpdateWebsite: Dispatch<SetStateAction<IWebsite>>;
-  page: IPage;
-  onSelectPage: (page: IPage) => void;
-  selectedPage: IPage | null;
+  page: ITreePage;
 };
-function PageListItem({
-  organizationId,
-  websiteId,
-  onUpdateWebsite,
-  page,
-  onSelectPage,
-  selectedPage
-}: Props) {
+function PageListItem({ page }: Props) {
   const [open, setOpen] = useState(false);
-  const handleCreatePage = (createdPage: IPage) => {
-    onUpdateWebsite((prev) => {
-      return {
-        ...prev,
-        pages: prev.pages.map((p) => {
-          if (p._id === page._id) {
-            return {
-              ...p,
-              subPages: [...p.subPages, createdPage]
-            };
-          }
-          return p;
-        })
-      };
-    });
-    setOpen(false);
-  };
+  const setSelectedPage = usePageBuilderStore((state) => state.setSelectedPage);
+  const selectedPage = usePageBuilderStore((state) => state.selectedPage);
+
   return (
     <li>
       <div className='flex'>
         <Button
-          className={`${
+          className={`w-full ${
             selectedPage?._id === page._id ? 'bg-black text-white' : ''
           }`}
-          onClick={() => onSelectPage(page)}>
+          onClick={() => setSelectedPage(page)}>
           {page.name}
         </Button>
         <Dialog
@@ -58,24 +33,20 @@ function PageListItem({
               <FontAwesomeIcon icon={faAdd} />
             </Button>
           }>
-          <PageForm
-            initialPage={null}
-            organizationId={organizationId}
-            onSubmit={handleCreatePage}
-            websiteId={websiteId}
-          />
+          <PageForm onClose={() => setOpen(false)} parentId={page._id} create />
         </Dialog>
       </div>
       <ul className='ml-4'>
-        {page.subPages.map((subPage) => (
-          <Button
-            className={`${
-              selectedPage?._id === subPage._id ? 'bg-black text-white' : ''
-            }`}
-            key={subPage._id}
-            onClick={() => onSelectPage(subPage)}>
-            {subPage.name}
-          </Button>
+        {page.children.map((subPage) => (
+          <li key={subPage._id}>
+            <Button
+              className={`w-full ${
+                selectedPage?._id === subPage._id ? 'bg-black text-white' : ''
+              }`}
+              onClick={() => setSelectedPage(subPage)}>
+              {subPage.name}
+            </Button>
+          </li>
         ))}
       </ul>
     </li>

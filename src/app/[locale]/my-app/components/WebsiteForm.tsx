@@ -9,24 +9,18 @@ import FormLabel from '@/components/form/FormLabel';
 import Input from '@/components/form/Input';
 import { Link } from '@/i18n/routing';
 import { ENUM_APP_ROUTES } from '@/lib/interfaces/enums';
-import {
-  IPage,
-  IPageTemplateVersion,
-  IUserSummary,
-  IWebsite
-} from '@/lib/interfaces/interfaces';
+import { IUserSummary, IWebsite } from '@/lib/interfaces/interfaces';
 import client from '@/lib/mongo/initMongoClient';
 import { ENUM_COLLECTIONS } from '@/lib/mongo/interfaces';
 import { toastPromise } from '@/lib/toast/toastPromise';
 import { useTranslations } from 'next-intl';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { v4 } from 'uuid';
 import PageForm from './PageForm';
-import { PageBuilderEditor } from './PageBuilder';
-import PageListItem from './PageListItem';
-import { IMasterTemplate } from '@/lib/TemplateBuilder/interfaces';
-import TemplateMasters from '../../admin/templates/components/TemplateMasters';
+import TemplateMasters from './TemplateMasters';
 import TailwindConfig from './TailwindConfig';
+import WebsitePages from './WebsitePages';
+import { usePageBuilderStore } from './usePageBuilderStore';
 
 type Props = {
   organizationId: string;
@@ -35,27 +29,34 @@ type Props = {
   create?: boolean;
 };
 function WebsiteForm({ initialWebsite, organizationId, create, user }: Props) {
-  const defaultWebsite: IWebsite = {
-    _id: v4(),
-    name: '',
-    createdAt: new Date(),
-    organizationId,
-    pages: []
-  };
-  const [website, setWebsite] = useState<IWebsite>(
-    initialWebsite || defaultWebsite
-  );
+  const setWebsite = usePageBuilderStore((state) => state.setWebsite);
+  const website = usePageBuilderStore((state) => state.website);
   const [open, setOpen] = useState(false);
-  const [selectedPage, setSelectedPage] = useState<IPage | null>(null);
   const t = useTranslations('WebsiteSection');
-  const [masterTemplates, setMasterTemplates] = useState<IMasterTemplate[]>([]);
-  const [pageTemplateVersions, setTemplateVersions] = useState<
-    IPageTemplateVersion[]
-  >([]);
-  const [selectedVersionPage, setSelectedVersionPage] =
-    useState<IPageTemplateVersion | null>(null);
+
+  const setOrganizationId = usePageBuilderStore(
+    (state) => state.setOrganizationId
+  );
+
+  useEffect(() => {
+    if (!organizationId) return;
+    const defaultWebsite: IWebsite = {
+      _id: v4(),
+      name: '',
+      createdAt: new Date(),
+      organizationId
+    };
+    setWebsite(initialWebsite || defaultWebsite);
+  }, [initialWebsite, organizationId, setWebsite]);
+
+  useEffect(() => {
+    if (organizationId) {
+      setOrganizationId(organizationId);
+    }
+  }, [organizationId, setOrganizationId]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (!website) return;
     const { name, value } = e.target;
     setWebsite({ ...website, [name]: value });
   };
@@ -84,91 +85,11 @@ function WebsiteForm({ initialWebsite, organizationId, create, user }: Props) {
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    handleSave(website, create || false);
-  };
-
-  const handleUpsertPage = async (updatedPage: IPage) => {
-    const updatePages = (pages: IPage[]): IPage[] =>
-      pages.map((page) => {
-        if (page._id === updatedPage._id) {
-          // Update the matching page
-          return updatedPage;
-        }
-        if (page._id === updatedPage.parentId) {
-          // Update the parent page with the updated subpage
-          return {
-            ...page,
-            subPages: updatePages(page.subPages || [])
-          };
-        }
-        // Recursively check and update subpages
-        return {
-          ...page,
-          subPages: updatePages(page.subPages || [])
-        };
-      });
-    const updatedWebpage: IWebsite = {
-      ...website,
-      pages: updatedPage.parentId
-        ? updatePages(website.pages)
-        : [...website.pages, updatedPage] // Add new page if no parentId
-    };
-
-    setWebsite(updatedWebpage);
-    await handleSave(updatedWebpage, false);
-    setOpen(false);
-  };
-
-  const handleSelectPage = async (page: IPage) => {
-    setSelectedPage(page);
-    const { data } = await client.list<IMasterTemplate>(
-      ENUM_COLLECTIONS.TEMPLATES_MASTER,
-      {
-        _id: {
-          $in: page.masterTemplates
-        }
-      }
-    );
-    setMasterTemplates(data || []);
-    setTemplateVersions([]);
-    setSelectedVersionPage(null);
-  };
-
-  const handleSelectMasterTemplate = async (
-    masterTemplate: IMasterTemplate
-  ) => {
-    const { data } = await client.list<IPageTemplateVersion>(
-      ENUM_COLLECTIONS.PAGE_TEMPLATES,
-      {
-        masterTemplateId: masterTemplate._id
-      }
-    );
-    setTemplateVersions(data || []);
-  };
-
-  const handleSelectPageVersion = (pageVersion: IPageTemplateVersion) => {
-    setSelectedVersionPage(pageVersion);
-  };
-
-  const onCreatePageVersionSuccess = async (masterTemplateId: string) => {
-    const { data } = await client.list<IPageTemplateVersion>(
-      ENUM_COLLECTIONS.PAGE_TEMPLATES,
-      {
-        masterTemplateId
-      }
-    );
-    setTemplateVersions(data || []);
-  };
-
-  const handleUpdateMasterTemplates = (masters: IMasterTemplate[]) => {
-    if (selectedPage) {
-      const updatedPage: IPage = {
-        ...selectedPage,
-        masterTemplates: masters.map((m) => m._id)
-      };
-      handleUpsertPage(updatedPage);
+    if (website) {
+      handleSave(website, create || false);
     }
   };
+
   const handleUpdateTailwindConfig = (tailwindConfig: string) => {
     if (website) {
       const updatedWebsite: IWebsite = {
@@ -183,6 +104,7 @@ function WebsiteForm({ initialWebsite, organizationId, create, user }: Props) {
     return <Link href={`${ENUM_APP_ROUTES.MY_APP}/create`}>Create</Link>;
   }
 
+  if (!website) return null;
   return (
     <div className='flex'>
       <div>
@@ -209,69 +131,14 @@ function WebsiteForm({ initialWebsite, organizationId, create, user }: Props) {
           open={open}
           onOpenChange={setOpen}
           Trigger={<Button>Create</Button>}>
-          <PageForm
-            initialPage={null}
-            organizationId={organizationId}
-            onSubmit={handleUpsertPage}
-            websiteId={website._id}
-          />
+          <PageForm create onClose={() => setOpen(false)} />
         </Dialog>
-
-        <ul>
-          {website.pages.map((page: IPage) => (
-            <PageListItem
-              page={page}
-              key={page._id}
-              selectedPage={selectedPage}
-              organizationId={organizationId}
-              websiteId={website._id}
-              onUpdateWebsite={setWebsite}
-              onSelectPage={handleSelectPage}
-            />
-          ))}
-        </ul>
+        <WebsitePages websiteId={website._id} />
       </div>
-      {selectedPage ? (
-        <div>
-          {selectedPage.name}
-          <PageForm
-            initialPage={selectedPage}
-            organizationId={organizationId}
-            onSubmit={handleUpsertPage}
-            websiteId={website._id}
-          />
-        </div>
-      ) : null}
-      <TemplateMasters
-        serverTemplates={masterTemplates}
-        user={user}
-        organizationId={organizationId}
-        onSubmit={handleUpdateMasterTemplates}
-        onSelectMasterTemplate={handleSelectMasterTemplate}
-        onCreatePageVersionSuccess={onCreatePageVersionSuccess}
-      />
-      {pageTemplateVersions.length && !selectedVersionPage ? (
-        <ul>
-          {pageTemplateVersions.map((pageTemplateVersion) => (
-            <li key={pageTemplateVersion._id}>
-              <Button
-                onClick={() => handleSelectPageVersion(pageTemplateVersion)}>
-                {pageTemplateVersion.version}
-              </Button>
-            </li>
-          ))}
-        </ul>
-      ) : null}
-      {selectedVersionPage ? (
-        <div className='flex-1'>
-          <Button onClick={() => setSelectedVersionPage(null)}>Back</Button>
-          <PageBuilderEditor
-            initialPageVersion={selectedVersionPage}
-            organizationId={organizationId}
-            websiteId={website._id}
-          />
-        </div>
-      ) : null}
+      <div>
+        <PageForm />
+        <TemplateMasters user={user} />
+      </div>
     </div>
   );
 }

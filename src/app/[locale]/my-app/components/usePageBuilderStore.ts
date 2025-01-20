@@ -4,34 +4,85 @@ import { findNodeById, updateNodeById } from './utils';
 import { v4 } from 'uuid';
 import client from '@/lib/mongo/initMongoClient';
 import { ENUM_COLLECTIONS } from '@/lib/mongo/interfaces';
-import { IPageTemplateVersion } from '@/lib/interfaces/interfaces';
+import { IPageTemplateVersion, IWebsite, IPage } from '@/lib/interfaces/interfaces';
+import { IMasterTemplate } from '@/lib/TemplateBuilder/interfaces';
 
 interface PageBuilderContextProps {
   pageVersion: IPageTemplateVersion | null;
+  website: IWebsite | null;
   designMode: boolean;
   elementConfig: IElementConfig | null;
   gridDisplay: boolean;
   elementsConfig: IElementConfig[];
   selectedNodeId: string | null;
+  masterTemplates: IMasterTemplate[];
+  selectedPage: IPage | null;
+  selectedMasterTemplate: IMasterTemplate | null;
+  setSelectMasterTemplate: (masterTemplate: IMasterTemplate) => void;
+  setSelectedPage: (page: IPage | null) => void;
   onSelectNode: (event: React.MouseEvent, node: IVDOMNode | null) => void;
   onUpdateNodeProperty: (name: string, value: string) => void;
+  setMasterTemplates: (templates: IMasterTemplate[]) => void;
   setDesignMode: (mode: boolean) => void;
   setGridDisplay: (status: boolean) => void;
   onSelectConfig: (config: IElementConfig | null) => void;
   onAddComponent: (component: ENUM_COMPONENTS) => void;
   fetchElementsConfig: () => Promise<void>;
   onPublish: () => Promise<void>;
+  setWebsite: (website: IWebsite) => void;
   organizationId: string | null;
-  onInitPageVersion: (page: IPageTemplateVersion, organizationId: string) => void;
+  setOrganizationId: (id: string) => void;
+  setSelectedVersionPage: (page: IPageTemplateVersion | null) => void;
+  setTemplateVersions: (templates: IPageTemplateVersion[]) => void;
+  addTemplateVersion: (template: IPageTemplateVersion) => void;
+  pageTemplateVersions: IPageTemplateVersion[];
 }
 export const usePageBuilderStore = create<PageBuilderContextProps>((set, get) => ({
+  website: null,
+  selectedMasterTemplate: null,
+  selectedPage: null,
   designMode: true,
   gridDisplay: false,
   selectedNodeId: null,
   pageVersion: null,
   elementsConfig: [],
   elementConfig: null,
+  masterTemplates: [],
   organizationId: null,
+  pageTemplateVersions: [],
+  addTemplateVersion: (template: IPageTemplateVersion) => {
+    set({ pageTemplateVersions: [...get().pageTemplateVersions, template] });
+  },
+  setSelectMasterTemplate: async (masterTemplate: IMasterTemplate) => {
+    const { data } = await client.list<IPageTemplateVersion>(
+      ENUM_COLLECTIONS.PAGE_TEMPLATES,
+      {
+        masterTemplateId: masterTemplate._id
+      }
+    );
+    set({ pageTemplateVersions: data || [], selectedMasterTemplate: masterTemplate });
+
+  },
+  setSelectedPage: async (page: IPage | null) => {
+    set({ selectedPage: page });
+    if (!page) {
+      set({ masterTemplates: [] });
+      return
+    };
+    const { data } = await client.list<IMasterTemplate>(
+      ENUM_COLLECTIONS.TEMPLATES_MASTER,
+      {
+        _id: {
+          $in: page.masterTemplates
+        }
+      }
+    );
+    set({ masterTemplates: data || [] });
+
+  },
+  setTemplateVersions: (templates: IPageTemplateVersion[]) => set({ pageTemplateVersions: templates }),
+  setOrganizationId: (id: string) => set({ organizationId: id }),
+  setWebsite: (website: IWebsite) => set({ website }),
   fetchElementsConfig: async () => {
     const { data } = await client.list<IElementConfig>(ENUM_COLLECTIONS.WEB_APP_ELEMENTS);
     set({ elementsConfig: data || [] });
@@ -39,9 +90,8 @@ export const usePageBuilderStore = create<PageBuilderContextProps>((set, get) =>
   onSelectConfig: (config: IElementConfig | null) => set({ elementConfig: config }),
   setDesignMode: (mode: boolean) => set({ designMode: mode }),
   setGridDisplay: (status: boolean) => set({ gridDisplay: status }),
-  onInitPageVersion: (page: IPageTemplateVersion, organizationId: string) => {
+  setSelectedVersionPage: (page: IPageTemplateVersion | null) => {
     set({ pageVersion: page })
-    set({ organizationId })
   },
   onSelectNode: (event: React.MouseEvent, node: IVDOMNode | null) => {
     event.stopPropagation();
@@ -108,17 +158,23 @@ export const usePageBuilderStore = create<PageBuilderContextProps>((set, get) =>
   onPublish: async () => {
     const pageVersion = get().pageVersion;
     if (!pageVersion) return;
+
     await client.updateMany(
       ENUM_COLLECTIONS.PAGE_TEMPLATES,
       { masterTemplateId: pageVersion.masterTemplateId, published: true },
       { $set: { published: false } }
     );
-    await client.update(
-      ENUM_COLLECTIONS.TEMPLATES,
+
+    const updatePublishedVersion = {
+      published: true,
+      hasBeenPublished: true,
+    }
+    await client.update<IPageTemplateVersion>(
+      ENUM_COLLECTIONS.PAGE_TEMPLATES,
       { _id: pageVersion._id },
-      { $set: { published: true, hasBeenPublished: true } }
+      { $set: updatePublishedVersion }
     );
-    await client.update(
+    await client.update<IMasterTemplate>(
       ENUM_COLLECTIONS.TEMPLATES_MASTER,
       {
         _id: pageVersion.masterTemplateId
@@ -126,11 +182,13 @@ export const usePageBuilderStore = create<PageBuilderContextProps>((set, get) =>
       {
         $set: {
           latestVersion: pageVersion.version,
-          publishedVersionId: pageVersion._id,
+          publishedVersion: { ...pageVersion, ...updatePublishedVersion },
           forceUpdate: pageVersion.forceUpdate
         }
       }
     );
-    set({ pageVersion: { ...pageVersion, published: true, hasBeenPublished: true } });
-  }
+    set({ pageVersion: { ...pageVersion, ...updatePublishedVersion } });
+  },
+  setMasterTemplates: (templates: IMasterTemplate[]) => set({ masterTemplates: templates }),
+
 }))

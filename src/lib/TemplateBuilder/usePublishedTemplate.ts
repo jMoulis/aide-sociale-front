@@ -1,7 +1,7 @@
 import client from "@/lib/mongo/initMongoClient";
 
 import { useCallback } from "react";
-import { IFormTemplate, IMasterTemplate } from "./interfaces";
+import { IMasterTemplate } from "./interfaces";
 import { ENUM_COLLECTIONS } from "../mongo/interfaces";
 
 export const usePublishedTemplate = (masterTemplateId?: string) => {
@@ -10,11 +10,8 @@ export const usePublishedTemplate = (masterTemplateId?: string) => {
       const { data } = await client.get<IMasterTemplate>(ENUM_COLLECTIONS.TEMPLATES_MASTER, {
         _id: masterTemplateId
       });
-      if (data?.publishedVersionId) {
-        const { data: template } = await client.get<IFormTemplate>(ENUM_COLLECTIONS.TEMPLATES, {
-          _id: data.publishedVersionId
-        });
-        return template;
+      if (data?.publishedVersion) {
+        return data?.publishedVersion;
       }
     }
     return null;

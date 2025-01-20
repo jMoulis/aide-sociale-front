@@ -1,4 +1,4 @@
-import { IUserSummary } from "../interfaces/interfaces";
+import { IPageTemplateVersion, IUserSummary } from "../interfaces/interfaces";
 
 export enum ENUM_FIELD_TYPE {
   TEXT = 'text',
@@ -27,7 +27,7 @@ export interface IMasterTemplate {
   _id: string;
   title: string;
   latestVersion: number;
-  publishedVersionId: string | null;
+  publishedVersion: IPageTemplateVersion | null;
   createdBy: IUserSummary | null;
   organizationId: string;
   createdAt: Date;

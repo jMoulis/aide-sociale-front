@@ -197,7 +197,7 @@ export interface IPage {
   _id: string;
   name: string;
   organizationId: string;
-  subPages: IPage[];
+  subPages: string[];
   parentId?: string;
   createdAt: Date;
   updatedAt?: Date;
@@ -208,6 +208,9 @@ export interface IPage {
   props?: {
     style?: string;
   };
+}
+export interface ITreePage extends IPage {
+  children: ITreePage[];
 }
 export interface IPageTemplateVersion {
   _id: string;
@@ -229,7 +232,6 @@ export interface IWebsite {
   organizationId: string;
   createdAt: Date;
   updatedAt?: Date;
-  pages: IPage[];
   tailwindConfig?: string;
   stylesheets?: string[];
 }

@@ -6,7 +6,6 @@ import {
   IMasterTemplate
 } from '@/lib/TemplateBuilder/interfaces';
 import { useCallback, useEffect, useState } from 'react';
-import MasterTemplateForm from '../../../templates/components/MasterTemplateForm';
 import MasterTemplateListItem from '../../../templates/[id]/components/MasterTemplateListItem';
 import TemplateListItem from './TemplateListItem';
 import { removeObjectFields, sortArray } from '@/lib/utils/utils';
@@ -55,7 +54,7 @@ function Templates({ page, user, organizationId, onUpdatePage }: Props) {
     }
   }, [page.masterTemplates]);
 
-  const handleSubmit = (incomingMasterTemplate: IMasterTemplate) => {
+  const _handleSubmit = (incomingMasterTemplate: IMasterTemplate) => {
     setSelectedMasterTemplate(incomingMasterTemplate);
     onUpdatePage({
       ...page,
@@ -133,11 +132,11 @@ function Templates({ page, user, organizationId, onUpdatePage }: Props) {
         ) : null}
         <div className='flex'>
           <h1>Templates</h1>
-          <MasterTemplateForm
+          {/* <MasterTemplateForm
             onSubmit={handleSubmit}
             user={user}
             organizationId={organizationId}
-          />
+          /> */}
         </div>
       </div>
       <div>
