@@ -6,13 +6,12 @@ import FormLabel from '@/components/form/FormLabel';
 import Input from '@/components/form/Input';
 import { IPage } from '@/lib/interfaces/interfaces';
 import { slugifyFunction } from '@/lib/utils/utils';
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { v4 } from 'uuid';
-import CssEditor from './Properties/CssEditor';
-import { Drawer } from '@/components/drawer/Drawer';
 import client from '@/lib/mongo/initMongoClient';
 import { ENUM_COLLECTIONS } from '@/lib/mongo/interfaces';
 import { usePageBuilderStore } from './usePageBuilderStore';
+import PageCssEditor from './PageCssEditor';
 
 type Props = {
   onClose?: () => void;
@@ -22,35 +21,44 @@ type Props = {
 function PageForm({ onClose, parentId, create }: Props) {
   const selectedPage = usePageBuilderStore((state) => state.selectedPage);
   const organizationId = usePageBuilderStore((state) => state.organizationId);
-  const websiteId = usePageBuilderStore((state) => state.website?._id);
+  const website = usePageBuilderStore((state) => state.website);
+  const linksRef = useRef<HTMLLinkElement[]>([]);
 
   const [page, setPage] = useState<IPage | null>(null);
-  const [open, setOpen] = useState(false);
 
-  const initializeCustomStyle = (incomingPage: IPage) => {
-    const prevStyleTag = document.querySelector('style[data-page-style]');
-    if (prevStyleTag) {
-      document.head.removeChild(prevStyleTag);
+  const initializeCustomStyle = (stylesheet: { name: string; uri: string }) => {
+    const sluggedName = slugifyFunction(stylesheet.name);
+    let stylesheetLink = document.querySelector(
+      `link[id="${sluggedName}"]`
+    ) as HTMLLinkElement;
+
+    if (stylesheetLink) {
+      stylesheetLink.href = `${
+        stylesheet.uri
+      }?timestamp=${new Date().getTime()}`;
+    } else {
+      stylesheetLink = document.createElement('link');
+      stylesheetLink.setAttribute('rel', 'stylesheet');
+      stylesheetLink.setAttribute('id', sluggedName);
+      stylesheetLink.setAttribute(
+        'href',
+        `${stylesheet.uri}?timestamp=${new Date().getTime()}`
+      );
+      document.head.appendChild(stylesheetLink);
     }
-    const styleTag = document.createElement('style');
-    styleTag.innerHTML = incomingPage.props?.style || '';
-    document.head.appendChild(styleTag);
-    return styleTag;
+    linksRef.current.push(stylesheetLink);
+    return stylesheetLink;
   };
 
-  useEffect(() => {
-    if (selectedPage) {
-      const styleTag = initializeCustomStyle(selectedPage);
-      return () => {
-        if (styleTag) {
-          document.head.removeChild(styleTag);
-        }
-      };
-    }
-  }, [selectedPage]);
+  const previousStylesheetUrl = useMemo(() => {
+    if (!website?.stylesheets || !page?.name) return;
+    return (website?.stylesheets || []).find(
+      (stylesheet) => stylesheet.name === page.name
+    );
+  }, [page?.name, website?.stylesheets]);
 
   useEffect(() => {
-    if (!organizationId || !websiteId) return;
+    if (!organizationId || !website?._id) return;
     if (selectedPage && !create) {
       setPage(selectedPage);
     } else {
@@ -59,7 +67,7 @@ function PageForm({ onClose, parentId, create }: Props) {
         name: '',
         createdAt: new Date(),
         organizationId,
-        websiteId,
+        websiteId: website._id,
         subPages: [],
         route: '',
         roles: [],
@@ -69,7 +77,22 @@ function PageForm({ onClose, parentId, create }: Props) {
       };
       setPage(defaultPage);
     }
-  }, [selectedPage, create, organizationId, websiteId, parentId]);
+  }, [selectedPage, create, organizationId, website?._id, parentId]);
+
+  useEffect(() => {
+    if (!website?.stylesheets || !selectedPage) return;
+    website.stylesheets.forEach((stylesheet) => {
+      initializeCustomStyle(stylesheet);
+    });
+    const currentLinks = linksRef.current;
+    return () => {
+      currentLinks.forEach((link) => {
+        if (link.parentNode) {
+          document.head.removeChild(link);
+        }
+      });
+    };
+  }, [website?.stylesheets, selectedPage]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!page) return;
@@ -100,21 +123,7 @@ function PageForm({ onClose, parentId, create }: Props) {
     }
   };
 
-  const handleSubmitCss = async () => {
-    setOpen(false);
-  };
-
-  const handleChangeStyle = (value: string) => {
-    if (!page) return;
-    const updatedPage = {
-      ...page,
-      props: { ...page.props, style: value }
-    };
-    setPage(updatedPage);
-    initializeCustomStyle(updatedPage);
-  };
-
-  if (!page) return null;
+  if ((!create && !selectedPage) || !page) return null;
   return (
     <Form onSubmit={handleSubmit}>
       <FormField>
@@ -132,19 +141,10 @@ function PageForm({ onClose, parentId, create }: Props) {
           />
         </div>
       </FormField>
-      <Drawer
-        side='left'
-        open={open}
-        onOpenChange={setOpen}
-        Trigger={<Button>CSS</Button>}>
-        <CssEditor
-          value={page.props?.style || ''}
-          onUpdate={handleChangeStyle}
-        />
-        <FormFooterAction>
-          <Button onClick={handleSubmitCss}>Save</Button>
-        </FormFooterAction>
-      </Drawer>
+      <PageCssEditor
+        page={page}
+        previousStylesheetUrl={previousStylesheetUrl}
+      />
       <FormFooterAction>
         <Button type='submit'>Save</Button>
       </FormFooterAction>

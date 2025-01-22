@@ -21,46 +21,10 @@ export const PageBuilderEditor = () => {
   const setSelectedVersionPage = usePageBuilderStore(
     (state) => state.setSelectedVersionPage
   );
-  const organizationId = usePageBuilderStore((state) => state.organizationId);
-  const websiteId = usePageBuilderStore((state) => state.website?._id);
 
   useEffect(() => {
     fetchElements();
   }, [fetchElements]);
-
-  const initCustomCssLink = (selector: string, title: string, href: string) => {
-    // const prevLink = document.querySelector(selector);
-    // if (prevLink) {
-    //   document.head.removeChild(prevLink);
-    // }
-    const link = document.createElement('link');
-    link.title = title;
-    link.rel = 'stylesheet';
-    link.href = `/styles/${href}`;
-    document.head.appendChild(link);
-    return link;
-  };
-  useEffect(() => {
-    if (!pageVersion?._id || !organizationId) return;
-    // const customLink = initCustomCssLink(
-    //   'link[title="dynamic-css"]',
-    //   'dynamic-css',
-    //   `${organizationId}/page-${pageVersion._id}.css`
-    // );
-    const tailwindLink = initCustomCssLink(
-      'link[title="tailwind"]',
-      'tailwind',
-      `${organizationId}/tailwind.css`
-    );
-    return () => {
-      // if (customLink) {
-      //   document.head.removeChild(customLink);
-      // }
-      if (tailwindLink) {
-        document.head.removeChild(tailwindLink);
-      }
-    };
-  }, [pageVersion?._id, organizationId, websiteId]);
 
   const handleSave = async () => {
     if (pageVersion) {

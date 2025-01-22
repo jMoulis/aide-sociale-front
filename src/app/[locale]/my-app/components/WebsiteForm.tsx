@@ -10,9 +10,6 @@ import Input from '@/components/form/Input';
 import { Link } from '@/i18n/routing';
 import { ENUM_APP_ROUTES } from '@/lib/interfaces/enums';
 import { IUserSummary, IWebsite } from '@/lib/interfaces/interfaces';
-import client from '@/lib/mongo/initMongoClient';
-import { ENUM_COLLECTIONS } from '@/lib/mongo/interfaces';
-import { toastPromise } from '@/lib/toast/toastPromise';
 import { useTranslations } from 'next-intl';
 import { useEffect, useState } from 'react';
 import { v4 } from 'uuid';
@@ -33,6 +30,7 @@ function WebsiteForm({ initialWebsite, organizationId, create, user }: Props) {
   const website = usePageBuilderStore((state) => state.website);
   const [open, setOpen] = useState(false);
   const t = useTranslations('WebsiteSection');
+  const onSaveWebsite = usePageBuilderStore((state) => state.onSaveWebsite);
 
   const setOrganizationId = usePageBuilderStore(
     (state) => state.setOrganizationId
@@ -61,45 +59,35 @@ function WebsiteForm({ initialWebsite, organizationId, create, user }: Props) {
     setWebsite({ ...website, [name]: value });
   };
 
-  const handleSave = async (updatedWebsite: IWebsite, isNew: boolean) => {
-    if (isNew) {
-      await toastPromise(
-        client.create(ENUM_COLLECTIONS.WEBSITES, updatedWebsite),
-        t,
-        'create'
-      );
-    } else {
-      toastPromise(
-        client.update(
-          ENUM_COLLECTIONS.WEBSITES,
-          {
-            _id: updatedWebsite._id
-          },
-          { $set: updatedWebsite }
-        ),
-        t,
-        'edit'
-      );
-    }
-  };
-
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    onSaveWebsite(create || false, t);
+  };
+
+  const handleUpdateTailwindConfig = (tailwindConfig: string, path: string) => {
     if (website) {
-      handleSave(website, create || false);
+      let updatedStylesheets = website.stylesheets || [];
+
+      const prevTailwind = updatedStylesheets.find((stylesheet) => {
+        return stylesheet.name === 'tailwind';
+      });
+      if (prevTailwind) {
+        updatedStylesheets = updatedStylesheets.map((stylesheet) =>
+          stylesheet.uri === path ? { ...prevTailwind, uri: path } : stylesheet
+        );
+      } else {
+        updatedStylesheets.push({ name: 'tailwind', uri: path });
+      }
+      const updatedWebsite: IWebsite = {
+        ...website,
+        tailwindConfig,
+        stylesheets: updatedStylesheets
+      };
+      setWebsite(updatedWebsite);
+      onSaveWebsite(false, t);
     }
   };
 
-  const handleUpdateTailwindConfig = (tailwindConfig: string) => {
-    if (website) {
-      const updatedWebsite: IWebsite = {
-        ...website,
-        tailwindConfig
-      };
-      setWebsite(updatedWebsite);
-      handleSave(updatedWebsite, create || false);
-    }
-  };
   if (!initialWebsite && !create) {
     return <Link href={`${ENUM_APP_ROUTES.MY_APP}/create`}>Create</Link>;
   }
@@ -125,7 +113,8 @@ function WebsiteForm({ initialWebsite, organizationId, create, user }: Props) {
         <TailwindConfig
           prevScript={website.tailwindConfig || ''}
           onUpdateWebsite={handleUpdateTailwindConfig}
-          path={`${organizationId}`}
+          organizationId={organizationId}
+          website={website}
         />
         <Dialog
           open={open}

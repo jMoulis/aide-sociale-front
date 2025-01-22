@@ -25,11 +25,7 @@ export default async function RootLayout({
 
   const files = organizationApp?.stylesheets || [];
   const customHeaders = files.map((file) => (
-    <link
-      key={file}
-      rel='stylesheet'
-      href={`/styles/${organizationId}/${file}`}
-    />
+    <link key={file} rel='stylesheet' href={`${file}`} />
   ));
 
   return (

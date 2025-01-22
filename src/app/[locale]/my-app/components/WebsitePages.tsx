@@ -9,12 +9,14 @@ type Props = {
 };
 const WebsitePages = ({ websiteId }: Props) => {
   const [websitePages, setWebsitePages] = useState<ITreePage[]>([]);
-
+  const [init, setInit] = useState(false);
   useEffect(() => {
+    if (!websiteId || init) return;
     client.onSnapshotList<IPage>(
       ENUM_COLLECTIONS.PAGES,
       { websiteId },
       (incomingPages) => {
+        setInit(true);
         function buildPageTree(pages: IPage[]): ITreePage[] {
           const pageMap = new Map<string, ITreePage>();
           pages.forEach((page) => {
@@ -31,14 +33,13 @@ const WebsitePages = ({ websiteId }: Props) => {
               tree.push(pageMap.get(page._id)!);
             }
           });
-
           return tree;
         }
         const tree = buildPageTree(incomingPages || []);
         setWebsitePages(tree);
       }
     );
-  }, [websiteId]);
+  }, [websiteId, init]);
 
   return (
     <ul>

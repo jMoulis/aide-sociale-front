@@ -6,6 +6,7 @@ import client from '@/lib/mongo/initMongoClient';
 import { ENUM_COLLECTIONS } from '@/lib/mongo/interfaces';
 import { IPageTemplateVersion, IWebsite, IPage } from '@/lib/interfaces/interfaces';
 import { IMasterTemplate } from '@/lib/TemplateBuilder/interfaces';
+import { toastPromise } from '@/lib/toast/toastPromise';
 
 interface PageBuilderContextProps {
   pageVersion: IPageTemplateVersion | null;
@@ -35,6 +36,7 @@ interface PageBuilderContextProps {
   setSelectedVersionPage: (page: IPageTemplateVersion | null) => void;
   setTemplateVersions: (templates: IPageTemplateVersion[]) => void;
   addTemplateVersion: (template: IPageTemplateVersion) => void;
+  onSaveWebsite: (create: boolean, t: any) => void;
   pageTemplateVersions: IPageTemplateVersion[];
 }
 export const usePageBuilderStore = create<PageBuilderContextProps>((set, get) => ({
@@ -50,6 +52,29 @@ export const usePageBuilderStore = create<PageBuilderContextProps>((set, get) =>
   masterTemplates: [],
   organizationId: null,
   pageTemplateVersions: [],
+  onSaveWebsite: async (create, t) => {
+    const website = get().website;
+    if (!website) return;
+    if (create) {
+      await toastPromise(
+        client.create(ENUM_COLLECTIONS.WEBSITES, website),
+        t,
+        'create'
+      );
+    } else {
+      toastPromise(
+        client.update(
+          ENUM_COLLECTIONS.WEBSITES,
+          {
+            _id: website._id
+          },
+          { $set: website }
+        ),
+        t,
+        'edit'
+      );
+    }
+  },
   addTemplateVersion: (template: IPageTemplateVersion) => {
     set({ pageTemplateVersions: [...get().pageTemplateVersions, template] });
   },

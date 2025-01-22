@@ -12,7 +12,9 @@ type Props = {
 };
 function TemplateMasters({ user }: Props) {
   const selectedVersionPage = usePageBuilderStore((state) => state.pageVersion);
+  const selectedPage = usePageBuilderStore((state) => state.selectedPage);
 
+  if (!selectedPage) return null;
   return (
     <div>
       <PageBuilderEditor />

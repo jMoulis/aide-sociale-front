@@ -193,6 +193,7 @@ export interface IOrganization {
   contactsInfo: IContactInfo[];
 }
 
+
 export interface IPage {
   _id: string;
   name: string;
@@ -226,6 +227,10 @@ export interface IPageTemplateVersion {
   hasBeenPublished: boolean;
   forceUpdate?: boolean;
 }
+export interface IStylesheet {
+  name: string;
+  uri: string;
+}
 export interface IWebsite {
   _id: string;
   name: string;
@@ -233,7 +238,7 @@ export interface IWebsite {
   createdAt: Date;
   updatedAt?: Date;
   tailwindConfig?: string;
-  stylesheets?: string[];
+  stylesheets?: IStylesheet[];
 }
 
 export interface IAddress {

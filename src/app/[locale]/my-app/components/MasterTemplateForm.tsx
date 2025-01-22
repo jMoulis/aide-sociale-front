@@ -106,7 +106,6 @@ function MasterTemplateForm({ initialMasterTemplate, user }: Props) {
   };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    console.log(masterTemplate);
     if (!masterTemplate) return;
     const { name, value } = e.target;
     setMasterTemplate({ ...masterTemplate, [name]: value });
