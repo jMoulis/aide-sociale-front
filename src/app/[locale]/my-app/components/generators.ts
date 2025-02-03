@@ -1,5 +1,5 @@
 import { v4 } from "uuid";
-import { ENUM_COMPONENTS, ENUM_COMPONENTS_TYPE } from "./interfaces";
+import { ENUM_COMPONENTS, IVDOMNode } from "./interfaces";
 import { TemplateDiff } from "@/lib/TemplateBuilder/interfaces";
 
 export const generatePageVersion = (masterTemplateId: string, version: number) => {
@@ -10,10 +10,12 @@ export const generatePageVersion = (masterTemplateId: string, version: number) =
     masterTemplateId,
     vdom: {
       _id: v4(),
-      type: ENUM_COMPONENTS_TYPE.BLOCK,
-      component: ENUM_COMPONENTS.BLOCK,
-      children: []
-    },
+      type: ENUM_COMPONENTS.BLOCK,
+      props: {
+        children: []
+      },
+      context: {}
+    } as IVDOMNode,
     version,
     diff: {} as TemplateDiff,
     published: false,

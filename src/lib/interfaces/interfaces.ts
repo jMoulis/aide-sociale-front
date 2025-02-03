@@ -197,15 +197,16 @@ export interface IOrganization {
 export interface IPage {
   _id: string;
   name: string;
+  slug: string;
   organizationId: string;
-  subPages: string[];
   parentId?: string;
   createdAt: Date;
   updatedAt?: Date;
-  masterTemplates: string[];
+  masterTemplateId: string;
   route: string;
   websiteId: string;
   roles: string[];
+  menus: IMenu[];
   props?: {
     style?: string;
   };
@@ -226,6 +227,8 @@ export interface IPageTemplateVersion {
   published: boolean;
   hasBeenPublished: boolean;
   forceUpdate?: boolean;
+  isDirty?: boolean;
+  hasUnpublishedChanges?: boolean;
 }
 export interface IStylesheet {
   name: string;
@@ -239,6 +242,8 @@ export interface IWebsite {
   updatedAt?: Date;
   tailwindConfig?: string;
   stylesheets?: IStylesheet[];
+  menus: IMenu[];
+  published: boolean;
 }
 
 export interface IAddress {

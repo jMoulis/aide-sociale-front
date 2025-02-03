@@ -1,25 +1,32 @@
+import { CSSProperties } from "react";
+
 export enum ENUM_COMPONENTS {
   TEXT = 'TEXT',
   INPUT = 'INPUT',
   BLOCK = 'BLOCK',
   FIELD_INPUT = 'FIELD_INPUT'
 }
-export enum ENUM_COMPONENTS_TYPE {
-  BLOCK = 'block',
-  INLINE = 'inline'
-}
+
 export enum ENUM_PROPERTIES_COMPONENTS {
   INPUT = 'INPUT',
-  STYLING = 'STYLING'
+  STYLING = 'STYLING',
+  AS = 'AS'
 }
 export interface IVDOMNode {
   _id: string;
-  type: ENUM_COMPONENTS_TYPE;
-  component: ENUM_COMPONENTS;
-  props?: {
+  inline?: boolean;
+  type: ENUM_COMPONENTS;
+  context: {
     [key: string]: any; // e.g. textContent, placeholder, className, etc.
+    styling?: {
+      style?: CSSProperties;
+      className?: string;
+    }
+  }
+  props: {
+    [key: string]: any; // e.g. textContent, placeholder, className, etc.
+    children: IVDOMNode[] | string;
   };
-  children?: IVDOMNode[];
 }
 export interface RenderElementProps {
   node: IVDOMNode;
@@ -33,11 +40,13 @@ export type ElementConfigProps = {
   label: string;
   propKey: string;
   component: ENUM_PROPERTIES_COMPONENTS;
+  context: boolean;
 }
 export interface IElementConfig {
   _id: string;
-  component: ENUM_COMPONENTS;
-  type: ENUM_COMPONENTS_TYPE;
-  props?: ElementConfigProps[];
+  inline?: boolean;
+  type: ENUM_COMPONENTS;
+  parameters?: ElementConfigProps[];
+  vdom: IVDOMNode;
 }
 

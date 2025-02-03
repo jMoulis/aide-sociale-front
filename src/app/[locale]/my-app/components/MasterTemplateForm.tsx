@@ -7,49 +7,47 @@ import Form from '@/components/form/Form';
 import FormField from '@/components/form/FormField';
 import FormLabel from '@/components/form/FormLabel';
 import Input from '@/components/form/Input';
-import { IPage, IUserSummary } from '@/lib/interfaces/interfaces';
+import { IPage, ITreePage } from '@/lib/interfaces/interfaces';
 import client from '@/lib/mongo/initMongoClient';
 import { ENUM_COLLECTIONS } from '@/lib/mongo/interfaces';
 import { IMasterTemplate } from '@/lib/TemplateBuilder/interfaces';
 import { toastPromise } from '@/lib/toast/toastPromise';
-import { faEdit } from '@awesome.me/kit-8441d3fdf2/icons/classic/solid';
+import { faAdd, faEdit } from '@awesome.me/kit-8441d3fdf2/icons/classic/solid';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { useTranslations } from 'next-intl';
 import { useEffect, useState } from 'react';
 import { v4 } from 'uuid';
-import { usePageBuilderStore } from './usePageBuilderStore';
+import { getUserSummary, removeObjectFields } from '@/lib/utils/utils';
+import { usePageBuilderStore } from './stores/pagebuilder-store-provider';
+import { useMongoUser } from '@/lib/mongo/MongoUserContext/MongoUserContext';
 
 type Props = {
-  initialMasterTemplate?: IMasterTemplate;
-  user: IUserSummary;
+  initialMasterTemplate?: IMasterTemplate | null;
+  page: ITreePage;
+  onSubmit?: (masterTemplate: IMasterTemplate) => void;
 };
-function MasterTemplateForm({ initialMasterTemplate, user }: Props) {
+function MasterTemplateForm({ initialMasterTemplate, page, onSubmit }: Props) {
   const [open, setOpen] = useState(false);
   const t = useTranslations('GlobalSection.actions');
   const tMaster = useTranslations('TemplateSection.master');
   const organizationId = usePageBuilderStore((state) => state.organizationId);
-  const selectedPage = usePageBuilderStore((state) => state.selectedPage);
+  const setSelectedPage = usePageBuilderStore((state) => state.setSelectedPage);
 
-  const setMasterTemplates = usePageBuilderStore(
-    (state) => state.setMasterTemplates
-  );
-  const masterTemplates = usePageBuilderStore((state) => state.masterTemplates);
+  const user = useMongoUser();
   const [masterTemplate, setMasterTemplate] = useState<IMasterTemplate | null>(
     null
   );
-
   useEffect(() => {
-    if (!organizationId) return;
+    if (!organizationId || !user) return;
     const defaultMasterTemplate: IMasterTemplate = {
       _id: v4(),
       title: '',
       publishedVersion: null,
       createdAt: new Date(),
-      createdBy: user,
+      createdBy: getUserSummary(user),
       latestVersion: 0,
       organizationId
     };
-
     setMasterTemplate(initialMasterTemplate || defaultMasterTemplate);
   }, [initialMasterTemplate, organizationId, user]);
 
@@ -71,6 +69,7 @@ function MasterTemplateForm({ initialMasterTemplate, user }: Props) {
         tMaster,
         'edit'
       );
+      onSubmit?.(masterTemplate);
     } else {
       await toastPromise(
         client.create<IMasterTemplate>(
@@ -80,28 +79,22 @@ function MasterTemplateForm({ initialMasterTemplate, user }: Props) {
         tMaster,
         'create'
       );
+      onSubmit?.(masterTemplate);
     }
-    let updatedMasterTemplates: IMasterTemplate[] = masterTemplates;
-    if (!initialMasterTemplate) {
-      updatedMasterTemplates = [...masterTemplates, masterTemplate];
-      setMasterTemplates(updatedMasterTemplates);
-    } else {
-      updatedMasterTemplates = masterTemplates.map((template) =>
-        template._id === masterTemplate._id ? masterTemplate : template
-      );
-      setMasterTemplates(updatedMasterTemplates);
-    }
-    if (selectedPage) {
-      const updatedPage = {
-        ...selectedPage,
-        masterTemplates: updatedMasterTemplates.map((template) => template._id)
-      };
-      await client.update<IPage>(
-        ENUM_COLLECTIONS.PAGES,
-        { _id: selectedPage._id },
-        { $set: updatedPage }
-      );
-    }
+
+    const updatedPage = removeObjectFields(
+      {
+        ...page,
+        masterTemplateId: masterTemplate._id
+      },
+      ['children']
+    );
+    await client.update<IPage>(
+      ENUM_COLLECTIONS.PAGES,
+      { _id: page._id },
+      { $set: updatedPage }
+    );
+    setSelectedPage({ ...page, masterTemplateId: masterTemplate._id });
     setOpen(false);
   };
 
@@ -111,19 +104,26 @@ function MasterTemplateForm({ initialMasterTemplate, user }: Props) {
     setMasterTemplate({ ...masterTemplate, [name]: value });
   };
 
+  const handleOpen = (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setOpen(true);
+    setSelectedPage(page);
+  };
+
   return (
     <Dialog
       open={open}
       onOpenChange={setOpen}
       title='Create master template'
       Trigger={
-        <Button>
+        <button onClick={handleOpen}>
           {initialMasterTemplate ? (
             <FontAwesomeIcon icon={faEdit} />
           ) : (
-            tMaster('create.action')
+            <FontAwesomeIcon icon={faAdd} />
           )}
-        </Button>
+        </button>
       }>
       <Form onSubmit={handleSubmit}>
         <FormField>

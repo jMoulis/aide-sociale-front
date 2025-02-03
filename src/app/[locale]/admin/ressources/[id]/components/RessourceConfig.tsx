@@ -1,10 +1,9 @@
 'use client';
 
-import { IMenu, IRessource } from '@/lib/interfaces/interfaces';
+import { IRessource } from '@/lib/interfaces/interfaces';
 import { isValidJSON } from '@/lib/utils/utils';
 import { useCallback, useState } from 'react';
 import RessourceForm from '../../components/RessourceForm';
-import MenusBuilder from '../../components/MenusBuilder/MenusBuilder';
 import { v4 } from 'uuid';
 import client from '@/lib/mongo/initMongoClient';
 import { ENUM_COLLECTIONS } from '@/lib/mongo/interfaces';
@@ -75,15 +74,6 @@ function PageStudio({ initialRessource, organizationId }: Props) {
     [organizationId, initialRessource?._id, t, router]
   );
 
-  const handleUpdateMenus = useCallback(
-    (updatedMenus: IMenu[]) => {
-      const updatedRessource = { ...ressource, menus: updatedMenus };
-      setRessource(updatedRessource);
-      handleSave(updatedRessource);
-    },
-    [handleSave, ressource]
-  );
-
   return (
     <div className='flex'>
       <RessourceForm
@@ -91,7 +81,6 @@ function PageStudio({ initialRessource, organizationId }: Props) {
         onUpdateRessource={setRessource}
         onSave={handleSave}
       />
-      <MenusBuilder menus={ressource.menus} onUpdateMenus={handleUpdateMenus} />
     </div>
   );
 }

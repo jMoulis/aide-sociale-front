@@ -72,8 +72,8 @@ export default async function RootLayout({ params }: Props) {
         <DynamicPage page={publishedTemplateVersion} />
       </MainLayout>
     );
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
   } catch (error) {
-    console.log('Error', error);
     notFound();
   }
 }

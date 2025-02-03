@@ -3,13 +3,14 @@ import DynamicPage from './components/DynamicPage';
 import MainLayout from '../components/MainLayout';
 import { getPublishedTemplateVersion } from './utils';
 
-export default async function RooPage() {
+export default async function RootPage() {
   try {
-    const { publishedTemplateVersion, page } =
-      await getPublishedTemplateVersion({ slug: ['/'] });
+    const { publishedTemplateVersion } = await getPublishedTemplateVersion({
+      slug: ['/']
+    });
+    // const getStylesheets = Promise.all()
     return (
       <MainLayout>
-        <style>{page.props?.style}</style>
         <DynamicPage page={publishedTemplateVersion} />
       </MainLayout>
     );

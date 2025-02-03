@@ -2,7 +2,7 @@ import client from '@/lib/mongo/initMongoServer';
 import { notFound } from 'next/navigation';
 import ErrorDefault from '@/app/[locale]/components/ErrorDefault';
 import DetailRole from './components/DetailRole';
-import { IRessource, IRole } from '@/lib/interfaces/interfaces';
+import { IPage, IRole } from '@/lib/interfaces/interfaces';
 import { ENUM_COLLECTIONS } from '@/lib/mongo/interfaces';
 
 type Props = {
@@ -24,22 +24,24 @@ async function ReoleDetailPage({ params }: Props) {
 
   if (!role) return notFound();
 
-  const { data, error: ressourceError } = await client.list<IRessource>(
-    ENUM_COLLECTIONS.RESSOURCES,
+  const { data: pages, error: pageError } = await client.list<IPage>(
+    ENUM_COLLECTIONS.PAGES,
     {
       organizationId: role.organizationId
     }
   );
-
+  if (error) {
+    return <ErrorDefault message={error} />;
+  }
   return (
     <>
       <header className='p-3 bg-slate-200 mb-2'>
         <h1>{role.name}</h1>
       </header>
       <DetailRole
+        pages={pages || []}
         role={role}
-        ressources={data || []}
-        error={ressourceError}
+        error={pageError}
         roleId={role._id}
       />
     </>

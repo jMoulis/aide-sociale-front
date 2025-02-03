@@ -21,13 +21,6 @@ const isDetailPage = (slug: string[]) => {
   };
 };
 
-// const findSubRoute = async (subRoutesId: string[], slug: string): string | null => {
-//   return (
-//     subRoutes.find((subroute) => sr.route === slug) ||
-//     subRoutes.find((sr) => sr.route === '[id]') ||
-//     null
-//   );
-// };
 const fetchTemplateVersion = async (templateId: string) => {
   const { data: template } = await clientMongoServer.get<IMasterTemplate>(
     ENUM_COLLECTIONS.TEMPLATES_MASTER,
@@ -43,6 +36,7 @@ const fetchTemplateVersion = async (templateId: string) => {
 
   return template.publishedVersion;
 };
+
 export async function getPublishedTemplateVersion({ slug }: { slug: string[] }) {
   const { rootRoute, childRoute } = isDetailPage(slug);
   const organizationId = await getServerSideCurrentUserOrganizationId();
@@ -50,7 +44,8 @@ export async function getPublishedTemplateVersion({ slug }: { slug: string[] }) 
     const { data: organizationApp } = await clientMongoServer.get<IWebsite>(
       ENUM_COLLECTIONS.WEBSITES,
       {
-        organizationId
+        organizationId,
+        published: true
       }
     );
 
@@ -63,7 +58,8 @@ export async function getPublishedTemplateVersion({ slug }: { slug: string[] }) 
     const { data: pages } = await clientMongoServer.list<IPage>(ENUM_COLLECTIONS.PAGES, {
       websiteId: organizationApp._id
     });
-    const page = (pages || []).find((page) => page.route === rootRoute);
+
+    const page = (pages || []).find((page) => page.route === `${rootRoute}`);
     if (!page) {
       throw {
         status: 404,
@@ -71,12 +67,13 @@ export async function getPublishedTemplateVersion({ slug }: { slug: string[] }) 
       }
     }
     const resolveTemplate = async (page: IPage) => {
-      const masterTemplateId = page.masterTemplates?.[0];
+      const masterTemplateId = page.masterTemplateId;
       if (!masterTemplateId) {
         throw { status: 404, message: 'No master template id found' };
       }
       return fetchTemplateVersion(masterTemplateId);
     };
+
     // if (childRoute && page.subPages) {
     //   const subRoute = findSubRoute(page.subPages, childRoute);
     //   if (!subRoute) {

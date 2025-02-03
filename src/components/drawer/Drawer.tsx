@@ -32,7 +32,12 @@ export function Drawer({
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetTrigger asChild>{Trigger ? Trigger : 'Open Dialog'}</SheetTrigger>
-      <SheetContent side={side}>
+      <SheetContent
+        style={{
+          width: 'fit-content',
+          maxWidth: '100vw'
+        }}
+        side={side}>
         <SheetHeader>
           <SheetTitle>{title}</SheetTitle>
           <SheetDescription className='hidden'>lool</SheetDescription>

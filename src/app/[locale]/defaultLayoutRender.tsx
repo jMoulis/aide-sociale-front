@@ -10,6 +10,8 @@ import '@fortawesome/fontawesome-svg-core/styles.css';
 import { config } from '@fortawesome/fontawesome-svg-core';
 import Header from './components/Header';
 import MainLayout from './components/MainLayout';
+import MenuLayout from './components/MenuLayout';
+import { IMenu } from '@/lib/interfaces/interfaces';
 
 config.autoAddCss = false;
 
@@ -30,10 +32,12 @@ export const metadata: Metadata = {
 
 export default async function DefaultLayoutRender({
   children,
-  headers
+  headers,
+  menus
 }: Readonly<{
   children: React.ReactNode;
   headers?: any;
+  menus?: IMenu[];
 }>) {
   const messages = (await getMessages()) as any;
 
@@ -47,6 +51,7 @@ export default async function DefaultLayoutRender({
             <MongoUserProvider>
               <div className='main-page'>
                 <Header />
+                <MenuLayout menus={menus ?? []} />
                 <MainLayout>{children}</MainLayout>
               </div>
               <Toaster />

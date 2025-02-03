@@ -99,29 +99,36 @@ export const generateCss = async (vdom: IVDOMNode, pageId: string, organizationI
 
 }
 
+const MAIN_NAME_FILE = 'main';
+const COMPILED_NAME_FILE = 'compiled';
+
 const processStylesheetsFilesTailwindImports = async (stylesheets: IStylesheet[]) => {
-  const filteredStylesheets = stylesheets.filter((stylesheet) => !stylesheet.uri.includes('tailwind')).map((stylesheet) => stylesheet.uri);
+  const filteredStylesheets = stylesheets.filter((stylesheet) => stylesheet.name !== COMPILED_NAME_FILE).map((stylesheet) => stylesheet.uri);
   const filesTempsUris = await downloadFilesFromLinks(filteredStylesheets);
+  const rootDirective = `
+ @tailwind components;
+  @tailwind utilities;
+  `
   return {
     paths: filesTempsUris,
+    rootDirective,
     directives: `
   ${filesTempsUris.map((uri) => `@import "${uri}";`).join('\n')}
 
-@tailwind components;
-@tailwind utilities;
+${rootDirective}
 `};
 };
 
-const processPagesVdom = async (websiteId: string, tailwindScript: string) => {
+const processPagesVdom = async (websiteId: string) => {
   const { data: pages } = await clientMongoServer.list<IPage>(ENUM_COLLECTIONS.PAGES, {
     websiteId,
   })
   const vdoms = await Promise.all((pages || []).map(async (page) => {
-    const { data: masterTemplates } = await clientMongoServer.list<IMasterTemplate>(ENUM_COLLECTIONS.TEMPLATES_MASTER, {
-      _id: { $in: page.masterTemplates }
+    const { data: masterTemplate } = await clientMongoServer.get<IMasterTemplate>(ENUM_COLLECTIONS.TEMPLATES_MASTER, {
+      _id: page.masterTemplateId
     });
     const { data: templates } = await clientMongoServer.list<IPageTemplateVersion>(ENUM_COLLECTIONS.PAGE_TEMPLATES, {
-      masterTemplateId: { $in: (masterTemplates || []).map((master) => master._id) }
+      masterTemplateId: masterTemplate?._id
     });
     return templates?.map((template) => template.vdom) || [];
   }));
@@ -129,65 +136,90 @@ const processPagesVdom = async (websiteId: string, tailwindScript: string) => {
   // Step 5: create temp txt file with all vdom props
   const tempVdomPath = path.resolve(`./temp/vdoms.json`);
   fs.writeFileSync(tempVdomPath, JSON.stringify(vdoms));
-
-  // update tailwind content array config
-  const contentArray = tailwindScript.split('\n');
-  const exportIndex = contentArray.findIndex((line) => line.includes('export'));
-  contentArray.splice(exportIndex + 1, 0, `content: ['${tempVdomPath}'],`);
-  const updatedTailwindScript = contentArray.join('\n');
-  return { updatedTailwindScript, tempVdomPath };
+  return { tempVdomPath };
 }
-
-export const generateTailwind = async (tailwindScript: string, organizationId: string, website: IWebsite): Promise<{ css: string; path: string }> => {
-  // eslint-disable-next-line no-console
-  console.log('Generating Tailwind CSS...');
-
-  const { directives, paths } = await processStylesheetsFilesTailwindImports(website.stylesheets || []);
-  const { updatedTailwindScript, tempVdomPath } = await processPagesVdom(website._id, tailwindScript);
-
-  const tempInputPath = path.resolve(`./temp/temp-index.css`);
-  const tempConfigPath = path.resolve(`./temp/temp-tailwind.config.js`);
-
-  fs.mkdirSync("./temp", { recursive: true }); // Ensure the temp directory exists
-  fs.writeFileSync(tempInputPath, directives); // Create the file
-  fs.writeFileSync(tempConfigPath, updatedTailwindScript);
-
-
-  const outputPath = path.join(process.cwd(), `./temp/tailwind.css`);
-  const command = `npx tailwindcss --input ${tempInputPath} --output ${outputPath} --config ${tempConfigPath}`;
-
+const execution = (tempInputPath: string, outputPath: string, tempConfigPath: string, tempVdomPath: string, compiledStoragePath: string, paths: string[] = [], shouldCleanup: boolean): Promise<{ css: string; path: string }> => {
+  const command = `npx tailwindcss --input ${tempInputPath} --output ${outputPath} --config ${tempConfigPath} --content ${tempVdomPath}`;
   return new Promise((resolve, reject) => {
     exec(command, async (error, _, stderr) => {
-      fs.unlinkSync(tempConfigPath);
-      fs.unlinkSync(tempInputPath);
-      fs.unlinkSync(tempVdomPath);
-      paths.forEach((path) => fs.unlinkSync(path));
       if (error) {
         return reject(JSON.stringify(parseErrorMessage(stderr)));
       }
-      const css = fs.readFileSync(outputPath, 'utf-8');
       try {
-        const mainStoragePath = `styles/${organizationId}/tailwind.css`;
+        const css = fs.readFileSync(outputPath, 'utf-8');
         const tailwindPath = path.resolve(outputPath);
         const [mainUrl] = await Promise.all([
-          uploadFile(tailwindPath, mainStoragePath),
+          uploadFile(tailwindPath, compiledStoragePath),
         ]);
-        fs.unlinkSync(outputPath);
         resolve({ css, path: mainUrl });
       } catch (error: any) {
         reject({ pageUrl: null, mainUrl: null, error: error.message });
+      } finally {
+        if (!shouldCleanup) return;
+        // eslint-disable-next-line no-console
+        console.log('Cleaning up...');
+        paths.forEach((path) => fs.unlinkSync(path));
       }
     });
   });
+}
+
+const updateWebsite = async (website: IWebsite, stylesheetsToUpsert: IStylesheet[]) => {
+  // eslint-disable-next-line no-console
+  console.log('Updating website...');
+  const prevStylesheets = website.stylesheets || [];
+
+  const updatedStylesheets = stylesheetsToUpsert.reduce((acc, stylesheet) => {
+    const prevStylesheet = acc.find((prevStylesheet) => prevStylesheet.name === stylesheet.name);
+    if (prevStylesheet) {
+      return acc.map((prevStylesheet) => prevStylesheet.name === stylesheet.name ? stylesheet : prevStylesheet);
+    }
+    return [...acc, stylesheet];
+  }, prevStylesheets);
+  clientMongoServer.update<IWebsite>(ENUM_COLLECTIONS.WEBSITES, { _id: website._id }, {
+    $set: {
+      stylesheets: updatedStylesheets
+    }
+  });
+  return { ...website, stylesheets: updatedStylesheets };
+}
+export const generateTailwind = async (tailwindScript: string, organizationId: string, website: IWebsite,): Promise<void> => {
+  // eslint-disable-next-line no-console
+  console.log('Generating compiled CSS...');
+  // generateTailwindStylesheet(tailwindScript, organizationId, website);
+  const { directives, paths, rootDirective } = await processStylesheetsFilesTailwindImports(website.stylesheets || []);
+  const { tempVdomPath } = await processPagesVdom(website._id);
+
+  const tempInputPath = path.resolve(`./temp/temp-index.css`);
+  const tempConfigPath = path.resolve(`./temp/temp-tailwind.config.js`);
+  const outputPath = path.resolve(`./temp/${COMPILED_NAME_FILE}.css`);
+
+  const tempUtilsOutputPath = path.resolve(`./temp/utils.css`);
+  const tempInputUtilsPath = path.resolve(`./temp/temp-utils.css`);
+
+  fs.mkdirSync("./temp", { recursive: true }); // Ensure the temp directory exists
+  fs.writeFileSync(tempInputUtilsPath, rootDirective);
+  fs.writeFileSync(tempInputPath, directives);
+  fs.writeFileSync(tempConfigPath, tailwindScript);
+
+  Promise.all(
+    [
+      execution(tempInputUtilsPath, tempUtilsOutputPath, tempConfigPath, tempVdomPath, `websites/${organizationId}/${website._id}/utils.css`, [], false), execution(tempInputPath, outputPath, tempConfigPath, tempVdomPath, `websites/${organizationId}/${website._id}/${COMPILED_NAME_FILE}.css`, [...paths, tempInputUtilsPath, tempConfigPath, tempInputPath], true)
+    ]).then(([utils, main]) => {
+      updateWebsite(website, [{ name: 'utils', uri: utils.path }, { name: COMPILED_NAME_FILE, uri: main.path }]);
+      // eslint-disable-next-line no-console
+    }).catch((error) => console.log(error)).finally(() => {
+      // eslint-disable-next-line no-console
+      console.log('All done');
+    });
 
 }
 
 export const generateStylesheet = async (
   style: string,
-  pageId: string,
-  organizationId: string
+  pageStoragePath: string
 ): Promise<{ pageUrl: string | null, error?: string }> => {
-  const pageStoragePath = `styles/${organizationId}/page-${pageId}.css`;
+  ;
   const pageStylesPath = path.resolve(`./temp/temps.css`);
 
   fs.mkdirSync('./temp', { recursive: true });
@@ -197,6 +229,27 @@ export const generateStylesheet = async (
       uploadFile(pageStylesPath, pageStoragePath),
     ]);
     fs.unlinkSync(pageStylesPath);
+    return { pageUrl };
+  } catch (error: any) {
+    return { pageUrl: null, error: error.message };
+  }
+};
+
+export const updateMainStylesheet = async (
+  style: string,
+  organizationId: string,
+  website: IWebsite
+): Promise<{ pageUrl: string | null, error?: string }> => {
+  const mainStoragePath = `websites/${organizationId}/${website._id}/${MAIN_NAME_FILE}.css`;
+  const pageStylesPath = path.resolve(`./temp/${MAIN_NAME_FILE}.css`);
+
+  fs.mkdirSync('./temp', { recursive: true });
+  fs.writeFileSync(pageStylesPath, style);
+  try {
+    const [pageUrl] = await Promise.all([
+      uploadFile(pageStylesPath, mainStoragePath),
+    ]);
+
     return { pageUrl };
   } catch (error: any) {
     return { pageUrl: null, error: error.message };

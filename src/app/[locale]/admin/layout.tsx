@@ -3,8 +3,6 @@ import clientMongoServer from '@/lib/mongo/initMongoServer';
 import { ENUM_API_ROUTES, ENUM_RESSOURCES } from '@/lib/interfaces/enums';
 import { ENUM_COLLECTIONS } from '@/lib/mongo/interfaces';
 import { routeSecurityMiddleware } from '@/lib/auth/routeSecurityMiddleware';
-import MenuLayout from '../components/MenuLayout';
-import MainLayout from '../components/MainLayout';
 import DefaultLayoutRender from '../defaultLayoutRender';
 
 export const metadata: Metadata = {
@@ -22,17 +20,14 @@ export default async function RootLayout({
   clientMongoServer.subscribe(ENUM_COLLECTIONS.ROLES, {}, webhookUrl);
 
   return (
-    <DefaultLayoutRender>
+    <>
       {routeSecurityMiddleware(ENUM_RESSOURCES.ADMIN, true, ({ menus }) => {
         return (
-          <>
-            <MenuLayout menus={menus} />
-            <MainLayout>
-              <section className='flex-1'>{children}</section>
-            </MainLayout>
-          </>
+          <DefaultLayoutRender menus={menus}>
+            <section className='flex-1'>{children}</section>
+          </DefaultLayoutRender>
         );
       })}
-    </DefaultLayoutRender>
+    </>
   );
 }
