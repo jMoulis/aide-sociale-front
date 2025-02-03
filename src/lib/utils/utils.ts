@@ -1,6 +1,6 @@
 import { format, isToday, isYesterday, Locale } from 'date-fns';
 import slugify from 'slugify';
-import { IProject, IProjectSummary, ITeam, ITeamSummary, IUser, IUserSummary } from '../interfaces/interfaces';
+import { IPage, IProject, IProjectSummary, ITeam, ITeamSummary, ITreePage, IUser, IUserSummary } from '../interfaces/interfaces';
 
 export const slugifyFunction = (value: string) => {
   return slugify(value, {
@@ -91,4 +91,27 @@ export function getProjectSummary(project: IProject): IProjectSummary {
     _id: project._id,
     name: project.name
   };
+}
+
+export function buildPageTree(pages: IPage[]): ITreePage[] {
+  const pageMap = new Map<string, ITreePage>();
+  pages.forEach((page) => {
+    pageMap.set(page._id, { ...page, children: [] });
+  });
+  const tree: ITreePage[] = [];
+  pages.forEach((page) => {
+    if (page.parentId) {
+      const parent = pageMap.get(page.parentId);
+      if (parent) {
+        parent.children.push(pageMap.get(page._id)!);
+      }
+    } else {
+      tree.push(pageMap.get(page._id)!);
+    }
+  });
+  const sorted = sortArray(tree.map((child) => ({
+    ...child,
+    children: sortArray(child.children, 'name')
+  })), 'name');
+  return sorted;
 }

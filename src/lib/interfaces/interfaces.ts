@@ -193,21 +193,26 @@ export interface IOrganization {
   contactsInfo: IContactInfo[];
 }
 
+
 export interface IPage {
   _id: string;
   name: string;
+  slug: string;
   organizationId: string;
-  subPages: IPage[];
+  parentId?: string;
   createdAt: Date;
   updatedAt?: Date;
-  masterTemplates: string[];
+  masterTemplateId: string;
   route: string;
   websiteId: string;
   roles: string[];
+  menus: IMenu[];
   props?: {
     style?: string;
   };
-
+}
+export interface ITreePage extends IPage {
+  children: ITreePage[];
 }
 export interface IPageTemplateVersion {
   _id: string;
@@ -222,6 +227,12 @@ export interface IPageTemplateVersion {
   published: boolean;
   hasBeenPublished: boolean;
   forceUpdate?: boolean;
+  isDirty?: boolean;
+  hasUnpublishedChanges?: boolean;
+}
+export interface IStylesheet {
+  name: string;
+  uri: string;
 }
 export interface IWebsite {
   _id: string;
@@ -229,8 +240,10 @@ export interface IWebsite {
   organizationId: string;
   createdAt: Date;
   updatedAt?: Date;
-  pages: IPage[];
   tailwindConfig?: string;
+  stylesheets?: IStylesheet[];
+  menus: IMenu[];
+  published: boolean;
 }
 
 export interface IAddress {

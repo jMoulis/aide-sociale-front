@@ -112,6 +112,7 @@
     "profile": "Profil",
     "logout": "Déconnexion",
     "dashboard": "Tableau de bord",
+    "myApp": "Mon application",
     "admin": "Admin",
     "errorOrganization": "Une erreur s'est produite, aucune organisation n'a été trouvée. Veuillez contacter l'administrateur.",
     "create": {
@@ -504,6 +505,9 @@
     }
   },
   "TemplateSection": {
+    "inlineStyle": "Style en ligne",
+    "classNames": "Classes",
+    "editor": "Éditeur",
     "selectCollection": "Sélectionner une collection",
     "template": "modèle",
     "generate": "Générer",
@@ -640,6 +644,23 @@
       "action": "Modifier le site web",
       "success": "Site web mis à jour avec succès",
       "error": "Une erreur s'est produite lors de la mise à jour du site web. <code>Erreur {error}</code>"
+    },
+    "pageForm": {
+      "editCss": "Modifier le CSS",
+      "create": {
+        "title": "Créer une page",
+        "description": "Créer une nouvelle page",
+        "action": "Créer une page",
+        "success": "Page créée avec succès",
+        "error": "Une erreur s'est produite lors de la création de la page. <code>Erreur {error}</code>"
+      },
+      "edit": {
+        "title": "Modifier la page",
+        "description": "Modifier une page existante",
+        "action": "Modifier la page",
+        "success": "Page mise à jour avec succès",
+        "error": "Une erreur s'est produite lors de la mise à jour de la page. <code>Erreur {error}</code>"
+      }
     }
   },
   "clerk": {

@@ -6,7 +6,6 @@ import {
   IMasterTemplate
 } from '@/lib/TemplateBuilder/interfaces';
 import { useCallback, useEffect, useState } from 'react';
-import MasterTemplateForm from '../../../templates/components/MasterTemplateForm';
 import MasterTemplateListItem from '../../../templates/[id]/components/MasterTemplateListItem';
 import TemplateListItem from './TemplateListItem';
 import { removeObjectFields, sortArray } from '@/lib/utils/utils';
@@ -25,8 +24,8 @@ type Props = {
   organizationId: string;
   onUpdatePage: (page: IPage) => void;
 };
-function Templates({ page, user, organizationId, onUpdatePage }: Props) {
-  const [masters, setMasters] = useState<IMasterTemplate[]>([]);
+function Templates({ page, user, organizationId }: Props) {
+  const [master, setMaster] = useState<IMasterTemplate | null>(null);
   const [formTemplates, setFormTemplates] = useState<IFormTemplate[]>([]);
   const [_selectedMasterTemplate, setSelectedMasterTemplate] =
     useState<IMasterTemplate | null>(null);
@@ -36,34 +35,17 @@ function Templates({ page, user, organizationId, onUpdatePage }: Props) {
   const tTemplate = useTranslations('TemplateSection');
 
   useEffect(() => {
-    if (page.masterTemplates) {
+    if (page.masterTemplateId) {
       client
-        .list<IMasterTemplate>(ENUM_COLLECTIONS.TEMPLATES_MASTER, {
-          _id: { $in: page.masterTemplates }
+        .get<IMasterTemplate>(ENUM_COLLECTIONS.TEMPLATES_MASTER, {
+          _id: page.masterTemplateId
         })
         .then(({ data }) => {
           if (!data) return;
-          setMasters(data);
-          // client
-          //   .list<IFormTemplate>(ENUM_COLLECTIONS.TEMPLATES, {
-          //     masterId: data._id
-          //   })
-          //   .then(({ data: templates }) => {
-          //     setFormTemplates(templates || []);
-          //   });
+          setMaster(data);
         });
     }
-  }, [page.masterTemplates]);
-
-  const handleSubmit = (incomingMasterTemplate: IMasterTemplate) => {
-    setSelectedMasterTemplate(incomingMasterTemplate);
-    onUpdatePage({
-      ...page,
-      masterTemplates: page.masterTemplates
-        ? [...page.masterTemplates, incomingMasterTemplate._id]
-        : [incomingMasterTemplate._id]
-    });
-  };
+  }, [page.masterTemplateId]);
 
   const handleCreate = (masterTemplate: IMasterTemplate) => {
     setCreate(true);
@@ -133,47 +115,38 @@ function Templates({ page, user, organizationId, onUpdatePage }: Props) {
         ) : null}
         <div className='flex'>
           <h1>Templates</h1>
-          <MasterTemplateForm
-            onSubmit={handleSubmit}
+        </div>
+      </div>
+
+      {!selectedTemplate && master && (
+        <div>
+          <MasterTemplateListItem
+            onSelect={handleSelectMasterTemplate}
+            masterTemplate={master}
             user={user}
             organizationId={organizationId}
           />
+          <Button onClick={() => handleCreate(master)}>Create version</Button>
+          <div className='flex flex-wrap'>
+            {sortArray(formTemplates || [], 'version', false).map(
+              (templateVersion) => {
+                const isEditable =
+                  !templateVersion.published &&
+                  !templateVersion.hasBeenPublished;
+                return (
+                  <TemplateListItem
+                    key={templateVersion._id}
+                    template={templateVersion}
+                    isEditable={isEditable}
+                    masterTemplate={master}
+                    onSelectTemplate={setSelectedTemplate}
+                  />
+                );
+              }
+            )}
+          </div>
         </div>
-      </div>
-      <div>
-        {!selectedTemplate &&
-          masters.map((masterTemplate) => (
-            <div key={masterTemplate._id}>
-              <MasterTemplateListItem
-                onSelect={handleSelectMasterTemplate}
-                masterTemplate={masterTemplate}
-                user={user}
-                organizationId={organizationId}
-              />
-              <Button onClick={() => handleCreate(masterTemplate)}>
-                Create version
-              </Button>
-              <div className='flex flex-wrap'>
-                {sortArray(formTemplates || [], 'version', false).map(
-                  (templateVersion) => {
-                    const isEditable =
-                      !templateVersion.published &&
-                      !templateVersion.hasBeenPublished;
-                    return (
-                      <TemplateListItem
-                        key={templateVersion._id}
-                        template={templateVersion}
-                        isEditable={isEditable}
-                        masterTemplate={masterTemplate}
-                        onSelectTemplate={setSelectedTemplate}
-                      />
-                    );
-                  }
-                )}
-              </div>
-            </div>
-          ))}
-      </div>
+      )}
 
       {selectedTemplate ? (
         <>

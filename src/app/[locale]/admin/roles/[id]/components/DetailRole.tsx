@@ -1,10 +1,8 @@
 'use client';
 
 import { useState } from 'react';
-import { IRessource, IRoleInput } from '@/lib/interfaces/interfaces';
+import { IPage, IRoleInput } from '@/lib/interfaces/interfaces';
 import { ENUM_ACTIONS, ENUM_APP_ROUTES } from '@/lib/interfaces/enums';
-
-import TableRessources from './TablePermissionsRessources';
 import Form from '@/components/form/Form';
 import FormField from '@/components/form/FormField';
 import FormLabel from '@/components/form/FormLabel';
@@ -24,22 +22,29 @@ import {
 
 import { useOrganization } from '@/lib/hooks/useOrganization';
 import { v4 } from 'uuid';
-import { removeObjectFields, slugifyFunction } from '@/lib/utils/utils';
+import {
+  buildPageTree,
+  removeObjectFields,
+  slugifyFunction
+} from '@/lib/utils/utils';
+import TablePermissionsPages from './TablePermissionsPages';
 
 type Props = {
   role: IRoleInput | null;
-  ressources: IRessource[];
+  pages: IPage[];
   error: string | null;
   roleId: string | null;
   onSubmit?: () => void;
 };
 function DetailRole({
   role: incomingRole,
-  ressources,
   error,
   roleId,
-  onSubmit
+  onSubmit,
+  pages
 }: Props) {
+  const tree = buildPageTree(pages || []);
+  console.log(tree);
   const organizationId = useOrganization();
   const defaultRole = {
     _id: v4(),
@@ -58,6 +63,7 @@ function DetailRole({
   const t = useTranslations('RoleSection');
   const tGlobal = useTranslations('GlobalSection');
 
+  console.log(pages);
   const handleSelectPermissions = (
     ressourceName: string,
     action: ENUM_ACTIONS,
@@ -207,12 +213,18 @@ function DetailRole({
           onChange={handleInputChange}
         />
       </FormField>
-      <TableRessources
+      <TablePermissionsPages
+        pages={tree}
+        permissions={permissions}
+        error={error}
+        onSelectPermissions={handleSelectPermissions}
+      />
+      {/* <TableRessources
         ressources={ressources}
         error={error}
         permissions={permissions}
         onSelectPermissions={handleSelectPermissions}
-      />
+      /> */}
       <FormFooterAction>
         <Button type='submit'>
           {roleId ? t('edit.action') : t('create.action')}

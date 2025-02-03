@@ -12,7 +12,7 @@ import { toastPromise } from '@/lib/toast/toastPromise';
 import { useTranslations } from 'next-intl';
 import { useState } from 'react';
 import { v4 } from 'uuid';
-import TagsInput from '../../ressources/components/TagsInput';
+import TagsInput from '../../../../../components/form/TagsInput';
 
 type Props = {
   initialCollection?: ICollection;

@@ -19,15 +19,28 @@ type Props = {
   onOpenChange?: (open: boolean) => void;
   Trigger?: JSX.Element;
   modal?: boolean;
+  title: string;
 };
-export function Drawer({ side, children, Trigger, open, onOpenChange }: Props) {
+export function Drawer({
+  side,
+  children,
+  Trigger,
+  open,
+  onOpenChange,
+  title
+}: Props) {
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetTrigger asChild>{Trigger ? Trigger : 'Open Dialog'}</SheetTrigger>
-      <SheetContent side={side}>
+      <SheetContent
+        style={{
+          width: 'fit-content',
+          maxWidth: '100vw'
+        }}
+        side={side}>
         <SheetHeader>
-          <SheetTitle>Edit profile</SheetTitle>
-          <SheetDescription>lool</SheetDescription>
+          <SheetTitle>{title}</SheetTitle>
+          <SheetDescription className='hidden'>lool</SheetDescription>
         </SheetHeader>
         {children}
       </SheetContent>

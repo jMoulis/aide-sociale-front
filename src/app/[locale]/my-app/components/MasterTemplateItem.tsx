@@ -1,79 +1,65 @@
-import Button from '@/components/buttons/Button';
+import MasterTemplateForm from './MasterTemplateForm';
+import { usePageBuilderStore } from './stores/pagebuilder-store-provider';
+import PageTemplateVersionsList from './PageTemplateVersionsList';
 import {
-  IPageTemplateVersion,
-  IUserSummary
-} from '@/lib/interfaces/interfaces';
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger
+} from '@/components/ui/collapsible';
+import { useState } from 'react';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import {
+  faChevronDown,
+  faChevronRight
+} from '@awesome.me/kit-8441d3fdf2/icons/classic/solid';
 import { IMasterTemplate } from '@/lib/TemplateBuilder/interfaces';
-import client from '@/lib/mongo/initMongoClient';
-import { ENUM_COLLECTIONS } from '@/lib/mongo/interfaces';
-import { generatePageVersion } from './generators';
-import MasterTemplateForm from '../../admin/templates/components/MasterTemplateForm';
-import { useEffect, useState } from 'react';
+import { ITreePage } from '@/lib/interfaces/interfaces';
 
 type Props = {
-  masterTemplate: IMasterTemplate;
-  onSelectMasterTemplate: (masterTemplate: IMasterTemplate) => void;
-  onCreatePageVersionSuccess: (masterTemplateId: string) => void;
-  user: IUserSummary;
-  organizationId: string;
+  masterTemplateId: string;
+  page: ITreePage;
 };
-function MasterTemplateItem({
-  masterTemplate: initialMasterTemplate,
-  onSelectMasterTemplate,
-  onCreatePageVersionSuccess,
-  organizationId,
-  user
-}: Props) {
-  const [masterTemplate, setMasterTemplate] = useState<IMasterTemplate>(
-    initialMasterTemplate
+function MasterTemplateItem({ masterTemplateId, page }: Props) {
+  const [open, setOpen] = useState(false);
+  const masterTemplates = usePageBuilderStore((state) => state.masterTemplates);
+
+  const [masterTemplate, setMasterTemplate] = useState<IMasterTemplate | null>(
+    masterTemplates.find((mt) => mt._id === masterTemplateId) || null
   );
-  useEffect(() => {
-    setMasterTemplate(initialMasterTemplate);
-  }, [initialMasterTemplate]);
-
-  const handleCreateVersion = async () => {
-    let newVersion = 1;
-    if (masterTemplate.latestVersion !== 0) {
-      const { data: lastVersion } = await client.get<IPageTemplateVersion>(
-        ENUM_COLLECTIONS.PAGE_TEMPLATES,
-        {
-          masterTemplateId: masterTemplate._id
-        },
-        { sort: { version: -1 } }
-      );
-
-      if (lastVersion) {
-        newVersion = lastVersion.version + 1;
-      }
-    }
-    const version: IPageTemplateVersion = generatePageVersion(
-      masterTemplate._id,
-      newVersion
-    );
-    await client.create<IPageTemplateVersion>(
-      ENUM_COLLECTIONS.PAGE_TEMPLATES,
-      version
-    );
-    onCreatePageVersionSuccess(masterTemplate._id);
-  };
+  // useEffect(() => {
+  //   if (masterTemplateId) {
+  //     client
+  //       .get<IMasterTemplate>(ENUM_COLLECTIONS.TEMPLATES_MASTER, {
+  //         _id: masterTemplateId
+  //       })
+  //       .then(({ data }) => {
+  //         setMasterTemplate(data);
+  //       });
+  //   }
+  // }, [masterTemplateId]);
 
   return (
-    <li key={masterTemplate._id}>
-      <div className='flex items-center'>
-        <Button onClick={() => onSelectMasterTemplate(masterTemplate)}>
-          {masterTemplate.title}
-        </Button>
-        <MasterTemplateForm
-          initialMasterTemplate={masterTemplate}
-          onSubmit={(updatedMasterTemplate) =>
-            setMasterTemplate(updatedMasterTemplate)
-          }
-          organizationId={organizationId}
-          user={user}
-        />
-      </div>
-      <Button onClick={handleCreateVersion}>Create version</Button>
-    </li>
+    <Collapsible className='mt-1' open={open} onOpenChange={setOpen}>
+      <CollapsibleTrigger asChild>
+        <div className='flex items-center justify-between border disabled:cursor-not-allowed w-full disabled:opacity-50 shadow-sm border-input rounded-md px-3 py-1 md:text-sm text-lg'>
+          <button className='text-left grid grid-cols-[20px_1fr] items-center justify-start w-full'>
+            <FontAwesomeIcon icon={open ? faChevronDown : faChevronRight} />
+            <div className='flex flex-col justify-start'>
+              <span className='text-sm block'>{masterTemplate?.title}</span>
+              <span className='text-[8px] block text-gray-500'>Templates</span>
+            </div>
+          </button>
+          <MasterTemplateForm
+            initialMasterTemplate={masterTemplate}
+            page={page}
+            onSubmit={setMasterTemplate}
+          />
+        </div>
+      </CollapsibleTrigger>
+      <CollapsibleContent className='rounded'>
+        <PageTemplateVersionsList masterTemplate={masterTemplate} />
+      </CollapsibleContent>
+    </Collapsible>
   );
 }
 export default MasterTemplateItem;

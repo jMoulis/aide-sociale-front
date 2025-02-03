@@ -7,7 +7,7 @@ import { useTranslations } from 'next-intl';
 import DetailRole from '../[id]/components/DetailRole';
 
 import client from '@/lib/mongo/initMongoClient';
-import { IRessource } from '@/lib/interfaces/interfaces';
+import { IPage, IRessource } from '@/lib/interfaces/interfaces';
 import { ENUM_COLLECTIONS } from '@/lib/mongo/interfaces';
 
 type Props = {
@@ -16,13 +16,13 @@ type Props = {
 function CreateRole({ organizationId }: Props) {
   const t = useTranslations('RoleSection');
   const [open, setOpen] = useState(false);
-  const [ressources, setRessources] = useState<IRessource[]>([]);
+  const [pages, setPages] = useState<IPage[]>([]);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     if (open && organizationId) {
       client
-        .list<IRessource>(ENUM_COLLECTIONS.RESSOURCES, {
+        .list<IPage>(ENUM_COLLECTIONS.PAGES, {
           organizationId
         })
         .then(({ data, error: fetchError }) => {
@@ -30,7 +30,7 @@ function CreateRole({ organizationId }: Props) {
             setError(fetchError);
             return;
           }
-          setRessources(data || []);
+          setPages(data || []);
         });
     }
   }, [open, organizationId]);
@@ -43,7 +43,7 @@ function CreateRole({ organizationId }: Props) {
       Trigger={<Button>{t('create.action')}</Button>}>
       <DetailRole
         role={null}
-        ressources={ressources}
+        pages={pages}
         error={error}
         roleId={null}
         onSubmit={() => setOpen(false)}

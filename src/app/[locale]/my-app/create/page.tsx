@@ -1,19 +1,28 @@
-import {
-  getMongoUser,
-  getServerSideCurrentUserOrganizationId
-} from '@/lib/utils/auth/serverUtils';
-import { getUserSummary } from '@/lib/utils/utils';
-import WebsitePage from '../components/WebsiteForm';
+import { getServerSideCurrentUserOrganizationId } from '@/lib/utils/auth/serverUtils';
+import { PagebuilderProvider } from '@/app/[locale]/my-app/components/stores/pagebuilder-store-provider';
+import WebsitePage from '../components/Website/WebsitePage';
 
-export default async function WebsiteCreatePage() {
+export default async function CreatePage() {
   const organizationId = await getServerSideCurrentUserOrganizationId();
-  const mongoUser = await getMongoUser();
 
-  const excerptUser = getUserSummary(mongoUser);
   return (
     <>
-      <h1>My website</h1>
-      <WebsitePage organizationId={organizationId} user={excerptUser} create />
+      <PagebuilderProvider
+        elementConfig={null}
+        pages={[]}
+        website={null}
+        masterTemplates={[]}
+        pageTemplateVersions={[]}
+        organizationId={organizationId}
+        elementsConfig={[]}
+        designMode={true}
+        gridDisplay={false}
+        selectedNode={null}
+        selectedPage={null}
+        selectedMasterTemplate={null}
+        pageVersion={null}>
+        <WebsitePage create />
+      </PagebuilderProvider>
     </>
   );
 }
