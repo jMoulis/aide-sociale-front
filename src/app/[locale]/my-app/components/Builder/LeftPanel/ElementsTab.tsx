@@ -36,7 +36,7 @@ function ElementsTab() {
           {elementsConfig.map((elementConfig) => (
             <li key={elementConfig._id}>
               <Button onClick={() => onAddComponent?.(elementConfig.type)}>
-                {elementConfig.type}
+                {elementConfig.label}
               </Button>
             </li>
           ))}

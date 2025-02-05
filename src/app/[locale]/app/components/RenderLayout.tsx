@@ -1,6 +1,8 @@
 import React, { PropsWithChildren } from 'react';
 import { ComponentsMap } from '../../my-app/components/Builder/ComponentsMap';
-import { IVDOMNode } from '../../my-app/components/interfaces';
+import { ENUM_COMPONENTS, IVDOMNode } from '../../my-app/components/interfaces';
+import { IPageTemplateVersion, VDOMContext } from '@/lib/interfaces/interfaces';
+import { FormProvider } from '../../my-app/components/Builder/Components/FormContext';
 
 type BuilderContext = {
   selectedNodeId: string | null;
@@ -44,30 +46,44 @@ function getBuilderEnhancements(
     .filter(Boolean)
     .join(' ');
 
+  if (node.type === ENUM_COMPONENTS.BUTTON) {
+    ephemeralProps.type = 'button';
+  }
+  ephemeralProps.disabled = false;
   return ephemeralProps;
 }
 
 interface RenderLayoutProps {
-  layout: IVDOMNode;
-  data?: any;
-  params?: any;
+  pageVersion: IPageTemplateVersion;
+  routeParams?: any;
+  forms: Record<string, any>;
 }
 
-export default function RenderLayout({ layout }: RenderLayoutProps) {
+export default function RenderLayout({
+  pageVersion,
+  routeParams,
+  forms
+}: RenderLayoutProps) {
   // Start with the root node's ID in the path array (or "root" if missing)
-  const initialId = layout._id || 'root';
+  const rootNode = pageVersion.vdom;
+  const initialId = rootNode._id || 'root';
   const initialPath = [initialId];
 
-  return <>{renderVNode(layout, initialPath)}</>;
+  return (
+    <FormProvider forms={forms}>
+      {renderVNode(rootNode, initialPath, undefined, routeParams)}
+    </FormProvider>
+  );
 }
 
 export function renderVNode(
   node: IVDOMNode,
   path: string[],
-  builderContext?: BuilderContext
+  builderContext?: BuilderContext,
+  routeParams?: Record<string, string>
 ): React.ReactNode {
   const { type, props = { children: [] }, _id } = node;
-  const Comp = ComponentsMap[type] || type || 'div';
+  const Component = ComponentsMap[type] || type || 'div';
 
   const nodeOriginalId = _id || `auto_${Math.random().toString(36).slice(2)}`;
   const newPath = [...path, nodeOriginalId];
@@ -91,12 +107,10 @@ export function renderVNode(
     childElements = children.map((childNode, i) => {
       return (
         <React.Fragment key={childNode._id ?? i}>
-          {renderVNode(childNode, newPath, builderContext)}
+          {renderVNode(childNode, newPath, builderContext, routeParams)}
         </React.Fragment>
       );
     });
-  } else if (typeof children === 'string') {
-    childElements = children;
   }
   let ephemeralProps: Record<string, any> = {};
 
@@ -104,13 +118,19 @@ export function renderVNode(
     ephemeralProps = getBuilderEnhancements(node, builderContext);
   }
   interface PropsWithChildrenAndContext extends PropsWithChildren {
-    context: any;
+    context: VDOMContext;
     props: any;
+    node: IVDOMNode;
   }
   // Merge the props
   const mergedProps: PropsWithChildrenAndContext = {
-    context: node.context || {},
+    context: {
+      ...node.context,
+      routeParams,
+      isBuilderMode: !!builderContext
+    },
+    node,
     props: { ...extendedProps, ...ephemeralProps }
   };
-  return React.createElement(Comp, mergedProps, childElements);
+  return React.createElement(Component, mergedProps, childElements);
 }

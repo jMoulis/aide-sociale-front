@@ -103,10 +103,11 @@ function Styling({ config }: Props) {
   const handleChangeStyle = (event: ChangeEvent<HTMLTextAreaElement>) => {
     const { value } = event.target;
     onUpdateNodeProperty(
-      'styling',
       {
-        ...prevValue.styling,
-        className: value
+        styling: {
+          ...prevValue.styling,
+          className: value
+        }
       },
       config.context
     );
@@ -140,10 +141,11 @@ function Styling({ config }: Props) {
 
   const handleInlineStyleChange = useCallback((value?: string) => {
     onUpdateNodeProperty(
-      'styling',
       {
-        ...prevValue.styling,
-        style: value ? parseCSSWithDummy(value) : {}
+        styling: {
+          ...prevValue.styling,
+          style: value ? parseCSSWithDummy(value) : {}
+        }
       },
       config.context
     );

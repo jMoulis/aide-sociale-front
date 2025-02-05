@@ -54,6 +54,7 @@
     "next": "^15.1.6",
     "next-intl": "^3.26.3",
     "openai": "^4.78.0",
+    "path-to-regexp": "^8.2.0",
     "react": "^19.0.0",
     "react-day-picker": "^9.5.0",
     "react-dom": "^19.0.0",

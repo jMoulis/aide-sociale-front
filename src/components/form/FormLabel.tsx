@@ -13,10 +13,7 @@ const FormLabel = forwardRef<HTMLLabelElement, Props>(
       <label
         ref={ref}
         {...props}
-        className={cn(
-          `mb-1 md:text-sm text-lg flex items-center`,
-          props?.className
-        )}>
+        className={cn(`mb-1 text-sm flex items-center`, props?.className)}>
         {children}
         {required ? <RequiredFlag /> : null}
       </label>

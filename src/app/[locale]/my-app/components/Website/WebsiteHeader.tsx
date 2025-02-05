@@ -8,6 +8,7 @@ import TailwindConfig from './TailwindConfig';
 import { useTranslations } from 'next-intl';
 import { usePageBuilderStore } from '../stores/pagebuilder-store-provider';
 import { useState } from 'react';
+import { PublishedDot } from '../PublishedDot';
 
 type Props = {
   website: IWebsite;
@@ -44,6 +45,7 @@ function WebsiteHeader({ create, website }: Props) {
       </Dialog>
       <Button onClick={handlePublish} disabled={saving} loading={saving}>
         {t('publish')}
+        {website.published ? <PublishedDot /> : null}
       </Button>
     </div>
   );

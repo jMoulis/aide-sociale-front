@@ -12,7 +12,7 @@ import { toastPromise } from '@/lib/toast/toastPromise';
 import { useTranslations } from 'next-intl';
 import { useState } from 'react';
 import { v4 } from 'uuid';
-import TagsInput from '../../../../../components/form/TagsInput';
+// import TagsInput from '../../../../../components/form/TagsInput';
 
 type Props = {
   initialCollection?: ICollection;
@@ -37,7 +37,7 @@ function CollectionForm({
     createdBy: user,
     createdAt: new Date(),
     fields: [],
-    templates: []
+    slug: ''
   };
   const [collection, setCollection] = useState<ICollection>(
     initialCollection || defaultCollection
@@ -68,9 +68,9 @@ function CollectionForm({
     }
     onSubmit(collection, !initialCollection);
   };
-  const handleFieldsChange = (fields: string[]) => {
-    setCollection((prev) => ({ ...prev, fields }));
-  };
+  // const handleFieldsChange = (fields: string[]) => {
+  //   // setCollection((prev) => ({ ...prev, fields }));
+  // };
   return (
     <Form onSubmit={handleSubmit}>
       <FormField>
@@ -87,10 +87,10 @@ function CollectionForm({
       </FormField>
       <FormField>
         <FormLabel>{t('labels.fields')}</FormLabel>
-        <TagsInput
+        {/* <TagsInput
           onChange={handleFieldsChange}
           previousTags={collection.fields}
-        />
+        /> */}
       </FormField>
       <FormFooterAction>
         <SaveButton type='submit' />

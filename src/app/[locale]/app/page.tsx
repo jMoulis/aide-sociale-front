@@ -1,17 +1,18 @@
 import { notFound } from 'next/navigation';
 import DynamicPage from './components/DynamicPage';
 import MainLayout from '../components/MainLayout';
-import { getPublishedTemplateVersion } from './utils';
+import { collectAsyncPayloads, getPublishedTemplateVersion } from './utils';
 
 export default async function RootPage() {
   try {
-    const { publishedTemplateVersion } = await getPublishedTemplateVersion({
+    const { template, routeParams } = await getPublishedTemplateVersion({
       slug: ['/']
     });
-    // const getStylesheets = Promise.all()
+    const forms = await collectAsyncPayloads(template.vdom, routeParams);
+
     return (
       <MainLayout>
-        <DynamicPage page={publishedTemplateVersion} />
+        <DynamicPage page={template} routeParams={routeParams} forms={forms} />
       </MainLayout>
     );
   } catch (error) {

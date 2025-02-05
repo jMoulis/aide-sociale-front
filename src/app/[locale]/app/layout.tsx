@@ -1,15 +1,9 @@
 import type { Metadata } from 'next';
 import DefaultLayoutRender from '../defaultLayoutRender';
-import {
-  getMongoUser,
-  getServerSideCurrentUserOrganizationId
-} from '@/lib/utils/auth/serverUtils';
+import { getServerSideCurrentUserOrganizationId } from '@/lib/utils/auth/serverUtils';
 import clientMongoServer from '@/lib/mongo/initMongoServer';
-import { IWebsite } from '@/lib/interfaces/interfaces';
+import { IMenuEntry, IWebsite } from '@/lib/interfaces/interfaces';
 import { ENUM_COLLECTIONS } from '@/lib/mongo/interfaces';
-import { routeSecurityMiddleware } from '@/lib/auth/routeSecurityMiddleware';
-import { ENUM_RESSOURCES } from '@/lib/interfaces/enums';
-import { getPublishedTemplateVersion } from './utils';
 import { v4 } from 'uuid';
 
 export const metadata: Metadata = {
@@ -46,13 +40,14 @@ export default async function RootLayout({
     : [];
   const ROOT = '/app';
 
+  const buildRootedEntry = (entry: IMenuEntry) => ({
+    ...entry,
+    uri: entry.uri.length === 1 ? ROOT : `${ROOT}/${entry.uri}`
+  });
   const menus =
     organizationApp?.menus.map((menu) => ({
       ...menu,
-      entries: menu.entries.map((entry) => ({
-        ...entry,
-        uri: entry.uri.length === 1 ? ROOT : `${ROOT}/${entry.uri}`
-      }))
+      entries: menu.entries.map(buildRootedEntry)
     })) || [];
 
   return (

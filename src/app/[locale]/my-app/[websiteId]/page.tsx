@@ -63,7 +63,7 @@ export default async function WebsiteDetailPage({ params }: Props) {
         organizationId={organizationId}
         elementsConfig={[]}
         designMode={true}
-        gridDisplay={false}
+        gridDisplay={true}
         selectedNode={null}
         selectedPage={null}
         selectedMasterTemplate={null}

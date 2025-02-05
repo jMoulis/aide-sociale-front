@@ -37,7 +37,7 @@ export type PageBuilderActions = {
   setSelectMasterTemplate: (masterTemplate: IMasterTemplate) => void;
   setSelectedPage: (page: IPage | null) => void;
   onSelectNode: (event: React.MouseEvent, node: IVDOMNode | null) => void;
-  onUpdateNodeProperty: (name: string, value: string | Record<string, any>, isContext: boolean) => void;
+  onUpdateNodeProperty: (value: Record<string, any>, isContext: boolean) => void;
   onDeleteNode: (nodeId: string | null) => void;
   setDesignMode: (mode: boolean) => void;
   setGridDisplay: (status: boolean) => void;
@@ -217,34 +217,7 @@ export const createPageBuilderStore = (
 
     },
     setSelectedPage: async (page: IPage | null) => {
-      const reset = {
-        pageVersion: null,
-        selectedMasterTemplate: null,
-        masterTemplates: [],
-        pageTemplateVersions: [],
-        selectedNodeId: null,
-      }
-      set({ ...reset, selectedPage: page });
-      if (!page) {
-        set(reset);
-        return
-      };
-      // const { data } = await client.get<IMasterTemplate>(
-      //   ENUM_COLLECTIONS.TEMPLATES_MASTER,
-      //   {
-      //     _id: page.masterTemplateId
-      //   }
-      // );
-
-      // const { data: templatePageVersions } = await client.list<IPageTemplateVersion>(
-      //   ENUM_COLLECTIONS.PAGE_TEMPLATES,
-      //   {
-      //     masterTemplateId: page.masterTemplateId
-      //   }
-      // );
-
-      // set({ ...reset, selectedMasterTemplate: data, pageTemplateVersions: templatePageVersions || [] });
-
+      set({ selectedPage: page, selectedNode: null, pageVersion: null, selectedMasterTemplate: null });
     },
     setOrganizationId: (id: string) => set({ organizationId: id }),
     setWebsite: (website: IWebsite) => set({ website }),
@@ -265,7 +238,6 @@ export const createPageBuilderStore = (
         const config = elementsConfig.find(
           (el) => el.type === node?.type
         );
-
         set({ selectedNode: node, elementConfig: config });
       } else {
         set({ selectedNode: null, elementConfig: null });
@@ -284,15 +256,16 @@ export const createPageBuilderStore = (
         }
       });
     },
-    onUpdateNodeProperty: (name: string, value: string | Record<string, any>, isContext: boolean) => {
+    onUpdateNodeProperty: (value: Record<string, any>, isContext: boolean) => {
       const pageVersion = get().pageVersion;
       const selectedNodeId = get().selectedNode?._id;
       if (!selectedNodeId || !pageVersion) return;
+
       const updatedVDOM = updateNodeById(pageVersion.vdom, selectedNodeId, (node) => {
         if (isContext) {
-          return { ...node, context: { ...node.context, [name]: value } };
+          return { ...node, context: { ...node.context, ...value } };
         }
-        return { ...node, props: { ...node.props, [name]: value } };
+        return { ...node, props: { ...node.props, ...value } };
       });
       let updatedStatePageVersions = {
         ...pageVersion,
@@ -314,10 +287,23 @@ export const createPageBuilderStore = (
         get().elementsConfig.find((el) => el.type === component) || null;
 
       if (!config) return;
-      const newElement: IVDOMNode = {
-        ...config.vdom,
-        _id: v4(),
+
+      const setNewVdomId = (vdom: IVDOMNode) => {
+        let updatedVdom = { ...vdom, _id: v4() };
+        if (Array.isArray(updatedVdom.props?.children)) {
+          updatedVdom = {
+            ...updatedVdom,
+            props: {
+              ...updatedVdom.props,
+              children: updatedVdom.props.children.map((child) =>
+                setNewVdomId(child)
+              )
+            }
+          }
+        }
+        return updatedVdom
       };
+      const newElement: IVDOMNode = { ...setNewVdomId(config.vdom) };
       const selectedNodeId = get().selectedNode?._id;
       const vdom = pageVersion.vdom;
 
@@ -342,8 +328,12 @@ export const createPageBuilderStore = (
       set({
         pageVersion: {
           ...pageVersion,
-          vdom: updatedVDOM
-        }, elementConfig: config, selectedNode: newElement
+          vdom: updatedVDOM,
+          isDirty: true,
+          hasUnpublishedChanges: pageVersion.published ? true : pageVersion.hasUnpublishedChanges
+        },
+        elementConfig: config,
+        selectedNode: newElement
       });
     },
     onPublish: async () => {

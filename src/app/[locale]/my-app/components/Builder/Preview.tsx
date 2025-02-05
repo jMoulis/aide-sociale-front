@@ -1,5 +1,4 @@
 import { useEffect, useState } from 'react';
-import { IVDOMNode } from '../interfaces';
 import { usePageBuilderStore } from '../stores/pagebuilder-store-provider';
 import { useCssLive } from '../stores/useCssLive';
 import { RenderBuilder } from './RenderBuilder';
@@ -91,7 +90,7 @@ function Preview() {
             __html: liveTailwindCss
           }}
         />
-        <RenderBuilder node={pageVersion?.vdom || ({} as IVDOMNode)} />
+        <RenderBuilder pageVersion={pageVersion} />
       </div>
     </div>
   );

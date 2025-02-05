@@ -27,6 +27,8 @@ export function useProperties({ config }: { config: ElementConfigProps }) {
   ]);
 
   return {
-    value
+    value,
+    vdom,
+    selectedNode
   };
 }

@@ -8,6 +8,7 @@ import { ENUM_COLLECTIONS } from '@/lib/mongo/interfaces';
 import { generatePageVersion } from './generators';
 import { useMemo } from 'react';
 import { IMasterTemplate } from '@/lib/TemplateBuilder/interfaces';
+import { PublishedDot } from './PublishedDot';
 
 type Props = {
   masterTemplate: IMasterTemplate | null;
@@ -84,7 +85,7 @@ function PageTemplateVersionsList({ masterTemplate }: Props) {
               Version: {pageTemplateVersion.version}
             </span>
             {publishedVersion?._id === pageTemplateVersion._id ? (
-              <FontAwesomeIcon icon={faGlobe} />
+              <PublishedDot />
             ) : null}
           </Button>
         </li>

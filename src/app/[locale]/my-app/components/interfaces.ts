@@ -1,32 +1,29 @@
-import { CSSProperties } from "react";
+import { VDOMContext, VDOMProps } from "@/lib/interfaces/interfaces";
+
 
 export enum ENUM_COMPONENTS {
   TEXT = 'TEXT',
   INPUT = 'INPUT',
   BLOCK = 'BLOCK',
-  FIELD_INPUT = 'FIELD_INPUT'
+  FIELD_INPUT = 'FIELD_INPUT',
+  FORM = 'FORM',
+  BUTTON = 'BUTTON',
+  REPEAT = 'REPEAT',
 }
 
 export enum ENUM_PROPERTIES_COMPONENTS {
   INPUT = 'INPUT',
   STYLING = 'STYLING',
-  AS = 'AS'
+  AS = 'AS',
+  DATASET = 'DATASET',
+  GENERIC_INPUT = 'GENERIC_INPUT',
 }
 export interface IVDOMNode {
   _id: string;
   inline?: boolean;
   type: ENUM_COMPONENTS;
-  context: {
-    [key: string]: any; // e.g. textContent, placeholder, className, etc.
-    styling?: {
-      style?: CSSProperties;
-      className?: string;
-    }
-  }
-  props: {
-    [key: string]: any; // e.g. textContent, placeholder, className, etc.
-    children: IVDOMNode[] | string;
-  };
+  context: VDOMContext;
+  props: VDOMProps
 }
 export interface RenderElementProps {
   node: IVDOMNode;
@@ -45,6 +42,7 @@ export type ElementConfigProps = {
 export interface IElementConfig {
   _id: string;
   inline?: boolean;
+  label: string;
   type: ENUM_COMPONENTS;
   parameters?: ElementConfigProps[];
   vdom: IVDOMNode;

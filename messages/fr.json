@@ -17,6 +17,7 @@
   },
   "CollectionSection": {
     "name": "Nom de la collection",
+    "selectCollection": "Sélectionner une collection",
     "labels": {
       "name": "Nom",
       "fields": "Champs"

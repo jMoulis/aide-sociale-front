@@ -5,6 +5,8 @@ import {
 import Styling from './Styling/Styling';
 import PropertyInput from './PropertyInput';
 import AsInput from './AsInput';
+import Dataset from './Dataset/Dataset';
+import GenericInput from './GenericInput';
 
 export const PropertiesComponent: {
   [key: string]: React.FC<{
@@ -19,5 +21,11 @@ export const PropertiesComponent: {
   },
   [ENUM_PROPERTIES_COMPONENTS.AS]: (props) => {
     return <AsInput {...props} />;
+  },
+  [ENUM_PROPERTIES_COMPONENTS.DATASET]: (props) => {
+    return <Dataset {...props} />;
+  },
+  [ENUM_PROPERTIES_COMPONENTS.GENERIC_INPUT]: (props) => {
+    return <GenericInput {...props} />;
   }
 };

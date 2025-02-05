@@ -57,10 +57,7 @@ function DatabaseConnexion({ field, blockId }: Props) {
   //   }
   // }, [selectedCollectionId, collections]);
 
-  const availableCollectionFields = useMemo<string[]>(
-    () => selectedCollection?.fields || [],
-    [selectedCollection]
-  );
+  const availableCollectionFields = useMemo<string[]>(() => [], []);
 
   const handleSelectCollection = useCallback(
     (collection: ICollection | null) => {

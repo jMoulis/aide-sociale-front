@@ -1,6 +1,8 @@
 import { IVDOMNode } from "@/app/[locale]/my-app/components/interfaces";
 import { ActionKey, ENUM_ACTIONS } from "./enums";
 import { TemplateDiff } from "../TemplateBuilder/interfaces";
+import { CSSProperties, PropsWithChildren } from "react";
+import { FormType } from "@/app/[locale]/my-app/components/Builder/Components/FormContext";
 
 export type UserExcerpt = {
   id: string;
@@ -56,14 +58,49 @@ export interface IMenu {
   roles: string[];
   entries: IMenuEntry[];
 }
+export interface ICollectionField {
+  label: string;
+  key: string;
+}
 export interface ICollection {
   _id: string;
   name: string;
+  slug: string;
   createdBy?: IUserSummary;
   createdAt: Date;
   organizationId: string;
-  fields: string[];
-  templates: string[];
+  fields: ICollectionField[];
+}
+export interface IDataset {
+  collectionSlug: string;
+  collectionName: string;
+  isCreation?: boolean;
+  pageTemplateVersionId: string;
+  connexion?: {
+    field?: string;
+    routeParam?: string;
+  };
+}
+export type VDOMProps = {
+  [key: string]: any;
+  children: IVDOMNode[];
+}
+export type VDOMContext = {
+  [key: string]: any;
+  styling?: {
+    style?: CSSProperties;
+    className?: string;
+  },
+  isBuilderMode?: boolean;
+  dataset?: IDataset;
+  routeParams?: Record<string, string>;
+  form?: FormType;
+}
+export interface PropsWithChildrenAndContext extends PropsWithChildren {
+  context: VDOMContext;
+  props: any;
+  node: IVDOMNode;
+
 }
 export interface IRessource {
   _id: string;

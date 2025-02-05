@@ -26,10 +26,10 @@ function AsInput({ config }: Props) {
     setTempValue(e.target.value);
   };
   const handleOnBlur = () => {
-    onUpdateNodeProperty(config.propKey, tempValue, config.context);
+    onUpdateNodeProperty({ [config.propKey]: tempValue }, config.context);
   };
   const handleClear = () => {
-    onUpdateNodeProperty(config.propKey, '', config.context);
+    onUpdateNodeProperty({ [config.propKey]: '' }, config.context);
     setTempValue('');
   };
   return (

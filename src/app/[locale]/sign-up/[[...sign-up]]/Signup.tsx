@@ -14,7 +14,13 @@ import { Input } from '@/components/ui/input';
 import { Form, FormField, FormItem, FormLabel } from '@/components/ui/form';
 import { Button } from '@/components/ui/button';
 import { ENUM_API_ROUTES } from '@/lib/interfaces/enums';
+import { v4 } from 'uuid';
 
+function shortBase64UUID(uuid: string) {
+  return btoa(uuid)
+    .replace(/[^a-zA-Z0-9]/g, '')
+    .slice(0, 8);
+}
 const formSchema = z.object({
   identifier: z.string().min(2, {
     message: 'Identifier must be at least 2 characters.'
@@ -113,7 +119,7 @@ export default function SignupForm() {
           firstName: mainFormValues.firstName,
           lastName: mainFormValues.lastName,
           email: mainFormValues.identifier,
-          organizationId: 'undefined'
+          organizationId: shortBase64UUID(v4())
         };
         await fetch(ENUM_API_ROUTES.SIGN_UP, {
           method: 'POST',
