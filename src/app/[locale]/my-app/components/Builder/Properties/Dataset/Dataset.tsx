@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import {
   ElementConfigProps,
   ENUM_COMPONENTS,
@@ -23,6 +23,9 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faInfoCircle } from '@awesome.me/kit-8441d3fdf2/icons/classic/solid';
 import FormField from '@/components/form/FormField';
 import Input from '@/components/form/Input';
+import CollectionFormDialog from './CollectionFormDialog';
+import FieldList from './FieldList';
+import Popup from '@/components/popup/Popup';
 
 function findClosestFormParent(
   vdom: IVDOMNode,
@@ -34,7 +37,7 @@ function findClosestFormParent(
     if (parent) {
       parentMap.set(node._id, parent);
     }
-    node.props?.children?.forEach((child) => buildParentMap(child, node));
+    node?.children?.forEach((child) => buildParentMap(child, node));
   }
 
   // Step 1: Build parent references
@@ -60,6 +63,8 @@ const Dataset = ({ config }: Props) => {
   const onUpdateNodeProperty = usePageBuilderStore(
     (state) => state.onUpdateNodeProperty
   );
+  const t = useTranslations('CollectionSection');
+
   const {
     value: currentCollection,
     vdom,
@@ -74,7 +79,6 @@ const Dataset = ({ config }: Props) => {
   );
   const [collectionsSelectedCollection, setCollectionsSelectedCollection] =
     useState<ICollection | null>(null);
-  const t = useTranslations('CollectionSection');
 
   const [parentForm, setParentForm] = useState<IVDOMNode | null>(null);
 
@@ -93,54 +97,65 @@ const Dataset = ({ config }: Props) => {
     setParentForm(form);
   }, [vdom, selectedNode?._id, selectedNode?.type]);
 
-  useEffect(() => {
-    client
-      .list<ICollection>(ENUM_COLLECTIONS.COLLECTIONS, { organizationId })
-      .then(({ data }) => {
-        if (!data) return;
-        const collectionsAsMap = data.reduce(
-          (acc: Record<string, ICollection>, collection) => {
-            acc[collection.slug] = collection;
-            return acc;
-          },
-          {}
-        );
-        setCollections(collectionsAsMap);
-      });
+  const fetchCollections = useCallback(async () => {
+    const { data } = await client.list<ICollection>(
+      ENUM_COLLECTIONS.COLLECTIONS,
+      { organizationId }
+    );
+    if (!data) return;
+    const collectionsAsMap = data.reduce(
+      (acc: Record<string, ICollection>, collection) => {
+        acc[collection.slug] = collection;
+        return acc;
+      },
+      {}
+    );
+    setCollections(collectionsAsMap);
   }, [organizationId]);
 
   useEffect(() => {
-    if (
-      parentForm?.context.dataset?.collectionName &&
-      pageTemplateVersion?._id
-    ) {
-      const collection = collections[parentForm.context.dataset.collectionSlug];
-      if (!collection) return;
-      setCollectionsSelectedCollection(collection);
-      const updatedCollection: IDataset = {
-        collectionSlug: collection.slug,
-        collectionName: collection.name,
-        pageTemplateVersionId: pageTemplateVersion._id,
-        connexion: {}
-      };
-      onUpdateNodeProperty(
-        { [config.propKey]: updatedCollection || '' },
-        config.context
-      );
+    fetchCollections();
+  }, [fetchCollections]);
+
+  useEffect(() => {
+    let collection: ICollection | null = null;
+    if (!pageTemplateVersion?._id) return;
+
+    if (parentForm?.context.dataset?.collectionSlug) {
+      collection = collections[parentForm.context.dataset.collectionSlug];
+    } else if (currentCollection?.collectionSlug) {
+      collection = collections[currentCollection?.collectionSlug];
     }
+    setCollectionsSelectedCollection(collection);
+
+    if (!collection) return;
+
+    // const updatedCollection: IDataset = {
+    //   collectionSlug: collection.slug,
+    //   collectionName: collection.name,
+    //   pageTemplateVersionId: pageTemplateVersion._id,
+    //   connexion: currentCollection?.connexion || {}
+    // };
+    // onUpdateNodeProperty(
+    //   { [config.propKey]: updatedCollection || '' },
+    //   config.context
+    // );
   }, [
     collections,
     parentForm?.context?.dataset,
     config.propKey,
     config.context,
     onUpdateNodeProperty,
-    pageTemplateVersion?._id
+    pageTemplateVersion?._id,
+    currentCollection?.collectionSlug,
+    currentCollection?.connexion
   ]);
 
   const handleSelectCollection = (value?: string) => {
     if (!pageTemplateVersion?._id) return;
     const selectedCollection = value ? collections[value] : null;
     if (!selectedCollection) return;
+
     const collection: IDataset = {
       collectionSlug: selectedCollection.slug,
       collectionName: selectedCollection.name,
@@ -156,16 +171,23 @@ const Dataset = ({ config }: Props) => {
   };
 
   const handleSelectField = (state: CheckedState, selectedValue?: string) => {
-    if (!currentCollection) return;
-    const collection = collections[currentCollection.collectionSlug];
+    let collection: ICollection | null = null;
+    if (!pageTemplateVersion?._id) return;
+
+    if (parentForm?.context.dataset?.collectionSlug) {
+      collection = collections[parentForm.context.dataset.collectionSlug];
+    } else if (currentCollection?.collectionSlug) {
+      collection = collections[currentCollection.collectionSlug];
+    }
+    if (!collection) return;
 
     const updatedCollection: IDataset = {
       collectionSlug: collection.slug,
       collectionName: collection.name,
       pageTemplateVersionId: pageTemplateVersion?._id as string,
       connexion: {
-        ...currentCollection.connexion,
-        field: selectedValue || ''
+        ...currentCollection?.connexion,
+        field: state === true ? selectedValue : ''
       }
     };
     onUpdateNodeProperty(
@@ -190,6 +212,7 @@ const Dataset = ({ config }: Props) => {
       config.context
     );
   };
+
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     if (!currentCollection) return;
@@ -208,66 +231,107 @@ const Dataset = ({ config }: Props) => {
 
   return (
     <div>
-      Dataset
-      {parentForm ? (
-        <div>
-          <span className='text-xs'>
-            <FontAwesomeIcon icon={faInfoCircle} />
-            Parent form connection: {parentForm.context.dataset?.collectionName}
-          </span>
-        </div>
-      ) : null}
-      <Select
-        disabled={Boolean(parentForm)}
-        onValueChange={handleSelectCollection}
-        defaultValue={currentCollection?.collectionSlug}
-        value={currentCollection?.collectionSlug}>
-        <SelectTrigger className='w-[180px]'>
-          <span style={{ textAlign: 'left' }}>
-            {parentForm?.context.dataset?.collectionName ??
-              currentCollection?.collectionName ??
-              t('selectCollection')}
-          </span>
-        </SelectTrigger>
-        <SelectContent>
-          {Object.values(collections).map((collection) => (
-            <SelectItem key={collection.slug} value={collection.slug}>
-              {collection.name}
-            </SelectItem>
-          ))}
-        </SelectContent>
-      </Select>
-      {collectionsSelectedCollection ? (
-        <ul className='ml-2'>
-          {collectionsSelectedCollection.fields.map((field) => (
-            <li key={field.key} className='mt-2 flex items-center'>
-              <Checkbox
-                id={`${field.key}`}
-                onCheckedChange={(state) => handleSelectField(state, field.key)}
-                value={field.key}
-                checked={currentCollection?.connexion?.field === field.key}
-              />
-              <FormLabel className='mb-0 ml-1' htmlFor={field.key}>
-                {field.label}
-              </FormLabel>
-            </li>
-          ))}
-        </ul>
-      ) : null}
-      <FormField className='mt-2 flex flex-row items-center'>
-        <Checkbox onCheckedChange={handleCreateFormChecked} id='create-form' />
-        <FormLabel className='mb-0 ml-1' htmlFor='create-form'>
-          CREATE
-        </FormLabel>
-      </FormField>
-      <FormField>
-        <FormLabel>Route param</FormLabel>
-        <Input
-          name='routeParam'
-          value={currentCollection?.connexion?.routeParam || ''}
-          onChange={handleInputChange}
+      <h3 className='text-sm'>{t('dataset')}</h3>
+      <div>
+        <FormField>
+          <FormLabel className='text-gray-700 text-sm'>
+            {t('selectCollection')}
+          </FormLabel>
+          <div className='flex'>
+            <Select
+              disabled={
+                !config.options?.includes('SELECT_COLLECTION') ||
+                Boolean(parentForm)
+              }
+              onValueChange={handleSelectCollection}
+              defaultValue={currentCollection?.collectionSlug}
+              value={currentCollection?.collectionSlug}>
+              <SelectTrigger className='w-[180px]'>
+                <span style={{ textAlign: 'left' }}>
+                  {parentForm?.context?.dataset?.collectionName ??
+                    currentCollection?.collectionName ??
+                    t('selectCollection')}
+                </span>
+              </SelectTrigger>
+              <SelectContent>
+                {Object.values(collections).map((collection) => (
+                  <SelectItem key={collection.slug} value={collection.slug}>
+                    {collection.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            {config.options?.includes('SELECT_COLLECTION') ? (
+              <>
+                <CollectionFormDialog
+                  prevCollection={collectionsSelectedCollection}
+                  onSubmit={fetchCollections}
+                  onOpen={handleSelectCollection}
+                />
+                <CollectionFormDialog onSubmit={fetchCollections} />
+              </>
+            ) : null}
+          </div>
+          {parentForm ? (
+            <Popup
+              trigger={
+                <span className='mt-1 text-xs text-gray-700 block text-left'>
+                  <FontAwesomeIcon
+                    icon={faInfoCircle}
+                    className='mr-1 text-blue-600'
+                  />
+                  {t('parentCollection', {
+                    collectionName: parentForm.context?.dataset?.collectionName
+                  })}
+                </span>
+              }>
+              <div className='p-2'>
+                <p className='font-bold text-xs text-gray-700 whitespace-pre'>
+                  Informations
+                </p>
+                <p className='text-xs text-gray-700 whitespace-pre'>
+                  Les champs de formulaire sont liés à la collection du
+                  formulaire parent.
+                </p>
+                <p className='text-xs text-gray-700 whitespace-pre'>
+                  Pour modifier la collection, veuillez modifier le formulaire
+                  parent.
+                </p>
+              </div>
+            </Popup>
+          ) : null}
+        </FormField>
+      </div>
+
+      {config.options?.includes('FIELDS') ? (
+        <FieldList
+          onSelectField={handleSelectField}
+          selectedCollection={collectionsSelectedCollection}
+          currentCollection={currentCollection}
         />
-      </FormField>
+      ) : null}
+      {config.options?.includes('CREATE') ? (
+        <FormField className='mt-2 flex flex-row items-center'>
+          <Checkbox
+            checked={currentCollection?.isCreation}
+            onCheckedChange={handleCreateFormChecked}
+            id='create-form'
+          />
+          <FormLabel className='mb-0 ml-1 text-gray-700' htmlFor='create-form'>
+            {t('createANewDocument')}
+          </FormLabel>
+        </FormField>
+      ) : null}
+      {config.options?.includes('ROUTE_PARAM') ? (
+        <FormField>
+          <FormLabel className='text-gray-700'>{t('routeParam')}</FormLabel>
+          <Input
+            name='routeParam'
+            value={currentCollection?.connexion?.routeParam || ''}
+            onChange={handleInputChange}
+          />
+        </FormField>
+      ) : null}
     </div>
   );
 };

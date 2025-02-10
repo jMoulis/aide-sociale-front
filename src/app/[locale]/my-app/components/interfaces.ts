@@ -2,13 +2,34 @@ import { VDOMContext, VDOMProps } from "@/lib/interfaces/interfaces";
 
 
 export enum ENUM_COMPONENTS {
-  TEXT = 'TEXT',
-  INPUT = 'INPUT',
   BLOCK = 'BLOCK',
-  FIELD_INPUT = 'FIELD_INPUT',
-  FORM = 'FORM',
   BUTTON = 'BUTTON',
+  CHECKBOX = 'CHECKBOX',
+  COLOR = 'COLOR',
+  DATE = 'DATE',
+  DATETIME = 'DATETIME',
+  DATERANGE = 'DATERANGE',
+  EMAIL = 'EMAIL',
+  FILE = 'FILE',
+  FORM = 'FORM',
+  INPUT = 'INPUT',
+  NUMERIC = 'NUMERIC',
+  RADIO = 'RADIO',
+  RANGE = 'RANGE',
+  RATING = 'RATING',
   REPEAT = 'REPEAT',
+  SELECT = 'SELECT',
+  TEXT = 'TEXT',
+  TEXTAREA = 'TEXTAREA',
+  TIME = 'TIME',
+  TOGGLE = 'TOGGLE',
+
+  // temp
+  ROW = 'ROW',
+  COLUMN = 'COLUMN',
+  COMPONENT = 'COMPONENT',
+  SIDEBAR_ITEM = 'SIDEBAR_ITEM',
+
 }
 
 export enum ENUM_PROPERTIES_COMPONENTS {
@@ -24,6 +45,8 @@ export interface IVDOMNode {
   type: ENUM_COMPONENTS;
   context: VDOMContext;
   props: VDOMProps
+  path?: string[];
+  children: IVDOMNode[];
 }
 export interface RenderElementProps {
   node: IVDOMNode;
@@ -38,6 +61,7 @@ export type ElementConfigProps = {
   propKey: string;
   component: ENUM_PROPERTIES_COMPONENTS;
   context: boolean;
+  options?: ('SELECT_COLLECTION' | 'FIELDS' | 'CREATE' | 'ROUTE_PARAM')[];
 }
 export interface IElementConfig {
   _id: string;

@@ -7,8 +7,8 @@ import { ENUM_COLLECTIONS } from '@/lib/mongo/interfaces';
 import { v4 } from 'uuid';
 
 export const metadata: Metadata = {
-  title: "Aide sociale à l'enfance - page d'accueil",
-  description: "Bienvenue sur la page d'accueil de l'Aide sociale à l'enfance"
+  title: 'Solinn app - Accueil',
+  description: "Bienvenue sur la page d'accueil de Solinn app"
 };
 
 export default async function RootLayout({

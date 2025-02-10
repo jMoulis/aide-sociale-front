@@ -25,7 +25,7 @@ function Calendar({
       className={cn('p-3', className)}
       classNames={{
         month: 'space-y-4',
-        months: 'flex flex-col sm:flex-row space-y-4 sm:space-y-0 relative',
+        months: 'flex flex-row space-y-4 sm:space-y-0 relative',
         month_caption:
           'flex justify-center pt-1 relative items-center cursor-pointer',
         month_grid: 'w-full border-collapse space-y-1',

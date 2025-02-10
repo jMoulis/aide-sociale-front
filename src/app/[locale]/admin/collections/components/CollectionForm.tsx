@@ -37,7 +37,8 @@ function CollectionForm({
     createdBy: user,
     createdAt: new Date(),
     fields: [],
-    slug: ''
+    slug: '',
+    roles: []
   };
   const [collection, setCollection] = useState<ICollection>(
     initialCollection || defaultCollection

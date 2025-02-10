@@ -51,7 +51,7 @@ function WebsitePage({ create }: Props) {
   if (!website) return null;
 
   return (
-    <main className='flex flex-col h-screen'>
+    <main className='flex flex-col'>
       <WebsiteHeader website={website} create={create || false} />
       <div className='flex'>
         <LeftPanel />

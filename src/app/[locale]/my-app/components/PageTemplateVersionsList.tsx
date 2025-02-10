@@ -1,9 +1,9 @@
 import Button from '@/components/buttons/Button';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faAdd, faGlobe } from '@awesome.me/kit-8441d3fdf2/icons/classic/solid';
+import { faAdd } from '@awesome.me/kit-8441d3fdf2/icons/classic/solid';
 import { usePageBuilderStore } from './stores/pagebuilder-store-provider';
 import client from '@/lib/mongo/initMongoClient';
-import { IPageTemplateVersion } from '@/lib/interfaces/interfaces';
+import { IPageTemplateVersion, ITreePage } from '@/lib/interfaces/interfaces';
 import { ENUM_COLLECTIONS } from '@/lib/mongo/interfaces';
 import { generatePageVersion } from './generators';
 import { useMemo } from 'react';
@@ -12,8 +12,9 @@ import { PublishedDot } from './PublishedDot';
 
 type Props = {
   masterTemplate: IMasterTemplate | null;
+  page: ITreePage;
 };
-function PageTemplateVersionsList({ masterTemplate }: Props) {
+function PageTemplateVersionsList({ masterTemplate, page }: Props) {
   const setSelectedVersionPage = usePageBuilderStore(
     (state) => state.setSelectedVersionPage
   );
@@ -64,6 +65,9 @@ function PageTemplateVersionsList({ masterTemplate }: Props) {
     onAddPageTemplateVersion(pageTemplateVersion);
     // fetchPageTemplateVersions();
   };
+  const handleSelectPageVersion = (version: IPageTemplateVersion) => {
+    setSelectedVersionPage(version, masterTemplate, page);
+  };
   return (
     <ul className='ml-2'>
       <li className='flex gap-2 items-center justify-between'>
@@ -80,7 +84,7 @@ function PageTemplateVersionsList({ masterTemplate }: Props) {
                 ? 'bg-black text-white'
                 : ''
             }`}
-            onClick={() => setSelectedVersionPage(pageTemplateVersion)}>
+            onClick={() => handleSelectPageVersion(pageTemplateVersion)}>
             <span className='text-sm'>
               Version: {pageTemplateVersion.version}
             </span>

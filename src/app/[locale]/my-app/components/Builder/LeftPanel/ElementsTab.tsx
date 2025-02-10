@@ -3,6 +3,7 @@ import { usePageBuilderStore } from '../../stores/pagebuilder-store-provider';
 import FormLabel from '@/components/form/FormLabel';
 import { Checkbox } from '@/components/ui/checkbox';
 import Button from '@/components/buttons/Button';
+import ResponsiveMenu from './ResponsiveMenu';
 
 function ElementsTab() {
   const gridDisplay = usePageBuilderStore((state) => state.gridDisplay);
@@ -29,19 +30,6 @@ function ElementsTab() {
   };
   return (
     <div className='border-r p-4 flex flex-col flex-1'>
-      <h2 className='text-xl font-bold'>Add Elements</h2>
-      <FormLabel className='block'>
-        <span className='text-gray-700'>Element Type:</span>
-        <ul>
-          {elementsConfig.map((elementConfig) => (
-            <li key={elementConfig._id}>
-              <Button onClick={() => onAddComponent?.(elementConfig.type)}>
-                {elementConfig.label}
-              </Button>
-            </li>
-          ))}
-        </ul>
-      </FormLabel>
       <div className='mt-2'>
         <FormLabel className='flex items-center'>
           <Checkbox
@@ -60,7 +48,21 @@ function ElementsTab() {
           />
           <span>Grid display</span>
         </FormLabel>
+        <ResponsiveMenu />
       </div>
+      <h2 className='text-xl font-bold'>Add Elements</h2>
+      <FormLabel className='block'>
+        <span className='text-gray-700'>Element Type:</span>
+        <ul>
+          {elementsConfig.map((elementConfig) => (
+            <li key={elementConfig._id}>
+              <Button onClick={() => onAddComponent?.(elementConfig.type)}>
+                {elementConfig.label}
+              </Button>
+            </li>
+          ))}
+        </ul>
+      </FormLabel>
     </div>
   );
 }

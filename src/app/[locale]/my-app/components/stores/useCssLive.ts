@@ -10,9 +10,15 @@ interface PageBuilderContextProps {
   utilsStyle: string;
   classSelectors: string[];
   tailwindStyles: string;
+  parentStylesheets: string[];
   setPageStyle: (style: string) => void;
   setWebsiteStyle: (style: string) => void;
   setTailwindStyles: (website: IWebsite, content: string) => void;
+  setParentStylesheets: (stylesheets: string[]) => void;
+  setDynamicStyles: (styles: {
+    name: string;
+    style: string;
+  }[]) => void;
   setUtilsStyle: (style: string) => void;
 }
 export const useCssLive = create<PageBuilderContextProps>((set, _get) => ({
@@ -21,6 +27,25 @@ export const useCssLive = create<PageBuilderContextProps>((set, _get) => ({
   tailwindStyles: '',
   utilsStyle: '',
   classSelectors: [],
+  parentStylesheets: [],
+  setParentStylesheets: (stylesheets: string[]) => {
+    set({ parentStylesheets: stylesheets });
+  },
+  setDynamicStyles: (styles: {
+    name: string;
+    style: string;
+  }[]) => {
+    const styleMap = styles.reduce((acc, curr) => {
+      acc[curr.name] = curr.style;
+      return acc;
+    }, {} as Record<string, string>);
+    set({
+      pageStyle: styleMap.page,
+      websiteStyle: styleMap.website,
+      utilsStyle: styleMap.utils,
+      classSelectors: extractClassSelectorsFromString(styleMap.utils)
+    });
+  },
   setPageStyle: (style: string) => set({ pageStyle: style }),
   setWebsiteStyle: (style: string) => set({ websiteStyle: style }),
   setTailwindStyles: (website: IWebsite, content: string) => {
@@ -48,5 +73,5 @@ export const useCssLive = create<PageBuilderContextProps>((set, _get) => ({
   setUtilsStyle: (style: string) => {
     const classSelectors = extractClassSelectorsFromString(style);
     set({ utilsStyle: style, classSelectors })
-  }
+  },
 }))

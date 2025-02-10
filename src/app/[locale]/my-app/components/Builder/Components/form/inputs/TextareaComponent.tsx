@@ -1,12 +1,12 @@
-import { useFormContext } from './FormContext';
-import Input from '@/components/form/Input';
 import { PropsWithChildrenAndContext } from '@/lib/interfaces/interfaces';
+import { useFormContext } from '../../FormContext';
+import Textarea from '@/components/form/Textarea';
 
-function InputComponent({ props, context }: PropsWithChildrenAndContext) {
+function TextareaComponent({ props, context }: PropsWithChildrenAndContext) {
   const { onInputChange, getFormFieldValue } = useFormContext();
   const value = getFormFieldValue(context.dataset);
   return (
-    <Input
+    <Textarea
       {...props}
       {...context.input}
       data-collection={context.dataset?.collectionSlug}
@@ -17,4 +17,4 @@ function InputComponent({ props, context }: PropsWithChildrenAndContext) {
   );
 }
 
-export default InputComponent;
+export default TextareaComponent;

@@ -72,6 +72,7 @@ export default async function RootLayout({ params }: Props) {
       slug
     });
     const forms = await collectAsyncPayloads(template.vdom, routeParams);
+
     return (
       <MainLayout>
         <DynamicPage page={template} routeParams={routeParams} forms={forms} />

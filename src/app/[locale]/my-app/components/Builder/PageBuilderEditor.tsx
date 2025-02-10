@@ -1,34 +1,22 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 import LeftPanel from './LeftPanel/LeftPanel';
 import RightPanel from './RightPanel';
-import Preview from './Preview';
-import PageBuilderDesignStyle from './PageBuilderDesignStyle';
-import { usePageBuilderStore } from '../stores/pagebuilder-store-provider';
 import PageBuilderHeader from './PageBuilderHeader';
 import PageBuilderSkeleton from './PageBuilderSkeleton';
+import { useInitializeBuilder } from './useInitializeBuilder';
+import { RenderScene } from './RenderScene';
 
 export const PageBuilderEditor = () => {
-  const [loading, setLoading] = React.useState(true);
-  const fetchElements = usePageBuilderStore(
-    (state) => state.fetchElementsConfig
-  );
-  useEffect(() => {
-    setLoading(true);
-    fetchElements().finally(() => setLoading(false));
-  }, [fetchElements]);
-
+  const loading = useInitializeBuilder();
   if (loading) return <PageBuilderSkeleton />;
   return (
-    <>
-      <div className='flex-1'>
-        <PageBuilderHeader />
-        <div className='flex w-full h-screen'>
-          <PageBuilderDesignStyle />
-          <LeftPanel />
-          <Preview />
-          <RightPanel />
-        </div>
+    <div className='flex-col flex'>
+      <PageBuilderHeader />
+      <div className='flex max-w-[calc(100vw_-_250px)]'>
+        <LeftPanel />
+        <RenderScene />
+        <RightPanel />
       </div>
-    </>
+    </div>
   );
 };

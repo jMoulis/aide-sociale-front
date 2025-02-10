@@ -126,6 +126,7 @@ export const collectAsyncPayloads = async (
   // Recursive helper function.
   const traverse = async (node: IVDOMNode) => {
     const dataset = node.context?.dataset;
+
     if (dataset) {
       const { collectionSlug, connexion } = dataset;
       if (collectionSlug && connexion) {
@@ -149,8 +150,8 @@ export const collectAsyncPayloads = async (
     }
 
     // Process all children recursively.
-    if (node.props && Array.isArray(node.props.children)) {
-      await Promise.all(node.props.children.map((child) => traverse(child)));
+    if (node.children && Array.isArray(node.children)) {
+      await Promise.all(node.children.map((child) => traverse(child)));
     }
   };
 

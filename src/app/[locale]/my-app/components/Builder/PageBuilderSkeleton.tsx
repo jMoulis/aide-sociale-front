@@ -2,7 +2,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 
 function PageBuilderSkeleton() {
   return (
-    <div className='flex-1 flex flex-col w-full h-screen space-y-5'>
+    <div className='flex-1 flex flex-col w-full space-y-5'>
       <header className='flex space-x-3'>
         <Skeleton className='h-10 w-20' />
         <Skeleton className='h-10 w-20' />

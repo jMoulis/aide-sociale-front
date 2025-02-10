@@ -6,7 +6,7 @@ export const slugifyFunction = (value: string) => {
   return slugify(value, {
     lower: true,
     strict: true,
-    replacement: '-',
+    replacement: '_',
     remove: /\d+/g
   });
 };

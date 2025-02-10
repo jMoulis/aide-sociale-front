@@ -2,9 +2,9 @@ import { IVDOMNode } from "./interfaces";
 
 export const findNodeById = (root: IVDOMNode, id: string): IVDOMNode | null => {
   if (root._id === id) return root;
-  if (!root.props.children) return null;
-  if (!Array.isArray(root.props.children)) return null;
-  for (const child of root.props.children) {
+  if (!root.children) return null;
+  if (!Array.isArray(root.children)) return null;
+  for (const child of root.children) {
     const found = findNodeById(child, id);
     if (found) return found;
   }
@@ -19,16 +19,13 @@ export const updateNodeById = (
   if (root._id === id) {
     return updateFn({ ...root });
   }
-  if (!root.props.children) return root;
+  if (!root.children) return root;
 
-  if (!Array.isArray(root.props.children)) return root;
+  if (!Array.isArray(root.children)) return root;
 
   return {
     ...root,
-    props: {
-      ...root.props,
-      children: root.props.children.map((child) => updateNodeById(child, id, updateFn))
-    }
+    children: root.children.map((child) => updateNodeById(child, id, updateFn))
   };
 };
 export const deleteNodeById = (
@@ -36,11 +33,11 @@ export const deleteNodeById = (
   id: string
 ): IVDOMNode | null => {
   if (root._id === id) return null;
-  if (!root.props.children || !Array.isArray(root.props.children)) return root;
-  const newChildren = root.props.children
+  if (!root.children || !Array.isArray(root.children)) return root;
+  const newChildren = root.children
     .map(child => deleteNodeById(child, id))
     .filter((child): child is IVDOMNode => child !== null);
-  return { ...root, props: { ...root.props, children: newChildren } };
+  return { ...root, children: newChildren };
 };
 
 export function extractClassSelectorsFromString(stylesheetString: string): string[] {
@@ -82,3 +79,66 @@ export function extractClassSelectorsFromString(stylesheetString: string): strin
 
   return classSelectors;
 }
+
+export const removeNodeFromTree = (
+  nodes: IVDOMNode[],
+  id: string
+): { removedNode: IVDOMNode | null; newNodes: IVDOMNode[] } => {
+  let removedNode: IVDOMNode | null = null;
+
+  const filterFn = (node: IVDOMNode): IVDOMNode | null => {
+    if (node._id === id) {
+      removedNode = node;
+      return null;
+    }
+    if (node.children?.length) {
+      const newChildren = node.children
+        .map(filterFn)
+        .filter(Boolean) as IVDOMNode[];
+      return { ...node, children: newChildren };
+    }
+    return node;
+  };
+
+  const newNodes = nodes.map(filterFn).filter(Boolean) as IVDOMNode[];
+  return { removedNode, newNodes };
+};
+export const insertNodeIntoTree = (
+  nodes: IVDOMNode[],
+  targetId: string | null,
+  nodeToInsert: IVDOMNode,
+  dropIndicator: 'above' | 'below' | null
+): IVDOMNode[] => {
+  if (targetId === null) {
+    // If no target is provided, insert at the root level.
+    // You could also decide to insert at the beginning if dropIndicator is 'above'.
+    return dropIndicator === 'above'
+      ? [nodeToInsert, ...nodes]
+      : [...nodes, nodeToInsert];
+  }
+
+  // Recursive function to find the parent of the target node.
+  const recursiveInsert = (node: IVDOMNode): IVDOMNode => {
+    if (node.children?.length) {
+      const targetIndex = node.children.findIndex(child => child._id === targetId);
+      if (targetIndex !== -1) {
+        // Compute the insertion index based on the drop indicator.
+        const insertIndex = dropIndicator === 'above' ? targetIndex : targetIndex + 1;
+        const newChildren = [...node.children];
+        newChildren.splice(insertIndex, 0, nodeToInsert);
+        return {
+          ...node,
+          children: newChildren,
+        };
+      }
+      // Recurse into children if target was not found at this level.
+      return {
+        ...node,
+        children: node.children.map(recursiveInsert)
+      };
+    }
+    return node;
+  };
+
+  return nodes.map(recursiveInsert);
+};

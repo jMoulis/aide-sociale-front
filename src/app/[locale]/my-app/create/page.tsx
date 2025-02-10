@@ -1,6 +1,7 @@
 import { getServerSideCurrentUserOrganizationId } from '@/lib/utils/auth/serverUtils';
 import { PagebuilderProvider } from '@/app/[locale]/my-app/components/stores/pagebuilder-store-provider';
 import WebsitePage from '../components/Website/WebsitePage';
+import { breakPoints } from '../components/stores/pagebuilder-store';
 
 export default async function CreatePage() {
   const organizationId = await getServerSideCurrentUserOrganizationId();
@@ -8,6 +9,10 @@ export default async function CreatePage() {
   return (
     <>
       <PagebuilderProvider
+        selectedBreakPoint={{
+          name: 'desktop',
+          size: breakPoints.desktop
+        }}
         elementConfig={null}
         pages={[]}
         website={null}

@@ -1,9 +1,7 @@
 'use client';
 
 import * as React from 'react';
-import { useSignIn } from '@clerk/nextjs';
-import { useRouter } from 'next/navigation';
-import { ENUM_APP_ROUTES } from '@/lib/interfaces/enums';
+import { useAuth, useSignIn } from '@clerk/nextjs';
 import { useTranslations } from 'next-intl';
 import { toast } from '@/lib/hooks/use-toast';
 import useClerkErrorLocalization from '@/lib/hooks/useClerkErrorLocalization';
@@ -11,6 +9,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { Button } from '@/components/ui/button';
+import { signInWithCustomToken } from 'firebase/auth';
 import {
   Form,
   FormControl,
@@ -20,6 +19,7 @@ import {
   FormMessage
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
+import { auth } from '@/lib/firebase/firebaseClient';
 
 const formSchema = z.object({
   identifier: z.string().min(2, {
@@ -35,8 +35,9 @@ export default function SignInForm() {
   const tError = useTranslations('ErrorSection');
   const tGlobal = useTranslations('GlobalSection');
   const tSecurity = useTranslations('SecuritySection');
-  const router = useRouter();
+
   const { onCatchErrors } = useClerkErrorLocalization();
+  const { getToken } = useAuth();
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -55,11 +56,8 @@ export default function SignInForm() {
       });
       if (signInAttempt.status === 'complete') {
         await setActive({ session: signInAttempt.createdSessionId });
-        const redirectUrl = new URLSearchParams(window.location.search).get(
-          'redirect_url'
-        );
-        router.prefetch(redirectUrl || ENUM_APP_ROUTES.DASHBOARD);
-        router.push(redirectUrl || ENUM_APP_ROUTES.DASHBOARD);
+        const token = await getToken({ template: 'integration_firebase' });
+        await signInWithCustomToken(auth, token || '');
       } else {
         // setError(signInAttempt.status || 'An error occurred');
         toast({

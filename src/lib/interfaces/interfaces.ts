@@ -61,12 +61,17 @@ export interface IMenu {
 export interface ICollectionField {
   label: string;
   key: string;
+  new: boolean;
 }
 export interface ICollection {
   _id: string;
   name: string;
   slug: string;
+  description?: string;
+  roles: string[];
   createdBy?: IUserSummary;
+  updatedBy?: IUserSummary;
+  updatedAt?: Date;
   createdAt: Date;
   organizationId: string;
   fields: ICollectionField[];
@@ -83,7 +88,6 @@ export interface IDataset {
 }
 export type VDOMProps = {
   [key: string]: any;
-  children: IVDOMNode[];
 }
 export type VDOMContext = {
   [key: string]: any;
@@ -97,9 +101,11 @@ export type VDOMContext = {
   form?: FormType;
 }
 export interface PropsWithChildrenAndContext extends PropsWithChildren {
+  dndChildrenContainerRef?: any;
   context: VDOMContext;
   props: any;
   node: IVDOMNode;
+  ref?: any
 
 }
 export interface IRessource {

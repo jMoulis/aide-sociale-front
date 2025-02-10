@@ -223,7 +223,6 @@ function TemplatePropertiesMenu() {
           deleting={deleting}
           onOpenChange={handleFetchRelatedDocuments}>
           <ConfirmationDeleteContent
-            relatedDocumentsLength={relatedDocuments.length}
             confirmationStringPattern={confirmationStringPattern}
             onConfirmStringChange={handleConfirmString}
             confirmString={confirmString}

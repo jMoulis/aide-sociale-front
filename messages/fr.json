@@ -16,11 +16,23 @@
     }
   },
   "CollectionSection": {
+    "dataset": "Ensemble de données",
     "name": "Nom de la collection",
     "selectCollection": "Sélectionner une collection",
+    "parentCollection": "Collection parent {collectionName}",
+    "selectValueField": "Sélectionner un champ de valeur",
+    "valueField": "Champ de valeur",
+    "createANewDocument": "Formulaire de création ?",
+    "routeParam": "Paramètre de route",
+    "validCollection": "Collection valide",
+    "startTyping": "Commencez à taper",
+    "correspondingCollections": "Collections correspondantes",
     "labels": {
+      "slug": "Slug",
       "name": "Nom",
-      "fields": "Champs"
+      "fields": "Champs",
+      "description": "Description",
+      "addField": "Ajouter un champs"
     },
     "create": {
       "title": "Créer une collection",
@@ -132,7 +144,7 @@
     },
     "emailPlaceholder": "ex: jean@dupont.fr",
     "actions": {
-      "addTag": "Tapez un mot et appuyez sur Entrée",
+      "addTagPlaceholder": "Tapez un mot et appuyez sur Entrée",
       "submit": "Envoyer",
       "cancel": "Annuler",
       "save": "Enregistrer",
@@ -148,7 +160,8 @@
       "clearFilters": "Effacer les filtres",
       "search": "Rechercher",
       "pickADate": "Choisir une date",
-      "pickRangeDate": "Choisir une période"
+      "pickRangeDate": "Choisir une période",
+      "addTag": "Ajouter un tag"
     }
   },
   "HomePage": {

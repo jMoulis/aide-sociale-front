@@ -11,8 +11,8 @@ export const generatePageVersion = (masterTemplateId: string, version: number) =
     vdom: {
       _id: v4(),
       type: ENUM_COMPONENTS.BLOCK,
+      children: [],
       props: {
-        children: []
       },
       context: {}
     } as IVDOMNode,

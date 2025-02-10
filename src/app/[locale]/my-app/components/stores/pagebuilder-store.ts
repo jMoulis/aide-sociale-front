@@ -1,5 +1,5 @@
 
-import { IPage, IPageTemplateVersion, IWebsite, } from '@/lib/interfaces/interfaces'
+import { IPage, IPageTemplateVersion, ITreePage, IWebsite, } from '@/lib/interfaces/interfaces'
 import { createStore } from 'zustand/vanilla'
 import { v4 } from 'uuid';
 import client from '@/lib/mongo/initMongoClient';
@@ -26,16 +26,26 @@ export type PageBuilderState = {
   organizationId: string | null;
   pages: IPage[];
   masterTemplates: IMasterTemplate[];
+  selectedBreakPoint: {
+    name: string;
+    size: {
+      width: number;
+      height: number;
+    }
+  };
 }
 
 export type PageBuilderActions = {
   initializeWebsite: (translation: any) => Promise<string>;
   setOrganizationId: (id: string) => void;
-  setSelectedVersionPage: (page: IPageTemplateVersion | null) => void;
+  setSelectedVersionPage: (pageVersion: IPageTemplateVersion | null, masterTemplate: IMasterTemplate | null, page: ITreePage | null) => void;
   onSaveWebsite: (create: boolean, t: any) => Promise<void>;
   onDuplicatePageVersion: () => Promise<void>;
   setSelectMasterTemplate: (masterTemplate: IMasterTemplate) => void;
   setSelectedPage: (page: IPage | null) => void;
+  onTreeUpdate: (
+    newTree: IVDOMNode | ((prevTree: IVDOMNode) => IVDOMNode)
+  ) => void;
   onSelectNode: (event: React.MouseEvent, node: IVDOMNode | null) => void;
   onUpdateNodeProperty: (value: Record<string, any>, isContext: boolean) => void;
   onDeleteNode: (nodeId: string | null) => void;
@@ -54,24 +64,29 @@ export type PageBuilderActions = {
   onAddMasterTemplate: (masterTemplate: IMasterTemplate) => void;
   onEditMasterTemplate: (masterTemplate: IMasterTemplate) => void;
   onDeleteMasterTemplate: (masterTemplate: IMasterTemplate) => void;
+  onSelectBreakpoint: (breakpoint: 'mobile' | 'tablet' | 'desktop') => void;
 }
 
 export type PageBuilderStore = PageBuilderState & PageBuilderActions
 
-export const defaultInitState: PageBuilderState = {
-  website: null,
-  pages: [],
-  selectedMasterTemplate: null,
-  selectedPage: null,
-  designMode: true,
-  gridDisplay: false,
-  selectedNode: null,
-  pageVersion: null,
-  elementsConfig: [],
-  elementConfig: null,
-  organizationId: null,
-  pageTemplateVersions: [],
-  masterTemplates: []
+export const breakPoints: {
+  [key: string]: {
+    width: number;
+    height: number;
+  };
+} = {
+  mobile: {
+    width: 375,
+    height: 812
+  },
+  tablet: {
+    width: 768,
+    height: 1024
+  },
+  desktop: {
+    width: 1440,
+    height: 1024
+  }
 }
 
 export const createPageBuilderStore = (
@@ -79,6 +94,13 @@ export const createPageBuilderStore = (
 ) => {
   return createStore<PageBuilderStore>()((set, get) => ({
     ...initState,
+    selectedBreakPoint: {
+      name: 'desktop',
+      size: breakPoints.desktop
+    },
+    onSelectBreakpoint: (breakpoint: 'mobile' | 'tablet' | 'desktop') => {
+      set({ selectedBreakPoint: { name: breakpoint, size: breakPoints[breakpoint] } });
+    },
     initializeWebsite: async (t: any) => {
       const defaultWebsite: IWebsite = {
         name: 'Nouveau site',
@@ -228,8 +250,8 @@ export const createPageBuilderStore = (
     onSelectConfig: (config: IElementConfig | null) => set({ elementConfig: config }),
     setDesignMode: (mode: boolean) => set({ designMode: mode }),
     setGridDisplay: (status: boolean) => set({ gridDisplay: status }),
-    setSelectedVersionPage: (page: IPageTemplateVersion | null) => {
-      set({ pageVersion: page, selectedNode: null });
+    setSelectedVersionPage: (version: IPageTemplateVersion | null, masterTemplate: IMasterTemplate | null, page: ITreePage | null) => {
+      set({ pageVersion: version, selectedPage: page, selectedMasterTemplate: masterTemplate, selectedNode: null });
     },
     onSelectNode: (event: React.MouseEvent, node: IVDOMNode | null) => {
       event.stopPropagation();
@@ -254,6 +276,33 @@ export const createPageBuilderStore = (
           vdom: updatedVDOM,
           isDirty: true
         }
+      });
+    },
+    onTreeUpdate: (vdom) => {
+      if (typeof vdom === 'function') {
+        const pageVersion = get().pageVersion;
+        if (!pageVersion) return;
+        const updatedVDOM = vdom(pageVersion.vdom);
+        set({
+          pageVersion: {
+            ...pageVersion,
+            vdom: updatedVDOM,
+            isDirty: true,
+            hasUnpublishedChanges: pageVersion.published ? true : pageVersion.hasUnpublishedChanges
+          }
+        });
+        return;
+      }
+      const pageVersion = get().pageVersion;
+      const root = pageVersion?.vdom;
+      if (!root) return;
+      set({
+        pageVersion: {
+          ...pageVersion,
+          vdom: vdom,
+          isDirty: true,
+          hasUnpublishedChanges: pageVersion.published ? true : pageVersion.hasUnpublishedChanges
+        },
       });
     },
     onUpdateNodeProperty: (value: Record<string, any>, isContext: boolean) => {
@@ -290,15 +339,12 @@ export const createPageBuilderStore = (
 
       const setNewVdomId = (vdom: IVDOMNode) => {
         let updatedVdom = { ...vdom, _id: v4() };
-        if (Array.isArray(updatedVdom.props?.children)) {
+        if (Array.isArray(updatedVdom?.children)) {
           updatedVdom = {
             ...updatedVdom,
-            props: {
-              ...updatedVdom.props,
-              children: updatedVdom.props.children.map((child) =>
-                setNewVdomId(child)
-              )
-            }
+            children: updatedVdom.children.map((child) =>
+              setNewVdomId(child)
+            )
           }
         }
         return updatedVdom
@@ -308,21 +354,21 @@ export const createPageBuilderStore = (
       const vdom = pageVersion.vdom;
 
       if (!vdom) return;
-      let updatedVDOM = { ...vdom };
+      let updatedVDOM = { ...vdom, children: vdom.children || [] };
 
-      if (Array.isArray(updatedVDOM.props?.children)) {
+      if (Array.isArray(updatedVDOM?.children)) {
         if (selectedNodeId) {
           const targetNode = findNodeById(updatedVDOM, selectedNodeId);
           if (targetNode && !targetNode.inline) {
             updatedVDOM = updateNodeById(updatedVDOM, selectedNodeId, (node) => {
-              const children = node.props?.children as IVDOMNode[] || [];
-              return { ...node, props: { ...node.props, children: [...children, newElement] } };
+              const children = node?.children as IVDOMNode[] || [];
+              return { ...node, children: [...children, newElement] };
             });
           } else {
-            updatedVDOM.props?.children.push(newElement);
+            updatedVDOM?.children.push(newElement);
           }
         } else {
-          updatedVDOM.props.children.push(newElement);
+          updatedVDOM.children.push(newElement);
         }
       }
       set({
@@ -405,41 +451,10 @@ export const createPageBuilderStore = (
     },
     addPage: (page: IPage) => {
       const pages = get().pages;
-      // if (page.parentId) {
-      //   pages = pages.map((p) => {
-      //     if (p._id === page.parentId) {
-      //       return {
-      //         ...p,
-      //         children: [...p.children, page]
-      //       }
-      //     }
-      //     return p;
-      //   })
-      // } else {
-      //   pages = [...pages, page];
-      // }
       set({ pages: [...pages, page] })
     },
     onEditPage: (page: IPage) => {
       const pages = get().pages;
-      // if (page.parentId) {
-      //   pages = pages.map((p) => {
-      //     if (p._id === page.parentId) {
-      //       return {
-      //         ...p,
-      //         children: p.children.map((child) => {
-      //           if (child._id === page._id) {
-      //             return page;
-      //           }
-      //           return child;
-      //         })
-      //       }
-      //     }
-      //     return p;
-      //   })
-      // } else {
-      //   pages = pages.map((prevPage) => prevPage._id === page._id ? page : prevPage);
-      // }
       const updatedPages = pages.map((prevPage) => prevPage._id === page._id ? page : prevPage);
       set({ pages: updatedPages })
     }

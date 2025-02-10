@@ -23,8 +23,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Aide sociale à l'enfance - page d'accueil",
-  description: "Bienvenue sur la page d'accueil de l'Aide sociale à l'enfance"
+  title: 'Solinn app - App Editor',
+  description: "Bienvenue sur la page d'accueil de Solinn app editor"
 };
 
 export default async function DefaultLayoutRender({
@@ -41,7 +41,7 @@ export default async function DefaultLayoutRender({
           className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
           <NextIntlClientProvider messages={messages}>
             <MongoUserProvider>
-              <div className='flex flex-col h-screen flex-1'>
+              <div className='main-my-app'>
                 <Header />
                 {children}
               </div>

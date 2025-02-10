@@ -6,7 +6,17 @@ import React, {
   useCallback,
   useMemo
 } from 'react';
+import { DateRange } from 'react-day-picker';
 
+type Value =
+  | string
+  | Date
+  | boolean
+  | number
+  | null
+  | DateRange
+  | number[]
+  | string[];
 export type FormType = {
   _id: string;
   createdAt?: Date;
@@ -20,13 +30,19 @@ export type FormType = {
 interface FormContextProps {
   forms: Record<string, FormType>;
   onInputChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
-  getFormFieldValue: (dataset?: IDataset) => string;
+  getFormFieldValue: (dataset?: IDataset) => Value;
+  onUpdateForm: (
+    collectionSlug: string,
+    fieldName: string,
+    value?: Value
+  ) => void;
 }
 // Define Context
 const FormContext = createContext<FormContextProps>({
   forms: {},
   onInputChange: () => {},
-  getFormFieldValue: () => ''
+  getFormFieldValue: () => '',
+  onUpdateForm: () => {}
 });
 
 export const useFormContext = () => {
@@ -74,19 +90,38 @@ export const FormProvider = ({
     },
     [isBuilderMode]
   );
+  const onUpdateForm = useCallback(
+    (collectionSlug: string, fieldName: string, value?: Value) => {
+      setForms((prev) => {
+        const formToUpdate = prev[collectionSlug] || { data: {} };
+        return {
+          ...prev,
+          [collectionSlug]: {
+            ...formToUpdate,
+            data: {
+              ...formToUpdate.data,
+              [fieldName]: value
+            }
+          }
+        };
+      });
+    },
+    []
+  );
   const getFormFieldValue = useCallback(
     (dataset?: IDataset) => {
       if (isBuilderMode) return '';
       if (!dataset?.connexion?.field) return '';
       if (!dataset?.collectionSlug) return '';
+
       const form = forms[dataset.collectionSlug];
       return form?.data?.[dataset.connexion.field] || '';
     },
     [forms, isBuilderMode]
   );
   const value = useMemo(
-    () => ({ forms, onInputChange, getFormFieldValue }),
-    [forms, onInputChange, getFormFieldValue]
+    () => ({ forms, onInputChange, getFormFieldValue, onUpdateForm }),
+    [forms, onInputChange, getFormFieldValue, onUpdateForm]
   );
   return <FormContext.Provider value={value}>{children}</FormContext.Provider>;
 };

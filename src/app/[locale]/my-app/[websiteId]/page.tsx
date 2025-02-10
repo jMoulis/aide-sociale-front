@@ -10,6 +10,7 @@ import { notFound } from 'next/navigation';
 import WebsitePage from '../components/Website/WebsitePage';
 import { PagebuilderProvider } from '../components/stores/pagebuilder-store-provider';
 import { IMasterTemplate } from '@/lib/TemplateBuilder/interfaces';
+import { breakPoints } from '../components/stores/pagebuilder-store';
 
 type Props = {
   params: Promise<{ websiteId: string }>;
@@ -55,6 +56,10 @@ export default async function WebsiteDetailPage({ params }: Props) {
   return (
     <>
       <PagebuilderProvider
+        selectedBreakPoint={{
+          name: 'desktop',
+          size: breakPoints.desktop
+        }}
         elementConfig={null}
         pages={websitePages || []}
         website={initialWebsite}

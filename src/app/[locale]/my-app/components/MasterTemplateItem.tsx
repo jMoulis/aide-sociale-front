@@ -57,7 +57,7 @@ function MasterTemplateItem({ masterTemplateId, page }: Props) {
         </div>
       </CollapsibleTrigger>
       <CollapsibleContent className='rounded'>
-        <PageTemplateVersionsList masterTemplate={masterTemplate} />
+        <PageTemplateVersionsList masterTemplate={masterTemplate} page={page} />
       </CollapsibleContent>
     </Collapsible>
   );

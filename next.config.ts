@@ -5,6 +5,9 @@ const withNextIntl = createNextIntlPlugin();
 const nextConfig: NextConfig = {
   experimental: {
     authInterrupts: true,
+    serverActions: {
+      bodySizeLimit: '20mb'
+    }
   },
   images: {
     remotePatterns: [
@@ -16,6 +19,10 @@ const nextConfig: NextConfig = {
         protocol: 'https',
         hostname: 'uhrmijr7gjg1p9va.public.blob.vercel-storage.com',
       },
+      {
+        protocol: 'https',
+        hostname: 'firebasestorage.googleapis.com'
+      }
     ],
   },
 };

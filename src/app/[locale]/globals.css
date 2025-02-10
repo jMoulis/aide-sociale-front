@@ -87,6 +87,13 @@ body {
   grid-template-rows: 50px 1fr;
   flex: 1;
 }
+.main-my-app {
+  display: grid;
+  grid-template-areas: 'header header' 'main main';
+  grid-template-columns: auto 1fr;
+  grid-template-rows: 50px 1fr;
+  flex: 1;
+}
 .pac-container {
   z-index: 10000;
 }
