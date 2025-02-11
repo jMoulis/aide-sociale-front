@@ -2,17 +2,19 @@ import { useTranslations } from 'next-intl';
 import FormField from '@/components/form/FormField';
 import FormLabel from '@/components/form/FormLabel';
 import Input from '@/components/form/Input';
-import { ChangeEvent } from 'react';
+import React, { ChangeEvent } from 'react';
 
 type Props = {
   confirmationStringPattern: string;
   onConfirmStringChange: (event: ChangeEvent<HTMLInputElement>) => void;
   confirmString: string;
+  children?: React.ReactNode;
 };
 const ConfirmationDeleteContent = ({
   confirmationStringPattern,
   onConfirmStringChange,
-  confirmString
+  confirmString,
+  children
 }: Props) => {
   const t = useTranslations('TemplateSection');
 
@@ -35,6 +37,7 @@ const ConfirmationDeleteContent = ({
           pattern={confirmationStringPattern}
         />
       </FormField>
+      {children}
     </div>
   );
 };

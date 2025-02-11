@@ -10,7 +10,7 @@ import {
 import { useState } from 'react';
 import Dialog from '../dialog/Dialog';
 import AddressForm from './AddressForm';
-import { v4 } from 'uuid';
+import { nanoid } from 'nanoid';
 import { useTranslations } from 'next-intl';
 import SquareButton from '../buttons/SquareButton';
 import { APIProvider } from '@vis.gl/react-google-maps';
@@ -25,7 +25,7 @@ function Addresses({ addresses, onUpdateAddress }: Props) {
 
   const handleAddNewAddress = () => {
     const defaultAddress: IAddress = {
-      _id: v4(),
+      _id: nanoid(),
       label: 'Mon addresse',
       street: '',
       city: '',

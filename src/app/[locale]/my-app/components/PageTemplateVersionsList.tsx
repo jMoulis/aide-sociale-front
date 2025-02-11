@@ -1,6 +1,9 @@
 import Button from '@/components/buttons/Button';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faAdd } from '@awesome.me/kit-8441d3fdf2/icons/classic/solid';
+import {
+  faAdd,
+  faBoxArchive
+} from '@awesome.me/kit-8441d3fdf2/icons/classic/solid';
 import { usePageBuilderStore } from './stores/pagebuilder-store-provider';
 import client from '@/lib/mongo/initMongoClient';
 import { IPageTemplateVersion, ITreePage } from '@/lib/interfaces/interfaces';
@@ -26,7 +29,6 @@ function PageTemplateVersionsList({ masterTemplate, page }: Props) {
   const templateVersions = usePageBuilderStore(
     (state) => state.pageTemplateVersions
   );
-  const publishedVersion = masterTemplate?.publishedVersion;
 
   const pageTemplateVersions = useMemo(() => {
     return templateVersions.filter(
@@ -79,8 +81,10 @@ function PageTemplateVersionsList({ masterTemplate, page }: Props) {
       {pageTemplateVersions?.map((pageTemplateVersion) => (
         <li key={pageTemplateVersion._id} className='mt-1'>
           <Button
-            className={`w-full ${
-              selectedVersionPage?._id === pageTemplateVersion._id
+            className={`w-full justify-between ${
+              pageTemplateVersion.archived
+                ? 'bg-indigo-500 text-white'
+                : selectedVersionPage?._id === pageTemplateVersion._id
                 ? 'bg-black text-white'
                 : ''
             }`}
@@ -88,9 +92,12 @@ function PageTemplateVersionsList({ masterTemplate, page }: Props) {
             <span className='text-sm'>
               Version: {pageTemplateVersion.version}
             </span>
-            {publishedVersion?._id === pageTemplateVersion._id ? (
-              <PublishedDot />
-            ) : null}
+            {pageTemplateVersion.published ? <PublishedDot /> : null}
+            <div>
+              {pageTemplateVersion.archived ? (
+                <FontAwesomeIcon icon={faBoxArchive} />
+              ) : null}
+            </div>
           </Button>
         </li>
       ))}

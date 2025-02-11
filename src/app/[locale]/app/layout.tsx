@@ -4,7 +4,7 @@ import { getServerSideCurrentUserOrganizationId } from '@/lib/utils/auth/serverU
 import clientMongoServer from '@/lib/mongo/initMongoServer';
 import { IMenuEntry, IWebsite } from '@/lib/interfaces/interfaces';
 import { ENUM_COLLECTIONS } from '@/lib/mongo/interfaces';
-import { v4 } from 'uuid';
+import { nanoid } from 'nanoid';
 
 export const metadata: Metadata = {
   title: 'Solinn app - Accueil',
@@ -34,7 +34,7 @@ export default async function RootLayout({
         <link
           key={compiledStylesheet.uri}
           rel='stylesheet'
-          href={`${compiledStylesheet.uri}?v=${v4()}`}
+          href={`${compiledStylesheet.uri}?v=${nanoid()}`}
         />
       ]
     : [];

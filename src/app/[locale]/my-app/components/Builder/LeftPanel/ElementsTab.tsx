@@ -4,6 +4,8 @@ import FormLabel from '@/components/form/FormLabel';
 import { Checkbox } from '@/components/ui/checkbox';
 import Button from '@/components/buttons/Button';
 import ResponsiveMenu from './ResponsiveMenu';
+import { useTranslations } from 'next-intl';
+import AdvancedPageEditor from './AdvancedPageEditor';
 
 function ElementsTab() {
   const gridDisplay = usePageBuilderStore((state) => state.gridDisplay);
@@ -12,6 +14,7 @@ function ElementsTab() {
   const onAddComponent = usePageBuilderStore((state) => state.onAddComponent);
   const setDesignMode = usePageBuilderStore((state) => state.setDesignMode);
   const setGridDisplay = usePageBuilderStore((state) => state.setGridDisplay);
+  const t = useTranslations('WebsiteSection');
 
   const handleCheckboxChange = (
     status: CheckedState,
@@ -30,6 +33,7 @@ function ElementsTab() {
   };
   return (
     <div className='border-r p-4 flex flex-col flex-1'>
+      <AdvancedPageEditor />
       <div className='mt-2'>
         <FormLabel className='flex items-center'>
           <Checkbox
@@ -37,7 +41,7 @@ function ElementsTab() {
             onCheckedChange={(e) => handleCheckboxChange(e, 'designMode')}
             className='mr-2'
           />
-          <span>Design Mode</span>
+          <span>{t('labels.designMode')}</span>
         </FormLabel>
         <FormLabel className='flex items-center'>
           <Checkbox
@@ -46,7 +50,7 @@ function ElementsTab() {
             onCheckedChange={(e) => handleCheckboxChange(e, 'gridDisplay')}
             className='mr-2'
           />
-          <span>Grid display</span>
+          <span>{t('labels.gridDisplay')}</span>
         </FormLabel>
         <ResponsiveMenu />
       </div>

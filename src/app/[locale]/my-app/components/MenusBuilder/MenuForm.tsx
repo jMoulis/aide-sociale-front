@@ -14,7 +14,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { sortArray } from '@/lib/utils/utils';
 import { CheckedState } from '@radix-ui/react-checkbox';
 import MenuEntryItem from './MenuEntryItem';
-import { v4 } from 'uuid';
+import { nanoid } from 'nanoid';
 import CancelButton from '@/components/buttons/CancelButton';
 import Dialog from '@/components/dialog/Dialog';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
@@ -28,7 +28,7 @@ type Props = {
 };
 function MenuForm({ menu, onSubmit, onCancel }: Props) {
   const defaultMenu: IMenu = {
-    _id: v4(),
+    _id: nanoid(),
     title: '',
     entries: [],
     roles: []

@@ -4,7 +4,7 @@ import {
   getServerSideCurrentUserOrganizationId
 } from '@/lib/utils/auth/serverUtils';
 import { getUserSummary } from '@/lib/utils/utils';
-import { v4 } from 'uuid';
+import { nanoid } from 'nanoid';
 
 type Props = {
   params: Promise<{ [key: string]: string }>;
@@ -17,7 +17,7 @@ export default async function TemplatePage({ params }: Props) {
 
   const excerptUser = getUserSummary(mongoUser);
 
-  const newVersionTemplateId = v4();
+  const newVersionTemplateId = nanoid();
   const _template: IFormTemplate = {
     _id: newVersionTemplateId,
     version: 1,

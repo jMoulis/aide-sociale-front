@@ -14,7 +14,7 @@ import { Input } from '@/components/ui/input';
 import { Form, FormField, FormItem, FormLabel } from '@/components/ui/form';
 import { Button } from '@/components/ui/button';
 import { ENUM_API_ROUTES } from '@/lib/interfaces/enums';
-import { v4 } from 'uuid';
+import { nanoid } from 'nanoid';
 
 function shortBase64UUID(uuid: string) {
   return btoa(uuid)
@@ -119,7 +119,7 @@ export default function SignupForm() {
           firstName: mainFormValues.firstName,
           lastName: mainFormValues.lastName,
           email: mainFormValues.identifier,
-          organizationId: shortBase64UUID(v4())
+          organizationId: shortBase64UUID(nanoid())
         };
         await fetch(ENUM_API_ROUTES.SIGN_UP, {
           method: 'POST',

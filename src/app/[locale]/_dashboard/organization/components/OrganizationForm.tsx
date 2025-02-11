@@ -15,7 +15,7 @@ import { toastPromise } from '@/lib/toast/toastPromise';
 import { removeObjectFields } from '@/lib/utils/utils';
 import { useTranslations } from 'next-intl';
 import { useEffect, useState } from 'react';
-import { v4 } from 'uuid';
+import { nanoid } from 'nanoid';
 
 type Props = {
   prevOrganization: IOrganization | null;
@@ -26,7 +26,7 @@ function OrganizationForm({ prevOrganization, onSubmit }: Props) {
   const t = useTranslations('OrganizationSection');
   const [form, setForm] = useState<IOrganization>(
     prevOrganization || {
-      _id: v4(),
+      _id: nanoid(),
       name: '',
       structures: [],
       department: '',

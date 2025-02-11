@@ -4,7 +4,7 @@ import { clerkClient, currentUser, User } from '@clerk/nextjs/server';
 import { getTranslations } from 'next-intl/server';
 
 import clientMongoServer from '@/lib/mongo/initMongoServer';
-import { v4 } from 'uuid';
+import { nanoid } from 'nanoid';
 import {
   getServerSideCurrentUserOrganizationId,
   getUsersListExcerpt
@@ -214,7 +214,7 @@ export async function createUser({
         organizationId: await getServerSideCurrentUserOrganizationId()
       }
     });
-    const userId = v4();
+    const userId = nanoid();
 
     await clientMongoServer.create<IUser>(ENUM_COLLECTIONS.USERS, {
       _id: userId,

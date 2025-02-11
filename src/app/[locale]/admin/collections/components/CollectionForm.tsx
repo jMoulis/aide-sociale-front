@@ -11,8 +11,7 @@ import { ENUM_COLLECTIONS } from '@/lib/mongo/interfaces';
 import { toastPromise } from '@/lib/toast/toastPromise';
 import { useTranslations } from 'next-intl';
 import { useState } from 'react';
-import { v4 } from 'uuid';
-// import TagsInput from '../../../../../components/form/TagsInput';
+import { nanoid } from 'nanoid';
 
 type Props = {
   initialCollection?: ICollection;
@@ -31,7 +30,7 @@ function CollectionForm({
   const t = useTranslations('CollectionSection');
 
   const defaultCollection: ICollection = {
-    _id: v4(),
+    _id: nanoid(),
     name: '',
     organizationId,
     createdBy: user,

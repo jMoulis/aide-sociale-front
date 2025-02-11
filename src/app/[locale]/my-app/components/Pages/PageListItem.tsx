@@ -8,9 +8,10 @@ import {
 import DialogPageForm from './DialogPageForm';
 import { usePageBuilderStore } from '../stores/pagebuilder-store-provider';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import RolesBlock from '../Website/RolesBlock';
 import MasterTemplateItem from '../MasterTemplateItem';
 import { removeObjectFields } from '@/lib/utils/utils';
+import MasterTemplateForm from '../MasterTemplateForm';
+import { useTranslations } from 'next-intl';
 
 type Props = {
   page: ITreePage;
@@ -19,10 +20,11 @@ type Props = {
 function PageListItem({ page, add }: Props) {
   const setSelectedPage = usePageBuilderStore((state) => state.setSelectedPage);
   const selectedPage = usePageBuilderStore((state) => state.selectedPage);
-
+  const t = useTranslations('WebsiteSection');
   const handleSelectPage = (incomingPage: ITreePage) => {
     setSelectedPage(removeObjectFields(incomingPage, ['children']));
   };
+
   return (
     <div className='flex flex-col'>
       <div className='flex'>
@@ -49,12 +51,20 @@ function PageListItem({ page, add }: Props) {
           />
         ) : null}
       </div>
-      <div className='ml-2'>
-        <MasterTemplateItem
-          masterTemplateId={page.masterTemplateId}
-          page={page}
-        />
-        <RolesBlock />
+      <div className='ml-2 mt-2'>
+        <div className='flex items-center justify-between'>
+          <h3 className='text-sm'>{t('labels.templates')}</h3>
+          <MasterTemplateForm initialMasterTemplate={null} page={page} />
+        </div>
+        <ul>
+          {page.masterTemplateIds?.map((masterTemplateId) => (
+            <MasterTemplateItem
+              key={masterTemplateId}
+              masterTemplateId={masterTemplateId}
+              page={page}
+            />
+          ))}
+        </ul>
       </div>
     </div>
   );

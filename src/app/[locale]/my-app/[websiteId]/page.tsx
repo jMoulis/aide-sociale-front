@@ -35,12 +35,14 @@ export default async function WebsiteDetailPage({ params }: Props) {
     }
   );
 
+  const masterTemplateIds =
+    websitePages?.map((page) => page.masterTemplateIds).flat() || [];
   const { data: masterTemplates } =
     await clientMongoServer.list<IMasterTemplate>(
       ENUM_COLLECTIONS.TEMPLATES_MASTER,
       {
         _id: {
-          $in: websitePages?.map((page) => page.masterTemplateId)
+          $in: masterTemplateIds
         }
       }
     );
@@ -52,6 +54,15 @@ export default async function WebsiteDetailPage({ params }: Props) {
         $in: masterTemplates?.map((template) => template._id)
       }
     }
+  );
+  const firstPage = websitePages?.[0];
+
+  const masterTemplate = masterTemplates?.find((template) =>
+    firstPage?.masterTemplateIds?.includes(template._id)
+  );
+  const puublishedVersion = versions?.find(
+    (version) =>
+      version.masterTemplateId === masterTemplate?._id && version.published
   );
   return (
     <>
@@ -70,9 +81,9 @@ export default async function WebsiteDetailPage({ params }: Props) {
         designMode={true}
         gridDisplay={true}
         selectedNode={null}
-        selectedPage={null}
-        selectedMasterTemplate={null}
-        pageVersion={null}>
+        selectedPage={firstPage || null}
+        selectedMasterTemplate={masterTemplate || null}
+        pageVersion={puublishedVersion || null}>
         <WebsitePage />
       </PagebuilderProvider>
     </>

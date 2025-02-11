@@ -27,7 +27,7 @@ import {
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { useTranslations } from 'next-intl';
 import { ChangeEvent, FormEvent, useEffect, useMemo, useState } from 'react';
-import { v4 } from 'uuid';
+import { nanoid } from 'nanoid';
 import FieldDialogForm from './FieldDialogForm';
 
 function debounce<T extends (...args: any[]) => void>(
@@ -56,7 +56,7 @@ function CollectionFormDialog({ prevCollection, onSubmit }: Props) {
   const defaultCollection = useMemo(
     () =>
       ({
-        _id: v4(),
+        _id: nanoid(),
         name: '',
         organizationId: '',
         createdAt: new Date(),

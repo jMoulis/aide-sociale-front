@@ -41,10 +41,10 @@ export default async function DefaultLayoutRender({
           className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
           <NextIntlClientProvider messages={messages}>
             <MongoUserProvider>
-              <div className='main-my-app'>
+              <main className='main-my-app'>
                 <Header />
                 {children}
-              </div>
+              </main>
               <Toaster />
             </MongoUserProvider>
           </NextIntlClientProvider>

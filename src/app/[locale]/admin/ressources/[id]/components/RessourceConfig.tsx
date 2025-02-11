@@ -4,7 +4,7 @@ import { IRessource } from '@/lib/interfaces/interfaces';
 import { isValidJSON } from '@/lib/utils/utils';
 import { useCallback, useState } from 'react';
 import RessourceForm from '../../components/RessourceForm';
-import { v4 } from 'uuid';
+import { nanoid } from 'nanoid';
 import client from '@/lib/mongo/initMongoClient';
 import { ENUM_COLLECTIONS } from '@/lib/mongo/interfaces';
 import { toast } from '@/lib/hooks/use-toast';
@@ -18,7 +18,7 @@ type Props = {
 };
 function PageStudio({ initialRessource, organizationId }: Props) {
   const defaultRessource: IRessource = {
-    _id: v4(),
+    _id: nanoid(),
     name: '',
     description: '',
     mandatoryPermissions: [],

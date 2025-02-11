@@ -1,3 +1,4 @@
+import { ActionKey } from "../interfaces/enums";
 import { IPageTemplateVersion, IUserSummary } from "../interfaces/interfaces";
 
 export enum ENUM_FIELD_TYPE {
@@ -26,12 +27,15 @@ export type OptionsSourceType = 'static' | 'database' | 'template';
 export interface IMasterTemplate {
   _id: string;
   title: string;
+  description?: string;
   latestVersion: number;
   publishedVersion: IPageTemplateVersion | null;
   createdBy: IUserSummary | null;
   organizationId: string;
   createdAt: Date;
   forceUpdate?: boolean;
+  mandatoryPermissions?: ActionKey[];
+  roles?: string[];
 }
 export interface IFormField {
   id: string

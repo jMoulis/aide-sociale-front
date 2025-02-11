@@ -14,8 +14,10 @@ import { toastPromise } from '@/lib/toast/toastPromise';
 import { useTranslations } from 'next-intl';
 import client from '@/lib/mongo/initMongoClient';
 import { ENUM_COLLECTIONS } from '@/lib/mongo/interfaces';
-import { v4 } from 'uuid';
+import { nanoid } from 'nanoid';
 import { usePageBuilderStore } from '../stores/pagebuilder-store-provider';
+import SaveButton from '@/components/buttons/SaveButton';
+import CancelButton from '@/components/buttons/CancelButton';
 
 type Props = {
   icon: IconProp;
@@ -45,16 +47,15 @@ function DialogPageForm({
     } else {
       if (!organizationId || !website?._id) return;
       const defaultPage: ITreePage = {
-        _id: v4(),
+        _id: nanoid(),
         name: '',
         slug: '',
         createdAt: new Date(),
         organizationId,
         websiteId: website._id,
         route: '',
-        roles: [],
         parentId,
-        masterTemplateId: '',
+        masterTemplateIds: [],
         props: {},
         menus: [],
         children: []
@@ -106,6 +107,14 @@ function DialogPageForm({
     setOpen(false);
   };
 
+  const handleCancel = () => {
+    if (create) {
+      setPage(null);
+    } else {
+      setPage(initialPage);
+    }
+    setOpen(false);
+  };
   return (
     <Dialog
       open={open}
@@ -135,7 +144,8 @@ function DialogPageForm({
           </div>
         </FormField>
         <FormFooterAction>
-          <Button type='submit'>Save</Button>
+          <SaveButton />
+          <CancelButton onClick={handleCancel} />
         </FormFooterAction>
       </Form>
     </Dialog>

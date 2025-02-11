@@ -245,10 +245,9 @@ export interface IPage {
   parentId?: string;
   createdAt: Date;
   updatedAt?: Date;
-  masterTemplateId: string;
+  masterTemplateIds: string[];
   route: string;
   websiteId: string;
-  roles: string[];
   menus: IMenu[];
   props?: {
     style?: string;
@@ -259,6 +258,8 @@ export interface ITreePage extends IPage {
 }
 export interface IPageTemplateVersion {
   _id: string;
+  title: string;
+  description: string;
   summaryAiAction?: string;
   masterTemplateId: string;
   version: number;
@@ -272,6 +273,7 @@ export interface IPageTemplateVersion {
   forceUpdate?: boolean;
   isDirty?: boolean;
   hasUnpublishedChanges?: boolean;
+  archived?: boolean;
 }
 export interface IStylesheet {
   name: string;

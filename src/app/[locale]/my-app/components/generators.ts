@@ -1,19 +1,20 @@
-import { v4 } from "uuid";
 import { ENUM_COMPONENTS, IVDOMNode } from "./interfaces";
 import { TemplateDiff } from "@/lib/TemplateBuilder/interfaces";
+import { IPageTemplateVersion } from "@/lib/interfaces/interfaces";
+import { nanoid } from "nanoid";
 
 export const generatePageVersion = (masterTemplateId: string, version: number) => {
-
-  return ({
-    _id: v4(),
+  const pageVersion: IPageTemplateVersion = {
+    _id: nanoid(),
     createdAt: new Date(),
     masterTemplateId,
+    title: `Version ${version}`,
+    description: '',
     vdom: {
-      _id: v4(),
+      _id: nanoid(),
       type: ENUM_COMPONENTS.BLOCK,
       children: [],
-      props: {
-      },
+      props: {},
       context: {}
     } as IVDOMNode,
     version,
@@ -21,5 +22,6 @@ export const generatePageVersion = (masterTemplateId: string, version: number) =
     published: false,
     hasBeenPublished: false,
     createdBy: null
-  })
+  }
+  return pageVersion;
 }

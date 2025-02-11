@@ -1,7 +1,7 @@
 import { useMongoUser } from '@/lib/mongo/MongoUserContext/MongoUserContext';
 import { useTemplateBuilder } from '../../TemplateBuilderContext';
 import { IFormTemplate } from '../../interfaces';
-import { v4 } from 'uuid';
+import { nanoid } from 'nanoid';
 import { useEffect, useMemo, useState } from 'react';
 import client from '@/lib/mongo/initMongoClient';
 import { ENUM_COLLECTIONS } from '@/lib/mongo/interfaces';
@@ -30,7 +30,7 @@ function Subform() {
         });
       return;
     } else {
-      const newVersionTemplateId = v4();
+      const newVersionTemplateId = nanoid();
       const subTemplate: IFormTemplate = {
         _id: newVersionTemplateId,
         version: 1,

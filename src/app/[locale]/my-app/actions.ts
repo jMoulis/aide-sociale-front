@@ -124,13 +124,19 @@ const processPagesVdom = async (websiteId: string) => {
     websiteId,
   })
   const vdoms = await Promise.all((pages || []).map(async (page) => {
-    const { data: masterTemplate } = await clientMongoServer.get<IMasterTemplate>(ENUM_COLLECTIONS.TEMPLATES_MASTER, {
-      _id: page.masterTemplateId
+    const { data: masterTemplates } = await clientMongoServer.list<IMasterTemplate>(ENUM_COLLECTIONS.TEMPLATES_MASTER, {
+      _id: {
+        $in: page.masterTemplateIds || []
+      }
     });
-    const { data: templates } = await clientMongoServer.list<IPageTemplateVersion>(ENUM_COLLECTIONS.PAGE_TEMPLATES, {
-      masterTemplateId: masterTemplate?._id
-    });
-    return templates?.map((template) => template.vdom) || [];
+    const templates = await Promise.all((masterTemplates || []).map(async (masterTemplate) => {
+      const { data: templates } = await clientMongoServer.list<IPageTemplateVersion>(ENUM_COLLECTIONS.PAGE_TEMPLATES, {
+        masterTemplateId: masterTemplate?._id
+      });
+      return templates?.map((template) => template.vdom) || [];
+    }));
+
+    return templates.flat();
   }));
 
   // Step 5: create temp txt file with all vdom props

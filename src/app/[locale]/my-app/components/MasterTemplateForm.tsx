@@ -7,7 +7,7 @@ import Form from '@/components/form/Form';
 import FormField from '@/components/form/FormField';
 import FormLabel from '@/components/form/FormLabel';
 import Input from '@/components/form/Input';
-import { IPage, ITreePage } from '@/lib/interfaces/interfaces';
+import { IPage, IRole, ITreePage } from '@/lib/interfaces/interfaces';
 import client from '@/lib/mongo/initMongoClient';
 import { ENUM_COLLECTIONS } from '@/lib/mongo/interfaces';
 import { IMasterTemplate } from '@/lib/TemplateBuilder/interfaces';
@@ -16,22 +16,32 @@ import { faAdd, faEdit } from '@awesome.me/kit-8441d3fdf2/icons/classic/solid';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { useTranslations } from 'next-intl';
 import { useEffect, useState } from 'react';
-import { v4 } from 'uuid';
+import { nanoid } from 'nanoid';
 import { getUserSummary, removeObjectFields } from '@/lib/utils/utils';
 import { usePageBuilderStore } from './stores/pagebuilder-store-provider';
 import { useMongoUser } from '@/lib/mongo/MongoUserContext/MongoUserContext';
+import RolesCheckboxesList from '@/components/RolesCheckboxesList/RolesCheckboxesList';
+import Textarea from '@/components/form/Textarea';
+import Actions from '../../admin/ressources/components/Actions';
+import { ActionKey } from '@/lib/interfaces/enums';
 
 type Props = {
   initialMasterTemplate?: IMasterTemplate | null;
   page: ITreePage;
-  onSubmit?: (masterTemplate: IMasterTemplate) => void;
 };
-function MasterTemplateForm({ initialMasterTemplate, page, onSubmit }: Props) {
+function MasterTemplateForm({ initialMasterTemplate, page }: Props) {
   const [open, setOpen] = useState(false);
   const t = useTranslations('GlobalSection.actions');
   const tMaster = useTranslations('TemplateSection.master');
   const organizationId = usePageBuilderStore((state) => state.organizationId);
   const setSelectedPage = usePageBuilderStore((state) => state.setSelectedPage);
+  const onEditPage = usePageBuilderStore((state) => state.onEditPage);
+  const onAddMasterTemplate = usePageBuilderStore(
+    (state) => state.onAddMasterTemplate
+  );
+  const onEditMasterTemplate = usePageBuilderStore(
+    (state) => state.onEditMasterTemplate
+  );
 
   const user = useMongoUser();
   const [masterTemplate, setMasterTemplate] = useState<IMasterTemplate | null>(
@@ -40,7 +50,7 @@ function MasterTemplateForm({ initialMasterTemplate, page, onSubmit }: Props) {
   useEffect(() => {
     if (!organizationId || !user) return;
     const defaultMasterTemplate: IMasterTemplate = {
-      _id: v4(),
+      _id: nanoid(),
       title: '',
       publishedVersion: null,
       createdAt: new Date(),
@@ -51,6 +61,28 @@ function MasterTemplateForm({ initialMasterTemplate, page, onSubmit }: Props) {
     setMasterTemplate(initialMasterTemplate || defaultMasterTemplate);
   }, [initialMasterTemplate, organizationId, user]);
 
+  const updatePage = async (masterTemplateId: string) => {
+    const updatedMasterTemplateIds = [
+      ...new Set([...(page.masterTemplateIds || []), masterTemplateId])
+    ];
+
+    const updatedPage = removeObjectFields(
+      {
+        ...page,
+        masterTemplateIds: updatedMasterTemplateIds
+      },
+      ['children']
+    );
+    await client.update<IPage>(
+      ENUM_COLLECTIONS.PAGES,
+      { _id: page._id },
+      { $set: updatedPage }
+    );
+    onEditPage({
+      ...page,
+      masterTemplateIds: updatedMasterTemplateIds
+    });
+  };
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!masterTemplate) return;
@@ -69,7 +101,8 @@ function MasterTemplateForm({ initialMasterTemplate, page, onSubmit }: Props) {
         tMaster,
         'edit'
       );
-      onSubmit?.(masterTemplate);
+
+      onEditMasterTemplate(masterTemplate);
     } else {
       await toastPromise(
         client.create<IMasterTemplate>(
@@ -79,26 +112,15 @@ function MasterTemplateForm({ initialMasterTemplate, page, onSubmit }: Props) {
         tMaster,
         'create'
       );
-      onSubmit?.(masterTemplate);
+      await updatePage(masterTemplate._id);
+      onAddMasterTemplate(masterTemplate);
     }
-
-    const updatedPage = removeObjectFields(
-      {
-        ...page,
-        masterTemplateId: masterTemplate._id
-      },
-      ['children']
-    );
-    await client.update<IPage>(
-      ENUM_COLLECTIONS.PAGES,
-      { _id: page._id },
-      { $set: updatedPage }
-    );
-    setSelectedPage({ ...page, masterTemplateId: masterTemplate._id });
     setOpen(false);
   };
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleInputChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
     if (!masterTemplate) return;
     const { name, value } = e.target;
     setMasterTemplate({ ...masterTemplate, [name]: value });
@@ -111,11 +133,31 @@ function MasterTemplateForm({ initialMasterTemplate, page, onSubmit }: Props) {
     setSelectedPage(page);
   };
 
+  const handleSelectRole = (role: IRole) => {
+    if (!masterTemplate) return;
+    setMasterTemplate({
+      ...masterTemplate,
+      roles: masterTemplate.roles?.includes(role._id)
+        ? masterTemplate.roles?.filter((id) => id !== role._id)
+        : [...(masterTemplate.roles || []), role._id]
+    });
+  };
+  const handleSelectAction = (action: ActionKey) => {
+    if (!masterTemplate) return;
+    setMasterTemplate({
+      ...masterTemplate,
+      mandatoryPermissions: masterTemplate.mandatoryPermissions?.includes(
+        action
+      )
+        ? masterTemplate.mandatoryPermissions?.filter((a) => a !== action)
+        : [...(masterTemplate.mandatoryPermissions || []), action]
+    });
+  };
   return (
     <Dialog
       open={open}
       onOpenChange={setOpen}
-      title='Create master template'
+      title={tMaster('create.title')}
       Trigger={
         <button onClick={handleOpen}>
           {initialMasterTemplate ? (
@@ -127,7 +169,7 @@ function MasterTemplateForm({ initialMasterTemplate, page, onSubmit }: Props) {
       }>
       <Form onSubmit={handleSubmit}>
         <FormField>
-          <FormLabel required>Title</FormLabel>
+          <FormLabel required>{tMaster('labels.title')}</FormLabel>
           <Input
             name='title'
             required
@@ -135,6 +177,34 @@ function MasterTemplateForm({ initialMasterTemplate, page, onSubmit }: Props) {
             onChange={handleInputChange}
           />
         </FormField>
+        <FormField>
+          <FormLabel required>{tMaster('labels.description')}</FormLabel>
+          <Textarea
+            name='description'
+            required
+            value={masterTemplate?.description || ''}
+            onChange={handleInputChange}
+          />
+        </FormField>
+        <div className='flex space-x-3'>
+          <FormField>
+            <FormLabel>{tMaster('labels.mandatoryPermissions')}</FormLabel>
+            <Actions
+              selectedPermissions={masterTemplate?.mandatoryPermissions || []}
+              onSelectAction={handleSelectAction}
+            />
+          </FormField>
+          <FormField>
+            <FormLabel>{tMaster('labels.roles')}</FormLabel>
+            <RolesCheckboxesList
+              prevRoles={masterTemplate?.roles || []}
+              onSelectRole={handleSelectRole}
+              shouldFetch={true}
+              organizationId={organizationId}
+              filter={page?.slug}
+            />
+          </FormField>
+        </div>
         <FormFooterAction>
           <Button type='submit'>{t('save')}</Button>
         </FormFooterAction>

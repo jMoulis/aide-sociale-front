@@ -13,7 +13,7 @@ function TooltipInformation({ trigger, children }: Props) {
   return (
     <TooltipProvider>
       <Tooltip>
-        <TooltipTrigger>{trigger}</TooltipTrigger>
+        <TooltipTrigger asChild>{trigger}</TooltipTrigger>
         <TooltipContent>
           <div>{children}</div>
         </TooltipContent>

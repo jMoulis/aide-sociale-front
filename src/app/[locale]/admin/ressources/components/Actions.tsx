@@ -30,7 +30,7 @@ function Actions({ onSelectAction, selectedPermissions }: Props) {
               checked={checkStatus(act)}
               onCheckedChange={(status) => onSelectAction(act, Boolean(status))}
             />
-            <label className='ml-2' htmlFor={act}>
+            <label className='ml-2 text-sm' htmlFor={act}>
               {act}
             </label>
           </li>

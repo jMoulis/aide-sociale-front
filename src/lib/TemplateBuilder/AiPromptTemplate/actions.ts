@@ -2,7 +2,7 @@
 
 import { client } from "@/lib/openAi/openAiClient";
 import { isValidJSON } from "@/lib/utils/utils";
-import { v4 } from "uuid";
+import { nanoid } from "nanoid";
 import { ENUM_FIELD_TYPE, IFormBlock } from "../interfaces";
 import { IAiMessage } from "./interfaces";
 
@@ -34,7 +34,7 @@ function ensureUniqueIDs(template: { title: string; blocks: IFormBlock[] }): { t
     // Ensure block ID uniqueness
     let originalBlockId = block.id;
     while (blockIdSet.has(originalBlockId)) {
-      originalBlockId = v4();
+      originalBlockId = nanoid();
     }
     blockIdSet.add(originalBlockId);
 
@@ -42,7 +42,7 @@ function ensureUniqueIDs(template: { title: string; blocks: IFormBlock[] }): { t
       // Ensure field ID uniqueness
       let originalFieldId = field.id;
       while (fieldIdSet.has(originalFieldId)) {
-        originalFieldId = v4();
+        originalFieldId = nanoid();
       }
       fieldIdSet.add(originalFieldId);
 

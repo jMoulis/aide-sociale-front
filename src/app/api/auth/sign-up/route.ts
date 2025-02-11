@@ -5,7 +5,7 @@ import clientMongoServer from '@/lib/mongo/initMongoServer';
 import { ENUM_COLLECTIONS } from '@/lib/mongo/interfaces';
 import { clerkClient } from '@clerk/nextjs/server';
 import { NextResponse } from 'next/server';
-import { v4 } from 'uuid';
+import { nanoid } from "nanoid";
 
 export interface ISignupApiBody {
   authId: string;
@@ -29,7 +29,7 @@ export async function POST(req: Request) {
       imageUrl: '',
       email
     }
-    const userId = v4();
+    const userId = nanoid();
     const response = await clientMongoServer.upsertServer<IUser>(ENUM_COLLECTIONS.USERS, { _id: userId }, { $set: userData });
 
     if (response.error) {

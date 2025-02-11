@@ -628,6 +628,12 @@
       "threeColumns": "3 colonnes"
     },
     "master": {
+      "labels": {
+        "title": "Titre",
+        "description": "Description",
+        "mandatoryPermissions": "Permissions obligatoires",
+        "roles": "Rôles"
+      },
       "create": {
         "title": "Créer un modèle principal",
         "description": "Créer un nouveau modèle principal",
@@ -645,6 +651,12 @@
     }
   },
   "WebsiteSection": {
+    "labels": {
+      "templates": "Modèles",
+      "designMode": "Mode design",
+      "gridDisplay": "Affichage en grille",
+      "advancedPageEditor": "Éditeur de page avancé"
+    },
     "create": {
       "title": "Créer un site web",
       "description": "Créer un nouveau site web",
@@ -674,6 +686,37 @@
         "action": "Modifier la page",
         "success": "Page mise à jour avec succès",
         "error": "Une erreur s'est produite lors de la mise à jour de la page. <code>Erreur {error}</code>"
+      }
+    },
+    "pageVersionForm": {
+      "labels": {
+        "title": "Titre",
+        "description": "Description",
+        "unsavedChanges": "Modifications non enregistrées",
+        "unpublishedChanges": "Modifications non publiées"
+      },
+      "archive": {
+        "title": "Archiver la version de la page",
+        "description": "Êtes-vous sûr de vouloir archiver cette version de la page ?",
+        "action": "Archiver la version de la page",
+        "success": "Version de la page archivée avec succès",
+        "toConfirm": "Saisissez \"<code>{pageVersionTitle}</code>\" ci-dessous pour continuer.",
+        "error": "Une erreur s'est produite lors de l'archivage de la version de la page. <code>Erreur {error}</code>"
+      },
+      "edit": {
+        "title": "Modifier la version de la page",
+        "description": "Modifier une version de page existante",
+        "action": "Modifier la version de la page",
+        "success": "Version de la page mise à jour avec succès",
+        "error": "Une erreur s'est produite lors de la mise à jour de la version de la page. <code>Erreur {error}</code>"
+      },
+      "delete": {
+        "title": "Supprimer la version de la page",
+        "description": "Êtes-vous sûr de vouloir supprimer cette version de la page ?",
+        "action": "Supprimer la version de la page",
+        "success": "Version de la page supprimée avec succès",
+        "toConfirm": "Saisissez \"<code>{pageVersionTitle}</code>\" ci-dessous pour continuer.",
+        "error": "Une erreur s'est produite lors de la suppression de la version de la page. <code>Erreur {error}</code>"
       }
     }
   },

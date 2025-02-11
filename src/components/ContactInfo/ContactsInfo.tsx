@@ -7,7 +7,7 @@ import {
 } from '@awesome.me/kit-8441d3fdf2/icons/classic/solid';
 import { useState } from 'react';
 import Dialog from '../dialog/Dialog';
-import { v4 } from 'uuid';
+import { nanoid } from 'nanoid';
 import ContactInfoForm from './ContactInfoForm';
 import { useTranslations } from 'next-intl';
 import SquareButton from '../buttons/SquareButton';
@@ -24,7 +24,7 @@ function ContactsInfo({ contactsInfo, onUpdateContacts }: Props) {
   const t = useTranslations('ContactInfoSection');
   const handleNewContactInfo = () => {
     const defaultAddress: IContactInfo = {
-      _id: v4(),
+      _id: nanoid(),
       label: '',
       value: '',
       type: ''

@@ -2,7 +2,7 @@ import { IEmployee } from '@/lib/interfaces/interfaces';
 import { ENUM_COLLECTIONS } from '@/lib/mongo/interfaces';
 import { useMemo } from 'react';
 import CreateEmployee from './CreateEmployee';
-import { v4 } from 'uuid';
+import { nanoid } from 'nanoid';
 import MongoSearchProvider from '@/lib/mongo/MongoSearchContext/MongoSearchContext';
 import Searchbar from '@/lib/mongo/MongoSearchContext/components/Searchbar';
 import Facets from '@/lib/mongo/MongoSearchContext/components/Facets/Facets';
@@ -24,7 +24,7 @@ function EmployeesList({ structureId, organizationId }: Props) {
   const t = useTranslations('GlobalSection.actions');
 
   const defaultEmployee: IEmployee = {
-    _id: v4(),
+    _id: nanoid(),
     firstName: '',
     lastName: '',
     roles: [],

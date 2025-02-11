@@ -5,7 +5,7 @@ import client from '@/lib/mongo/initMongoClient';
 import { ENUM_COLLECTIONS } from '@/lib/mongo/interfaces';
 import { cn } from '@/lib/utils/shadcnUtils';
 import { forwardRef, useCallback, useEffect, useId, useRef } from 'react';
-import { v4 } from 'uuid';
+import { nanoid } from 'nanoid';
 import { FormType, useFormContext } from '../FormContext';
 import { useMongoUser } from '@/lib/mongo/MongoUserContext/MongoUserContext';
 import { getUserSummary } from '@/lib/utils/utils';
@@ -74,7 +74,7 @@ const FormComponent = forwardRef<HTMLFormElement, PropsWithChildrenAndContext>(
         try {
           if (isCreation) {
             const newEntry: FormType = {
-              _id: v4(),
+              _id: nanoid(),
               createdBy: user ? getUserSummary(user) : undefined,
               createdAt: new Date(),
               data: formToSave.data,

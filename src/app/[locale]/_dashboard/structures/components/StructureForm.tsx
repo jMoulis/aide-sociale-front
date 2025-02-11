@@ -14,7 +14,7 @@ import { toastPromise } from '@/lib/toast/toastPromise';
 import { removeObjectFields } from '@/lib/utils/utils';
 import { useTranslations } from 'next-intl';
 import { useState } from 'react';
-import { v4 } from 'uuid';
+import { nanoid } from 'nanoid';
 
 type Props = {
   prevStructure: IStructure | null;
@@ -22,7 +22,7 @@ type Props = {
 };
 function StructureForm({ prevStructure, organizationId }: Props) {
   const defaultStructure: IStructure = {
-    _id: v4(),
+    _id: nanoid(),
     name: '',
     description: '',
     type: 'family',

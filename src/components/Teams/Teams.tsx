@@ -2,7 +2,7 @@ import { ITeam } from '@/lib/interfaces/interfaces';
 import { useMongoUser } from '@/lib/mongo/MongoUserContext/MongoUserContext';
 import { getUserSummary } from '@/lib/utils/utils';
 import { useState } from 'react';
-import { v4 } from 'uuid';
+import { nanoid } from 'nanoid';
 import Dialog from '../dialog/Dialog';
 import Button from '../buttons/Button';
 import TeamForm from './TeamForm';
@@ -25,7 +25,7 @@ function Teams({ prevTeams, organizationId }: Props) {
 
   const handleAddNewTeam = () => {
     const defaultTeam: ITeam = {
-      _id: v4(),
+      _id: nanoid(),
       name: '',
       members: [],
       organizationId,

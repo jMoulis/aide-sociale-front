@@ -1,7 +1,7 @@
 
 import { IPage, IPageTemplateVersion, ITreePage, IWebsite, } from '@/lib/interfaces/interfaces'
 import { createStore } from 'zustand/vanilla'
-import { v4 } from 'uuid';
+import { nanoid } from "nanoid";
 import client from '@/lib/mongo/initMongoClient';
 import { ENUM_COLLECTIONS } from '@/lib/mongo/interfaces';
 import { IMasterTemplate } from '@/lib/TemplateBuilder/interfaces';
@@ -55,7 +55,8 @@ export type PageBuilderActions = {
   onAddComponent: (component: ENUM_COMPONENTS) => void;
   fetchElementsConfig: () => Promise<void>;
   onAddPageTemplateVersion: (version: IPageTemplateVersion) => Promise<void>;
-  onDeletePageVersion: (pageVersion: IPageTemplateVersion) => Promise<void>;
+  onDeletePageVersion: (pageVersion: IPageTemplateVersion, softDelete?: boolean) => Promise<void>;
+  onEditPageTemplateVersion: (version: Partial<IPageTemplateVersion>) => Promise<void>;
   onSavePageTemplate: (silent?: boolean) => Promise<void>;
   onPublish: () => Promise<void>;
   setWebsite: (website: IWebsite) => void;
@@ -109,7 +110,7 @@ export const createPageBuilderStore = (
         stylesheets: [],
         menus: [],
         tailwindConfig: defaultTailwindConfig,
-        _id: v4(),
+        _id: nanoid(),
         published: false
       }
       await toastPromise(
@@ -125,8 +126,14 @@ export const createPageBuilderStore = (
       set({ masterTemplates: [...masterTemplates, masterTemplate] });
     },
     onEditMasterTemplate(masterTemplate) {
-      const masterTemplates = get().masterTemplates.map((template) => template._id === masterTemplate._id ? masterTemplate : template);
-      set({ masterTemplates });
+      const previousMasterTemplates = get().masterTemplates;
+
+      if (previousMasterTemplates.length === 0) {
+        set({ masterTemplates: [masterTemplate] });
+        return;
+      };
+      const updatedMasterTemplates = previousMasterTemplates.map((template) => template._id === masterTemplate._id ? masterTemplate : template);
+      set({ masterTemplates: updatedMasterTemplates });
     },
     onDeleteMasterTemplate(masterTemplate) {
       const masterTemplates = get().masterTemplates.filter((template) => template._id !== masterTemplate._id);
@@ -137,14 +144,42 @@ export const createPageBuilderStore = (
       const updatedPageTemplateList = [...pageTemplateList, version];
       set({ pageTemplateVersions: updatedPageTemplateList });
     },
-    onDeletePageVersion: async (pageVersion: IPageTemplateVersion) => {
+    onEditPageTemplateVersion: async (version: Partial<IPageTemplateVersion>) => {
+      const pageVersion = get().pageVersion;
+      if (!pageVersion) return;
+      const updatedPageVersion = { ...pageVersion, ...version, hasUnpublishedChanges: pageVersion.published ? true : pageVersion.hasUnpublishedChanges };
+
+      await client.update(
+        ENUM_COLLECTIONS.PAGE_TEMPLATES,
+        { _id: pageVersion._id },
+        { $set: updatedPageVersion }
+      );
+      const updatedPageTemplateList = get().pageTemplateVersions.map((template) =>
+        template._id === updatedPageVersion._id ? updatedPageVersion : template
+      );
+      set({ pageTemplateVersions: updatedPageTemplateList, pageVersion: updatedPageVersion });
+    },
+    onDeletePageVersion: async (pageVersion: IPageTemplateVersion, softDelete) => {
       const getMasterPublishedVersion = get().selectedMasterTemplate?.publishedVersion;
-      if (getMasterPublishedVersion?._id === pageVersion._id) {
+      if (pageVersion.published) {
         toast({
           title: 'Error',
           description: 'Cannot delete published version',
           variant: 'destructive'
         });
+        return;
+      }
+      if (softDelete) {
+        const updatedPageVersion: IPageTemplateVersion = { ...pageVersion, archived: true };
+        await client.update(
+          ENUM_COLLECTIONS.PAGE_TEMPLATES,
+          { _id: pageVersion._id },
+          { $set: updatedPageVersion }
+        );
+        const updatedPageTemplateList = get().pageTemplateVersions.map((template) =>
+          template._id === updatedPageVersion._id ? updatedPageVersion : template
+        );
+        set({ pageTemplateVersions: updatedPageTemplateList, pageVersion: updatedPageVersion });
         return;
       }
       await client.delete(ENUM_COLLECTIONS.PAGE_TEMPLATES, pageVersion._id);
@@ -225,18 +260,7 @@ export const createPageBuilderStore = (
       }
     },
     setSelectMasterTemplate: async (masterTemplate: IMasterTemplate) => {
-      const { data } = await client.list<IPageTemplateVersion>(
-        ENUM_COLLECTIONS.PAGE_TEMPLATES,
-        {
-          masterTemplateId: masterTemplate._id
-        }
-      );
-      const publishedVersionId = masterTemplate.publishedVersion?._id;
-
-      const publishedVersion = data?.find((version) => version._id === publishedVersionId) || null;
-
-      set({ pageTemplateVersions: data || [], selectedMasterTemplate: masterTemplate, pageVersion: publishedVersion });
-
+      set({ selectedMasterTemplate: masterTemplate });
     },
     setSelectedPage: async (page: IPage | null) => {
       set({ selectedPage: page, selectedNode: null, pageVersion: null, selectedMasterTemplate: null });
@@ -338,7 +362,7 @@ export const createPageBuilderStore = (
       if (!config) return;
 
       const setNewVdomId = (vdom: IVDOMNode) => {
-        let updatedVdom = { ...vdom, _id: v4() };
+        let updatedVdom = { ...vdom, _id: nanoid() };
         if (Array.isArray(updatedVdom?.children)) {
           updatedVdom = {
             ...updatedVdom,
@@ -419,6 +443,17 @@ export const createPageBuilderStore = (
             }
           }
         );
+        const previousPageVersion = get().pageTemplateVersions;
+        const updatedVersions = [...previousPageVersion]
+          .reduce((acc: IPageTemplateVersion[], version) => {
+            if (version.masterTemplateId !== pageVersion.masterTemplateId) {
+              return [...acc, version];
+            }
+            if (version._id === pageVersion._id) {
+              return [...acc, updatePublishedVersion];
+            }
+            return [...acc, { ...version, published: false }];
+          }, []);
         toast({
           title: 'Published',
           description: 'Page has been published',
@@ -426,7 +461,8 @@ export const createPageBuilderStore = (
         });
         let updatedState: PageBuilderState = {
           ...get(),
-          pageVersion: updatePublishedVersion
+          pageVersion: updatePublishedVersion,
+          pageTemplateVersions: updatedVersions
         }
         // Don't forget to update the selected master template ui
         const updatedMasterTemplate = get().selectedMasterTemplate;

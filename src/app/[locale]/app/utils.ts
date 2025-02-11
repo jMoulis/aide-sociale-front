@@ -1,14 +1,15 @@
 'use server';
 
-import { IPage } from "@/lib/interfaces/interfaces";
+import { IPage, IUser } from "@/lib/interfaces/interfaces";
 import clientMongoServer from "@/lib/mongo/initMongoServer";
 import { ENUM_COLLECTIONS } from "@/lib/mongo/interfaces";
 import { IMasterTemplate } from "@/lib/TemplateBuilder/interfaces";
-import { getServerSideCurrentUserOrganizationId } from "@/lib/utils/auth/serverUtils";
+import { getServerSideCurrentUserOrganizationId, hasPermissions } from "@/lib/utils/auth/serverUtils";
 import { notFound } from "next/navigation";
 import { pathToRegexp } from "path-to-regexp";
 import { IVDOMNode } from "../my-app/components/interfaces";
 import { FormType } from "../my-app/components/Builder/Components/FormContext";
+import { mergePermissions } from "@/lib/utils/auth/utils";
 
 
 export async function matchRoute(segments: string[], organizationId: string) {
@@ -38,76 +39,75 @@ export async function matchRoute(segments: string[], organizationId: string) {
 
   return { page: null, params: {} };
 }
-export const fetchTemplateVersion = async (templateId: string) => {
-  const { data: template } = await clientMongoServer.get<IMasterTemplate>(
+export const fetchTemplateVersions = async (templateId: string, user: IUser) => {
+  const { data: masterTemplates } = await clientMongoServer.list<IMasterTemplate>(
     ENUM_COLLECTIONS.TEMPLATES_MASTER,
-    { _id: templateId }
+    { _id: templateId, roles: { $in: user.roles.map((role) => role._id) } }
   );
-  if (!template) {
-    throw { status: 404, message: 'No master template found' };
+  if (!masterTemplates?.length) {
+    notFound();
   }
-
-  if (!template.publishedVersion) {
-    throw { status: 404, message: 'No published version id found' };
-  }
-
-  return template.publishedVersion;
+  return masterTemplates.filter((masterTemplate) => !!masterTemplate.publishedVersion);
 };
-export const resolveTemplate = async (page: IPage) => {
-  const masterTemplateId = page.masterTemplateId;
-  if (!masterTemplateId) {
-    throw { status: 404, message: 'No master template id found' };
+export const resolveTemplates = async (page: IPage, user: IUser) => {
+  const permissions = mergePermissions(user?.roles || []);
+  const masterTemplateIds = page.masterTemplateIds;
+  if (!masterTemplateIds?.length) {
+    notFound();
   }
-  return fetchTemplateVersion(masterTemplateId);
+  const masterTemplates = await Promise.all(
+    masterTemplateIds.map((masterTemplateId) => fetchTemplateVersions(masterTemplateId, user))
+  );
+  // Flatten the array of templates
+  const flatTemplates = masterTemplates.flat();
+
+  // Check permissions asynchronously and map to template or null
+  const allowedTemplatesPromises = flatTemplates.map(async (masterTemplate) => {
+    const isAllowed = await hasPermissions(
+      permissions[page.slug],
+      masterTemplate?.mandatoryPermissions || [],
+      true
+    );
+    return isAllowed ? masterTemplate : null;
+  });
+
+  const allowedTemplates = await Promise.all(allowedTemplatesPromises);
+  const filteredTemplates = allowedTemplates.filter(Boolean) as IMasterTemplate[];
+
+  return filteredTemplates.reduce((acc: IMasterTemplate[], masterTemplate) => {
+    if (masterTemplate.publishedVersion) {
+      acc.push(masterTemplate);
+    }
+    return acc;
+  }, []);
 };
-export async function getPublishedTemplateVersion({ slug }: { slug: string[] }) {
+export async function getPublishedMasterTemplates({ slug, user, templateSearch }: { slug: string[], user: IUser, templateSearch?: string | null }) {
   // const { rootRoute, childRoute } = isDetailPage(slug);
   const organizationId = await getServerSideCurrentUserOrganizationId();
+
   try {
     const { page, params } = await matchRoute(slug, organizationId);
+
+    // Check is user can access to route page. (in roles admin page)
+    const permissions = mergePermissions(user?.roles || []);
     if (!page) {
       notFound();
     }
-    const publishedTemplateVersion = await resolveTemplate(page);
-    return { template: publishedTemplateVersion, routeParams: params };
-    //   const { data: organizationApp } = await clientMongoServer.get<IWebsite>(
-    //     ENUM_COLLECTIONS.WEBSITES,
-    //     {
-    //       organizationId,
-    //       published: true
-    //     }
-    //   );
+    if (!permissions[page?.slug]?.length) {
+      notFound();
+    }
 
-    //   if (!organizationApp) {
-    //     throw {
-    //       status: 404,
-    //       message: 'Organization not found'
-    //     }
-    //   }
-    //   const { data: pages } = await clientMongoServer.list<IPage>(ENUM_COLLECTIONS.PAGES, {
-    //     websiteId: organizationApp._id
-    //   });
+    const publishedMasterTemplateVersions = await resolveTemplates(page, user);
 
-    //   const page = (pages || []).find((page) => page.route === `${rootRoute}`);
-    //   if (!page) {
-    //     throw {
-    //       status: 404,
-    //       message: 'No page found'
-    //     }
-    //   }
+    if (templateSearch) {
+      const masterTemplate = publishedMasterTemplateVersions.find((masterTemplate) => masterTemplate.publishedVersion?._id === templateSearch);
 
-
-    //   // if (childRoute && page.subPages) {
-    //   //   const subRoute = findSubRoute(page.subPages, childRoute);
-    //   //   if (!subRoute) {
-    //   //     throw { status: 404, message: 'No sub route found' };
-    //   //   }
-    //   //   const publishedTemplateVersion = await resolveTemplate(subRoute);
-    //   //   return { page, publishedTemplateVersion };
-    //   // }
-
-    //   const publishedTemplateVersion = await resolveTemplate(page);
-    //   return { page, publishedTemplateVersion };
+      if (!masterTemplate) {
+        notFound();
+      }
+      return { templates: [masterTemplate], routeParams: params };
+    }
+    return { templates: publishedMasterTemplateVersions, routeParams: params };
   } catch (error) {
     throw error;
   }

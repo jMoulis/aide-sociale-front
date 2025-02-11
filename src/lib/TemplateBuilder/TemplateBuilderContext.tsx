@@ -9,7 +9,7 @@ import React, {
   useMemo,
   useState
 } from 'react';
-import { v4 as uuid, v4 } from 'uuid';
+import { nanoid } from 'nanoid';
 import {
   IFormTemplate,
   IFormBlock,
@@ -120,7 +120,7 @@ export function TemplateBuilderProvider({
   //   createdBy: excerptUser,
   //   createdAt: new Date(),
   //   organizationId,
-  //   _id: v4(),
+  //   _id: nanoid(),
   //   version: 1,
   //   templateListItem: null
   // };
@@ -160,7 +160,7 @@ export function TemplateBuilderProvider({
   // --- BLOCK actions ---
   const addBlock = useCallback((layout: BlockLayout) => {
     const newBlock: IFormBlock = {
-      id: uuid(),
+      id: nanoid(),
       layout,
       fields: [],
       title: ''
@@ -206,7 +206,7 @@ export function TemplateBuilderProvider({
   const addFieldToBlock = useCallback(
     (blockId: string, type: ENUM_FIELD_TYPE) => {
       const newField: IFormField = {
-        id: v4(),
+        id: nanoid(),
         name: '',
         label: '',
         type,
@@ -374,7 +374,7 @@ export function TemplateBuilderProvider({
   //   }
   //   setTemplate(updatedTemplate);
   //   return updatedTemplate;
-  //   // const masterTemplateId = v4();
+  //   // const masterTemplateId = nanoid();
 
   //   // const masterTemplate: IMasterTemplate = {
   //   //   _id: masterTemplateId,
@@ -465,7 +465,7 @@ export function TemplateBuilderProvider({
       const previousVersion = prevTemplate.version;
 
       const newVersion = previousVersion + 1;
-      const newVersionTemplateId = v4();
+      const newVersionTemplateId = nanoid();
 
       const templatePayload: IFormTemplate = {
         _id: newVersionTemplateId,

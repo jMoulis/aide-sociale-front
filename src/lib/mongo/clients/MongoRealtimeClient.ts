@@ -1,5 +1,5 @@
 import { io, Socket } from 'socket.io-client';
-import { v4 } from 'uuid';
+import { nanoid } from "nanoid";
 import Cookies from 'js-cookie'
 import { ENUM_COLLECTIONS, ENUM_SOCKET_EVENTS, FilterType, IDeleteResponse, IMongoRealtimeConfig, ISocketEventListenCollectionProps, IUpsertResponse } from '../interfaces';
 import { COOKIE_SERVER_AUTH } from '@/lib/utils/auth/utils';
@@ -142,7 +142,7 @@ class MongoRealtimeClient {
   }
   // Method to listen to real-time updates on a collection or document
   onSnapshotList<TData>(collection: ENUM_COLLECTIONS, filter: FilterType, callback: (data: TData[], change: IChangeStream<TData>) => void): () => void {
-    const subscriptionId = v4();
+    const subscriptionId = nanoid();
     if (this.socket) {
       const params: ISocketEventListenCollectionProps = { collection, filter, subscriptionId, pipelineMatch: [] };
       this.socket.emit(ENUM_SOCKET_EVENTS.LISTEN_COLLECTION, params);
@@ -154,7 +154,7 @@ class MongoRealtimeClient {
     return () => this.unsubcribe(subscriptionId)
   }
   onSnapshotDocument<TData>(collection: ENUM_COLLECTIONS, filter: FilterType, callback: (change: IChangeStream<TData>) => void): () => void {
-    const subscriptionId = v4();
+    const subscriptionId = nanoid();
     if (this.socket) {
       this.socket.emit(ENUM_SOCKET_EVENTS.LISTEN_DOCUMENT, { collection, filter, subscriptionId });
       this.socket.on(ENUM_SOCKET_EVENTS.DB_CHANGE, (change: any) => {

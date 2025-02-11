@@ -1,11 +1,16 @@
 import SaveButton from '@/components/buttons/SaveButton';
-import { FormEvent, useEffect, useMemo, useState } from 'react';
+import { FormEvent, useMemo, useState } from 'react';
 import { usePageBuilderStore } from '../stores/pagebuilder-store-provider';
 import DeleteButtonWithConfirmation from '@/components/buttons/DeleteButtonWithConfirmation';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faTrash } from '@awesome.me/kit-8441d3fdf2/icons/classic/solid';
+import {
+  faBoxArchive,
+  faTrash
+} from '@awesome.me/kit-8441d3fdf2/icons/classic/solid';
 import ConfirmationDeleteContent from '@/lib/TemplateBuilder/PropertiesMenu/ConfirmationDeleteContent';
 import { PublishedDot } from '../PublishedDot';
+import PageVersionForm from './PageVersionForm';
+import { useTranslations } from 'next-intl';
 
 function PageBuilderHeader() {
   const [loading, setLoading] = useState<
@@ -20,8 +25,10 @@ function PageBuilderHeader() {
   const onDeletePageTemplate = usePageBuilderStore(
     (state) => state.onDeletePageVersion
   );
+  const t = useTranslations('WebsiteSection.pageVersionForm');
 
   const onPublish = usePageBuilderStore((state) => state.onPublish);
+
   const confirmationStringPattern = useMemo(
     () => `version-${pageVersion?.version}`,
     [pageVersion?.version]
@@ -38,7 +45,6 @@ function PageBuilderHeader() {
     setLoading(null);
   };
 
-  useEffect(() => {}, [pageVersion]);
   const handleConfirmString = (e: FormEvent<HTMLInputElement>) => {
     const { value } = e.currentTarget;
     setConfirmString(value);
@@ -51,7 +57,7 @@ function PageBuilderHeader() {
   const handleDelete = async () => {
     if (canDelete && pageVersion) {
       setLoading('deleting');
-      await onDeletePageTemplate(pageVersion);
+      await onDeletePageTemplate(pageVersion, pageVersion.hasBeenPublished);
       setLoading(null);
       setConfirmString('');
     } else {
@@ -63,13 +69,13 @@ function PageBuilderHeader() {
 
   return (
     <header className='flex items-center p-4 bg-white'>
-      <h1>Page builder - {pageVersion?.version}</h1>
+      <PageVersionForm initialPageVersion={pageVersion} />
       <SaveButton
         disabled={Boolean(loading)}
         loading={loading === 'saving'}
         onClick={handleSave}
       />
-      {pageVersion?.isDirty ? <span>Unsaved changes</span> : null}
+      {pageVersion?.isDirty ? <span>{t('labels.unsavedChanges')}</span> : null}
       <div className='flex items-center'>
         <SaveButton
           disabled={Boolean(loading)}
@@ -80,24 +86,33 @@ function PageBuilderHeader() {
         </SaveButton>
       </div>
       {pageVersion?.hasUnpublishedChanges ? (
-        <span>Unpublished changes</span>
+        <span>{t('labels.unpublishedChanges')}</span>
       ) : null}
       <DeleteButtonWithConfirmation
         onDelete={handleDelete}
-        title={"t('delete.title')"}
+        title={t('delete.title')}
         buttonActionText={
-          <div>
-            <FontAwesomeIcon icon={faTrash} />
-            <span>{"t('delete.action')"}</span>
-          </div>
+          <FontAwesomeIcon
+            icon={pageVersion.hasBeenPublished ? faBoxArchive : faTrash}
+          />
         }
-        deleteActionText={"t('delete.action')"}
+        deleteActionText={
+          pageVersion.hasBeenPublished
+            ? t('archive.action')
+            : t('delete.action')
+        }
         deleting={loading === 'deleting'}>
         <ConfirmationDeleteContent
           confirmationStringPattern={confirmationStringPattern}
           onConfirmStringChange={handleConfirmString}
-          confirmString={confirmString}
-        />
+          confirmString={confirmString}>
+          <p className='whitespace-pre-line text-sm'>
+            {pageVersion.hasBeenPublished
+              ? `Cette version a été publiée et utilisée.
+              Vous ne pourrez plus la supprimer, mais vous pouvez l'archiver`
+              : ''}
+          </p>
+        </ConfirmationDeleteContent>
       </DeleteButtonWithConfirmation>
     </header>
   );

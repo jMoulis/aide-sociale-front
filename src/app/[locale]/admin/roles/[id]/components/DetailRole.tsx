@@ -21,7 +21,7 @@ import {
 } from '../../actions/updateUsersRoles';
 
 import { useOrganization } from '@/lib/hooks/useOrganization';
-import { v4 } from 'uuid';
+import { nanoid } from 'nanoid';
 import {
   buildPageTree,
   removeObjectFields,
@@ -47,7 +47,7 @@ function DetailRole({
   console.log(tree);
   const organizationId = useOrganization();
   const defaultRole = {
-    _id: v4(),
+    _id: nanoid(),
     name: '',
     description: '',
     permissions: {},
