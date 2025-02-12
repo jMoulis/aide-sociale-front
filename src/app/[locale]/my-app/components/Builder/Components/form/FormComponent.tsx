@@ -73,11 +73,12 @@ const FormComponent = forwardRef<HTMLFormElement, PropsWithChildrenAndContext>(
 
         try {
           if (isCreation) {
+            const id = nanoid();
             const newEntry: FormType = {
-              _id: nanoid(),
+              _id: id,
               createdBy: user ? getUserSummary(user) : undefined,
               createdAt: new Date(),
-              data: formToSave.data,
+              data: { _id: id, ...formToSave.data },
               templatePageVersionId: context.dataset.pageTemplateVersionId,
               collectionSlug
             };

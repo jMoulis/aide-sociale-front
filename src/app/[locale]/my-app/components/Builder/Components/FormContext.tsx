@@ -1,4 +1,6 @@
 import { IDataset, IUserSummary } from '@/lib/interfaces/interfaces';
+import client from '@/lib/mongo/initMongoClient';
+import { ENUM_COLLECTIONS } from '@/lib/mongo/interfaces';
 import React, {
   useState,
   createContext,
@@ -17,6 +19,7 @@ type Value =
   | DateRange
   | number[]
   | string[];
+
 export type FormType = {
   _id: string;
   createdAt?: Date;
@@ -29,8 +32,15 @@ export type FormType = {
 };
 interface FormContextProps {
   forms: Record<string, FormType>;
-  onInputChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  onInputChange: (
+    e: React.ChangeEvent<
+      HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
+    >
+  ) => void;
   getFormFieldValue: (dataset?: IDataset) => Value;
+  getMultichoiceOptions: (
+    dataset?: IDataset
+  ) => Promise<{ label: string; value: string }[]>;
   onUpdateForm: (
     collectionSlug: string,
     fieldName: string,
@@ -42,7 +52,8 @@ const FormContext = createContext<FormContextProps>({
   forms: {},
   onInputChange: () => {},
   getFormFieldValue: () => '',
-  onUpdateForm: () => {}
+  onUpdateForm: () => {},
+  getMultichoiceOptions: async () => []
 });
 
 export const useFormContext = () => {
@@ -65,13 +76,23 @@ export const FormProvider = ({
   const [forms, setForms] = useState<Record<string, FormType>>(initialForms);
 
   const onInputChange = useCallback(
-    (e: React.ChangeEvent<HTMLInputElement>) => {
+    (
+      e: React.ChangeEvent<
+        HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
+      >
+    ) => {
       if (isBuilderMode) return;
       const { name, value } = e.target;
       const collectionSlug = e.target.dataset.collection;
+
       if (!collectionSlug) {
         // eslint-disable-next-line no-console
         console.error('Collection slug is missing');
+        return;
+      }
+      if (!name) {
+        // eslint-disable-next-line no-console
+        console.error('Name is missing');
         return;
       }
       setForms((prev) => {
@@ -115,13 +136,60 @@ export const FormProvider = ({
       if (!dataset?.collectionSlug) return '';
 
       const form = forms[dataset.collectionSlug];
+
       return form?.data?.[dataset.connexion.field] || '';
     },
     [forms, isBuilderMode]
   );
+  const getMultichoiceOptions = useCallback(async (dataset: IDataset) => {
+    const connexion = dataset?.connexion;
+    if (!connexion) return [];
+
+    const externalDataOptions = connexion.externalDataOptions;
+    const staticDataOptions = connexion.staticDataOptions;
+
+    if (!externalDataOptions && !staticDataOptions) return [];
+
+    if (
+      externalDataOptions?.collectionSlug &&
+      externalDataOptions?.labelField &&
+      externalDataOptions?.valueField
+    ) {
+      const { data } = await client.list<any>(
+        externalDataOptions?.collectionSlug as ENUM_COLLECTIONS
+      );
+
+      if (!data) return [] as any;
+      const options = data.map((item) => ({
+        label: item[externalDataOptions.labelField],
+        value: item[externalDataOptions.valueField]
+      }));
+      return options;
+    }
+    if (staticDataOptions) {
+      return staticDataOptions.map((option) => ({
+        value: option,
+        label: option
+      }));
+    }
+    return [] as any;
+  }, []);
   const value = useMemo(
-    () => ({ forms, onInputChange, getFormFieldValue, onUpdateForm }),
-    [forms, onInputChange, getFormFieldValue, onUpdateForm]
+    () =>
+      ({
+        forms,
+        onInputChange,
+        getFormFieldValue,
+        onUpdateForm,
+        getMultichoiceOptions
+      } as FormContextProps),
+    [
+      forms,
+      onInputChange,
+      getFormFieldValue,
+      onUpdateForm,
+      getMultichoiceOptions
+    ]
   );
   return <FormContext.Provider value={value}>{children}</FormContext.Provider>;
 };

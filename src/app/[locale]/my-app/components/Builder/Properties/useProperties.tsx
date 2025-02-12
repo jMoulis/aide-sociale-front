@@ -3,7 +3,16 @@ import { usePageBuilderStore } from '../../stores/pagebuilder-store-provider';
 import { findNodeById } from '../../utils';
 import { ElementConfigProps, IVDOMNode } from '../../interfaces';
 
-export function useProperties({ config }: { config: ElementConfigProps }) {
+type Props = {
+  value: any;
+  vdom: IVDOMNode | null;
+  selectedNode: IVDOMNode | null;
+};
+export function useProperties({
+  config
+}: {
+  config: ElementConfigProps;
+}): Props {
   const selectedNodeId = usePageBuilderStore(
     (state) => state.selectedNode?._id
   );

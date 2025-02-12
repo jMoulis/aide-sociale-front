@@ -61,7 +61,7 @@ export type ElementConfigProps = {
   propKey: string;
   component: ENUM_PROPERTIES_COMPONENTS;
   context: boolean;
-  options?: ('SELECT_COLLECTION' | 'FIELDS' | 'CREATE' | 'ROUTE_PARAM')[];
+  options?: ('SELECT_COLLECTION' | 'FIELDS' | 'CREATE' | 'ROUTE_PARAM' | 'STATIC_OPTIONS')[];
 }
 export interface IElementConfig {
   _id: string;

@@ -39,7 +39,7 @@ function AsInput({ config }: Props) {
         <div className='flex items-stretch'>
           <Input
             name={config.propKey}
-            value={tempValue}
+            value={(tempValue as string) || ''}
             onChange={handleTextContent}
           />
           <Button onClick={handleOnBlur}>

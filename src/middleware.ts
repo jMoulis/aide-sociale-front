@@ -3,7 +3,6 @@ import { clerkMiddleware, createRouteMatcher } from '@clerk/nextjs/server';
 import createMiddleware from 'next-intl/middleware';
 import { COOKIE_SERVER_AUTH } from './lib/utils/auth/utils';
 import getToken from '@/lib/auth/JWTToken';
-import { NextResponse } from 'next/server';
 
 const intlMiddleware = createMiddleware(routing);
 const isProtectedRoute = createRouteMatcher(['/admin(.*)', '/:locale/admin(.*)', '/dashboard(.*)', '/:locale/dashboard(.*)']);
@@ -19,9 +18,8 @@ export default clerkMiddleware(async (auth, request) => {
   response.cookies.set(COOKIE_SERVER_AUTH, token);
   const headers = new Headers(request.headers);
   headers.set("x-current-path", request.nextUrl.href);
-  return NextResponse.next({
-    headers
-  });
+  response.headers.set("x-current-path", request.nextUrl.href);
+  return response;
 });
 
 export const config = {

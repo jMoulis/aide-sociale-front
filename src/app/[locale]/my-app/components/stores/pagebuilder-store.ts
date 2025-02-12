@@ -336,7 +336,8 @@ export const createPageBuilderStore = (
 
       const updatedVDOM = updateNodeById(pageVersion.vdom, selectedNodeId, (node) => {
         if (isContext) {
-          return { ...node, context: { ...node.context, ...value } };
+          const updatedvDom = { ...node, context: { ...node.context, ...value } };
+          return updatedvDom;
         }
         return { ...node, props: { ...node.props, ...value } };
       });

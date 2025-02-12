@@ -1,24 +1,69 @@
-import Input from '@/components/form/Input';
 import { PropsWithChildrenAndContext } from '@/lib/interfaces/interfaces';
 import { useFormContext } from '../../FormContext';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
-import { FormLabel } from '@/components/ui/form';
+import { useEffect, useState } from 'react';
+import { SelectboxOption } from '@/components/form/Selectbox';
+import FormLabel from '@/components/form/FormLabel';
 
-function RadioComponent({ props, context }: PropsWithChildrenAndContext) {
-  const { onInputChange, getFormFieldValue } = useFormContext();
+function RadioComponent({ context, props }: PropsWithChildrenAndContext) {
+  const { onInputChange, getFormFieldValue, getMultichoiceOptions } =
+    useFormContext();
+  const [options, setOptions] = useState<SelectboxOption[]>([]);
   const value = getFormFieldValue(context.dataset);
-  const options = [] as any;
+
+  useEffect(() => {
+    getMultichoiceOptions(context.dataset).then((choices) =>
+      setOptions(choices)
+    );
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [context.dataset]);
+
+  const handleSelectOption = (selectedValue: string) => {
+    onInputChange({
+      target: {
+        name: context.dataset?.connexion?.field,
+        value: selectedValue,
+        dataset: {
+          collection: context.dataset?.collectionSlug
+        } as any
+      }
+    } as React.ChangeEvent<HTMLInputElement>);
+  };
+  if (context.isBuilderMode) {
+    return (
+      <RadioGroup
+        ref={props.ref}
+        data-collection={context.dataset?.collectionSlug}
+        className={props.className}
+        onClick={props.onClick}
+        name={context.dataset?.connexion?.field}
+        defaultValue={value as string | undefined}
+        onValueChange={handleSelectOption}>
+        <div className='flex items-center space-x-2'>
+          <RadioGroupItem value='option1' id='option1' />
+          <FormLabel className='mb-0' htmlFor={`option1`}>
+            Option 1
+          </FormLabel>
+        </div>
+      </RadioGroup>
+    );
+  }
   return (
     <>
       {/* <FormLabel required={props.required}>{field.label}</FormLabel> */}
       <RadioGroup
-        name={props.name}
-        //  defaultValue={value}
-        onValueChange={(v) => {}}>
+        name={context.dataset?.connexion?.field}
+        defaultValue={value as string | undefined}
+        onValueChange={handleSelectOption}>
         {options.map((opt: { label: string; value: string }, i: number) => (
           <div key={i} className='flex items-center space-x-2'>
-            <RadioGroupItem value={opt.value} id={`${i}-${props.name}`} />
-            <FormLabel className='mb-0' htmlFor={`${i}-${props.name}`}>
+            <RadioGroupItem
+              value={opt.value}
+              id={`${i}-${context.dataset?.connexion?.field}`}
+            />
+            <FormLabel
+              className='mb-0'
+              htmlFor={`${i}-${context.dataset?.connexion?.field}`}>
               {opt.label}
             </FormLabel>
           </div>

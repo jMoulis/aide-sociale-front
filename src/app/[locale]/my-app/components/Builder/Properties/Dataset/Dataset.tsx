@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   ElementConfigProps,
   ENUM_COMPONENTS,
@@ -20,12 +20,19 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { CheckedState } from '@radix-ui/react-checkbox';
 import FormLabel from '@/components/form/FormLabel';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faInfoCircle } from '@awesome.me/kit-8441d3fdf2/icons/classic/solid';
+import {
+  faInfoCircle,
+  faUnlink
+} from '@awesome.me/kit-8441d3fdf2/icons/classic/solid';
 import FormField from '@/components/form/FormField';
 import Input from '@/components/form/Input';
 import CollectionFormDialog from './CollectionFormDialog';
 import FieldList from './FieldList';
 import Popup from '@/components/popup/Popup';
+import Button from '@/components/buttons/Button';
+import StaticDataOptions from './StaticDataOptions';
+import ExternalDataOptions from './ExternalDataOptions';
+import Selectbox from '@/components/form/Selectbox';
 
 function findClosestFormParent(
   vdom: IVDOMNode,
@@ -64,9 +71,28 @@ const Dataset = ({ config }: Props) => {
     (state) => state.onUpdateNodeProperty
   );
   const t = useTranslations('CollectionSection');
+  const tTemplate = useTranslations('TemplateSection');
 
+  const optionsSourceTypes = useMemo(
+    () => [
+      {
+        value: 'database',
+        label: tTemplate('databaseOptions')
+      },
+      {
+        value: 'static',
+        label: tTemplate('staticOptions')
+      },
+      {
+        value: 'template',
+        label: tTemplate('template')
+      }
+    ],
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    []
+  );
   const {
-    value: currentCollection,
+    value: currentDataset,
     vdom,
     selectedNode
   }: {
@@ -74,6 +100,7 @@ const Dataset = ({ config }: Props) => {
     vdom: IVDOMNode | null;
     selectedNode: IVDOMNode | null;
   } = useProperties({ config });
+
   const [collections, setCollections] = useState<Record<string, ICollection>>(
     {}
   );
@@ -123,32 +150,15 @@ const Dataset = ({ config }: Props) => {
 
     if (parentForm?.context.dataset?.collectionSlug) {
       collection = collections[parentForm.context.dataset.collectionSlug];
-    } else if (currentCollection?.collectionSlug) {
-      collection = collections[currentCollection?.collectionSlug];
+    } else if (currentDataset?.collectionSlug) {
+      collection = collections[currentDataset?.collectionSlug];
     }
     setCollectionsSelectedCollection(collection);
-
-    if (!collection) return;
-
-    // const updatedCollection: IDataset = {
-    //   collectionSlug: collection.slug,
-    //   collectionName: collection.name,
-    //   pageTemplateVersionId: pageTemplateVersion._id,
-    //   connexion: currentCollection?.connexion || {}
-    // };
-    // onUpdateNodeProperty(
-    //   { [config.propKey]: updatedCollection || '' },
-    //   config.context
-    // );
   }, [
     collections,
     parentForm?.context?.dataset,
-    config.propKey,
-    config.context,
-    onUpdateNodeProperty,
     pageTemplateVersion?._id,
-    currentCollection?.collectionSlug,
-    currentCollection?.connexion
+    currentDataset?.collectionSlug
   ]);
 
   const handleSelectCollection = (value?: string) => {
@@ -160,7 +170,10 @@ const Dataset = ({ config }: Props) => {
       collectionSlug: selectedCollection.slug,
       collectionName: selectedCollection.name,
       pageTemplateVersionId: pageTemplateVersion?._id,
-      connexion: {}
+      connexion: {
+        ...currentDataset?.connexion,
+        field: ''
+      }
     };
 
     onUpdateNodeProperty(
@@ -170,14 +183,27 @@ const Dataset = ({ config }: Props) => {
     setCollectionsSelectedCollection(selectedCollection);
   };
 
+  const handleClearSelectedCollection = () => {
+    onUpdateNodeProperty(
+      {
+        [config.propKey]: {
+          ...currentDataset,
+          collectionSlug: '',
+          collectionName: ''
+        }
+      },
+      config.context
+    );
+    setCollectionsSelectedCollection(null);
+  };
   const handleSelectField = (state: CheckedState, selectedValue?: string) => {
     let collection: ICollection | null = null;
     if (!pageTemplateVersion?._id) return;
 
     if (parentForm?.context.dataset?.collectionSlug) {
       collection = collections[parentForm.context.dataset.collectionSlug];
-    } else if (currentCollection?.collectionSlug) {
-      collection = collections[currentCollection.collectionSlug];
+    } else if (currentDataset?.collectionSlug) {
+      collection = collections[currentDataset.collectionSlug];
     }
     if (!collection) return;
 
@@ -185,8 +211,9 @@ const Dataset = ({ config }: Props) => {
       collectionSlug: collection.slug,
       collectionName: collection.name,
       pageTemplateVersionId: pageTemplateVersion?._id as string,
+
       connexion: {
-        ...currentCollection?.connexion,
+        ...currentDataset?.connexion,
         field: state === true ? selectedValue : ''
       }
     };
@@ -197,14 +224,14 @@ const Dataset = ({ config }: Props) => {
   };
 
   const handleCreateFormChecked = (state: CheckedState) => {
-    if (!currentCollection) return;
-    const collection = collections[currentCollection.collectionSlug];
+    if (!currentDataset) return;
+    const collection = collections[currentDataset.collectionSlug];
 
     const updatedCollection: IDataset = {
       collectionSlug: collection.slug,
       collectionName: collection.name,
       isCreation: state as unknown as boolean,
-      connexion: currentCollection.connexion,
+      connexion: currentDataset.connexion,
       pageTemplateVersionId: pageTemplateVersion?._id as string
     };
     onUpdateNodeProperty(
@@ -213,18 +240,19 @@ const Dataset = ({ config }: Props) => {
     );
   };
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleInputChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
+  ) => {
     const { name, value } = e.target;
-    if (!currentCollection) return;
-    const updatedCollection: IDataset = {
-      ...currentCollection,
+    const updatedDataset: IDataset = {
+      ...(currentDataset || ({} as IDataset)),
       connexion: {
-        ...currentCollection?.connexion,
+        ...currentDataset?.connexion,
         [name]: value
       }
     };
     onUpdateNodeProperty(
-      { [config.propKey]: updatedCollection || '' },
+      { [config.propKey]: updatedDataset || '' },
       config.context
     );
   };
@@ -244,12 +272,12 @@ const Dataset = ({ config }: Props) => {
                 Boolean(parentForm)
               }
               onValueChange={handleSelectCollection}
-              defaultValue={currentCollection?.collectionSlug}
-              value={currentCollection?.collectionSlug}>
+              defaultValue={currentDataset?.collectionSlug || ''}
+              value={currentDataset?.collectionSlug || ''}>
               <SelectTrigger className='w-[180px]'>
                 <span style={{ textAlign: 'left' }}>
-                  {parentForm?.context?.dataset?.collectionName ??
-                    currentCollection?.collectionName ??
+                  {parentForm?.context?.dataset?.collectionName ||
+                    currentDataset?.collectionName ||
                     t('selectCollection')}
                 </span>
               </SelectTrigger>
@@ -263,12 +291,19 @@ const Dataset = ({ config }: Props) => {
             </Select>
             {config.options?.includes('SELECT_COLLECTION') ? (
               <>
-                <CollectionFormDialog
-                  prevCollection={collectionsSelectedCollection}
-                  onSubmit={fetchCollections}
-                  onOpen={handleSelectCollection}
-                />
+                {collectionsSelectedCollection ? (
+                  <CollectionFormDialog
+                    prevCollection={collectionsSelectedCollection}
+                    onSubmit={fetchCollections}
+                    onOpen={handleSelectCollection}
+                  />
+                ) : (
+                  <span />
+                )}
                 <CollectionFormDialog onSubmit={fetchCollections} />
+                <Button onClick={handleClearSelectedCollection}>
+                  <FontAwesomeIcon icon={faUnlink} />
+                </Button>
               </>
             ) : null}
           </div>
@@ -307,13 +342,13 @@ const Dataset = ({ config }: Props) => {
         <FieldList
           onSelectField={handleSelectField}
           selectedCollection={collectionsSelectedCollection}
-          currentCollection={currentCollection}
+          currentDataset={currentDataset}
         />
       ) : null}
       {config.options?.includes('CREATE') ? (
         <FormField className='mt-2 flex flex-row items-center'>
           <Checkbox
-            checked={currentCollection?.isCreation}
+            checked={currentDataset?.isCreation}
             onCheckedChange={handleCreateFormChecked}
             id='create-form'
           />
@@ -322,12 +357,40 @@ const Dataset = ({ config }: Props) => {
           </FormLabel>
         </FormField>
       ) : null}
+      {config.options?.includes('STATIC_OPTIONS') ? (
+        <>
+          <FormField>
+            <FormLabel>{tTemplate('sourceOptions')}</FormLabel>
+            <Selectbox
+              name='optionsSourceType'
+              value={
+                selectedNode?.context?.dataset?.connexion?.optionsSourceType ||
+                'static'
+              }
+              options={optionsSourceTypes}
+              onChange={handleInputChange}
+            />
+          </FormField>
+          {selectedNode?.context?.dataset?.connexion?.optionsSourceType ===
+          'database' ? (
+            <ExternalDataOptions
+              config={config}
+              collections={collections}
+              selectedNode={selectedNode}
+            />
+          ) : null}
+          {selectedNode?.context?.dataset?.connexion?.optionsSourceType ===
+          'static' ? (
+            <StaticDataOptions config={config} selectedNode={selectedNode} />
+          ) : null}
+        </>
+      ) : null}
       {config.options?.includes('ROUTE_PARAM') ? (
         <FormField>
           <FormLabel className='text-gray-700'>{t('routeParam')}</FormLabel>
           <Input
             name='routeParam'
-            value={currentCollection?.connexion?.routeParam || ''}
+            value={currentDataset?.connexion?.routeParam || ''}
             onChange={handleInputChange}
           />
         </FormField>

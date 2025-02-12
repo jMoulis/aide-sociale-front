@@ -82,6 +82,13 @@ export interface IDataset {
   isCreation?: boolean;
   pageTemplateVersionId: string;
   connexion?: {
+    optionsSourceType?: 'static' | 'database';
+    staticDataOptions?: string[];
+    externalDataOptions?: {
+      collectionSlug: string;
+      labelField: string;
+      valueField: string;
+    };
     field?: string;
     routeParam?: string;
   };

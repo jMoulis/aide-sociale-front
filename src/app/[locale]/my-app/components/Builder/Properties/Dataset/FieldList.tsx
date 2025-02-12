@@ -6,19 +6,19 @@ import { useTranslations } from 'next-intl';
 
 type Props = {
   selectedCollection: ICollection | null;
-  currentCollection: IDataset | null;
+  currentDataset: IDataset | null;
   onSelectField: (state: CheckedState, field: string) => void;
 };
 function FieldList({
   selectedCollection,
-  currentCollection,
+  currentDataset,
   onSelectField
 }: Props) {
   const t = useTranslations('CollectionSection');
 
   if (!selectedCollection) return null;
   return (
-    <div className='my-2'>
+    <div className='my-2 max-h-44 overflow-auto'>
       <FormLabel className='text-gray-700'>{t('selectValueField')}</FormLabel>
       <ul className='ml-2'>
         {selectedCollection.fields.map((field, index) => (
@@ -27,7 +27,7 @@ function FieldList({
               id={`${field.key}`}
               onCheckedChange={(state) => onSelectField(state, field.key)}
               value={field.key}
-              checked={currentCollection?.connexion?.field === field.key}
+              checked={currentDataset?.connexion?.field === field.key}
             />
             <FormLabel className='mb-0 ml-1' htmlFor={field.key}>
               {field.label}

@@ -543,7 +543,7 @@
     "labelField": "Champ d'étiquette",
     "collectionName": "Nom de la collection",
     "dataConnexion": "Connexion à la donnée",
-    "sourceOptions": "Source",
+    "sourceOptions": "Source de données",
     "databaseOptions": "Base de données",
     "staticOptions": "Statiques",
     "label": "Libellé",
