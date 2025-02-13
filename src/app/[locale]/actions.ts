@@ -8,7 +8,7 @@ export async function uploadFile(file: File, path: string) {
   const organizationId = await getServerSideCurrentUserOrganizationId();
 
   const fullstoragePath = `${organizationId}/${path}`;
-  console.log('uploading file', file, path)
+  console.info('uploading file', file, path)
   try {
     const arrayBuffer = await file.arrayBuffer();
     const fileBuffer = Buffer.from(arrayBuffer);
@@ -19,11 +19,11 @@ export async function uploadFile(file: File, path: string) {
       },
     });
     const downloadUrl = await getDownloadURL(fileUpload);
-    console.log('downloadUrl', downloadUrl)
+    console.info('downloadUrl', downloadUrl)
     return downloadUrl;
 
   } catch (error) {
-    console.log('FirebaseError', error)
+    console.info('FirebaseError', error)
     return null;
   }
   // .upload(file, {

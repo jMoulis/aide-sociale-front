@@ -55,7 +55,7 @@ function TailwindConfig() {
   }, [website?.stylesheets, open]);
   const handleGenerate = async () => {
     if (!organizationId || !website) return;
-    // eslint-disable-next-line no-console
+
     console.info('Generating Tailwind CSS...');
     try {
       setGenerating(true);

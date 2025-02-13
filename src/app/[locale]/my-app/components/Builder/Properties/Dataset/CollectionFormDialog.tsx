@@ -157,7 +157,6 @@ function CollectionFormDialog({ prevCollection, onSubmit }: Props) {
             equivalentCollections: foundCollections
           });
         } catch (error) {
-          // eslint-disable-next-line no-console
           console.error(error);
         } finally {
           setSearchCorrespondance(false);

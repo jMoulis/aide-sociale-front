@@ -56,10 +56,10 @@ async function downloadFilesFromLinks(links: string[]): Promise<string[]> {
 
       // Download the file
       await file.download({ destination: tempFilePath });
-      // eslint-disable-next-line no-console
-      console.log(`File downloaded to: ${tempFilePath}`);
+
+      console.info(`File downloaded to: ${tempFilePath}`);
     } catch (error) {
-      // eslint-disable-next-line no-console
+
       console.error(`Failed to download file from link: ${link}`, error);
     }
   }
@@ -91,8 +91,8 @@ export const generateCss = async (vdom: IVDOMNode, pageId: string, organizationI
       }
       const css = fs.readFileSync(outputPath, 'utf-8');
 
-      // eslint-disable-next-line no-console
-      console.log(`CSS generated for page `);
+
+      console.info(`CSS generated for page `);
       resolve(css); // Return the path to the generated CSS
     });
   });
@@ -162,8 +162,8 @@ const execution = (tempInputPath: string, outputPath: string, tempConfigPath: st
         reject({ pageUrl: null, mainUrl: null, error: error.message });
       } finally {
         if (!shouldCleanup) return;
-        // eslint-disable-next-line no-console
-        console.log('Cleaning up...');
+
+        console.info('Cleaning up...');
         paths.forEach((path) => fs.unlinkSync(path));
       }
     });
@@ -171,8 +171,8 @@ const execution = (tempInputPath: string, outputPath: string, tempConfigPath: st
 }
 
 const updateWebsite = async (website: IWebsite, stylesheetsToUpsert: IStylesheet[]) => {
-  // eslint-disable-next-line no-console
-  console.log('Updating website...');
+
+  console.info('Updating website...');
   const prevStylesheets = website.stylesheets || [];
 
   const updatedStylesheets = stylesheetsToUpsert.reduce((acc, stylesheet) => {
@@ -190,8 +190,8 @@ const updateWebsite = async (website: IWebsite, stylesheetsToUpsert: IStylesheet
   return { ...website, stylesheets: updatedStylesheets };
 }
 export const generateTailwind = async (tailwindScript: string, organizationId: string, website: IWebsite,): Promise<void> => {
-  // eslint-disable-next-line no-console
-  console.log('Generating compiled CSS...');
+
+  console.info('Generating compiled CSS...');
   // generateTailwindStylesheet(tailwindScript, organizationId, website);
   const { directives, paths, rootDirective } = await processStylesheetsFilesTailwindImports(website.stylesheets || []);
   const { tempVdomPath } = await processPagesVdom(website._id);
@@ -213,10 +213,10 @@ export const generateTailwind = async (tailwindScript: string, organizationId: s
       execution(tempInputUtilsPath, tempUtilsOutputPath, tempConfigPath, tempVdomPath, `websites/${organizationId}/${website._id}/utils.css`, [], false), execution(tempInputPath, outputPath, tempConfigPath, tempVdomPath, `websites/${organizationId}/${website._id}/${COMPILED_NAME_FILE}.css`, [...paths, tempInputUtilsPath, tempConfigPath, tempInputPath], true)
     ]).then(([utils, main]) => {
       updateWebsite(website, [{ name: 'utils', uri: utils.path }, { name: COMPILED_NAME_FILE, uri: main.path }]);
-      // eslint-disable-next-line no-console
-    }).catch((error) => console.log(error)).finally(() => {
-      // eslint-disable-next-line no-console
-      console.log('All done');
+
+    }).catch((error) => console.error(error)).finally(() => {
+
+      console.info('All done');
     });
 
 }

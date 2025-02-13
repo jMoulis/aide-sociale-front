@@ -93,32 +93,27 @@ export function updateTreeOnDrop(
 ): IVDOMNode {
   // Do not allow dropping a node onto itself.
   if (draggedId === dropTargetId) {
-    // eslint-disable-next-line no-console
     console.warn("Can't drop a node onto itself.");
     return tree;
   }
 
   const draggedNode = findNodeById(tree, draggedId);
   if (!draggedNode) {
-    // eslint-disable-next-line no-console
     console.warn(`Dragged node with id ${draggedId} not found.`);
     return tree;
   }
   const dropTargetNode = findNodeById(tree, dropTargetId);
   if (!dropTargetNode) {
-    // eslint-disable-next-line no-console
     console.warn(`Drop target node with id ${dropTargetId} not found.`);
     return tree;
   }
   // Do not allow dropping into an inline node.
   if (dropTargetNode.inline) {
-    // eslint-disable-next-line no-console
     console.warn('Cannot drop a node into an inline node.');
     return tree;
   }
   // Avoid circular reference: disallow dropping a node into one of its descendants.
   if (isDescendant(draggedNode, dropTargetId)) {
-    // eslint-disable-next-line no-console
     console.warn('Cannot drop a node into one of its descendants.');
     return tree;
   }
@@ -129,7 +124,6 @@ export function updateTreeOnDrop(
     draggedId
   );
   if (!removedNode) {
-    // eslint-disable-next-line no-console
     console.warn('Failed to remove dragged node from the tree.');
     return tree;
   }

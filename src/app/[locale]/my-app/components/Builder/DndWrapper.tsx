@@ -66,7 +66,6 @@ const DndWrapper: React.FC<DndWrapperProps> = ({
       const childElements = Array.from(
         childrenContainerRef.current.querySelectorAll('[data-id]')
       );
-      console.log(childElements.length);
       // For each child, get its bounding box.
       const bounds = childElements.map((el) => el.getBoundingClientRect());
       // Now, find the index where clientOffset.y is less than the midpoint of the child's vertical range.
@@ -109,7 +108,6 @@ const DndWrapper: React.FC<DndWrapperProps> = ({
       setIndicatorIndex(null);
       if (monitor.didDrop()) return;
       if (node.inline) {
-        // eslint-disable-next-line no-console
         console.warn(`Cannot drop on inline element ${node._id}`);
         return;
       }
@@ -122,8 +120,6 @@ const DndWrapper: React.FC<DndWrapperProps> = ({
       onTreeUpdate((prevTree) =>
         updateTreeOnDrop(prevTree, draggedItem.id, node._id, insertionIndex)
       );
-      // eslint-disable-next-line no-console
-      console.log(`Dropped node ${draggedItem.id} on node ${node._id}`);
     },
     collect: (monitor) => ({
       isOver: monitor.isOver({ shallow: true })

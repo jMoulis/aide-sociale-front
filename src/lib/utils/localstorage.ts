@@ -11,7 +11,7 @@ export function saveToLocalStorage<T>(key: string, data: T): void {
     const serializedData = JSON.stringify(data);
     localStorage.setItem(key, serializedData);
   } catch (error) {
-    // eslint-disable-next-line no-console
+
     console.error(`Error saving data to localStorage under key "${key}":`, error);
   }
 }
@@ -28,7 +28,7 @@ export function loadFromLocalStorage<T>(key: string): T | null {
     if (serializedData === null) return null;
     return JSON.parse(serializedData) as T;
   } catch (error) {
-    // eslint-disable-next-line no-console
+
     console.error(`Error loading data from localStorage under key "${key}":`, error);
     return null;
   }
@@ -43,7 +43,7 @@ export function clearLocalStorage(key: string): void {
   try {
     localStorage.removeItem(key);
   } catch (error) {
-    // eslint-disable-next-line no-console
+
     console.error(`Error clearing data from localStorage under key "${key}":`, error);
   }
 }

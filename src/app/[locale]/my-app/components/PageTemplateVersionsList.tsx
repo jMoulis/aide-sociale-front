@@ -52,8 +52,7 @@ function PageTemplateVersionsList({ masterTemplate, page }: Props) {
         );
       newVersion = (lastPageTemplateVersion?.version || newVersion) + 1;
     } catch (error) {
-      // eslint-disable-next-line no-console
-      console.log('error', error);
+      console.error('error', error);
     }
 
     const pageTemplateVersion: IPageTemplateVersion = generatePageVersion(

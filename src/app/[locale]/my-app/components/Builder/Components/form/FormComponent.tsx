@@ -26,7 +26,6 @@ const FormComponent = forwardRef<HTMLFormElement, PropsWithChildrenAndContext>(
       }
 
       const collectionSlug = context.dataset?.collectionSlug;
-      console.log(context);
       if (!context.routeParams) {
         toast({
           title: 'Erreur',

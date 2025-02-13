@@ -10,7 +10,6 @@ import Form from '../Form';
 import Button from '@/components/buttons/Button';
 import { forwardRef, useCallback, useEffect, useState } from 'react';
 import { useTranslations } from 'next-intl';
-import { useToast } from '@/lib/hooks/use-toast';
 import FormFooterAction from '@/components/dialog/FormFooterAction';
 
 interface Props extends React.InputHTMLAttributes<HTMLInputElement> {
@@ -21,12 +20,9 @@ interface Props extends React.InputHTMLAttributes<HTMLInputElement> {
 }
 const FileUpload = forwardRef<HTMLInputElement, Props>(
   ({ files, onUpload, children }, ref) => {
-    const { toast } = useToast();
-
     const [open, setOpen] = useState(false);
     const [uploadedFiles, setUploadedFiles] = useState<string[]>(files || []);
     const tMedia = useTranslations('MediaSection');
-    const tError = useTranslations('ErrorSection');
     const tGlobal = useTranslations('GlobalSection');
 
     const handleChange = async (event: React.ChangeEvent<HTMLInputElement>) => {

@@ -70,7 +70,7 @@ export function extractClassSelectorsFromString(stylesheetString: string): strin
       }
     }
   } catch (error) {
-    // eslint-disable-next-line no-console
+
     console.error("Error parsing CSS:", error);
   } finally {
     // Clean up by removing the <style> element

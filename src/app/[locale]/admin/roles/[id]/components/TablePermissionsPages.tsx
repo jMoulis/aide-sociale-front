@@ -57,7 +57,6 @@ type Props = {
 };
 function TablePermissionsPages({
   pages,
-  error,
   permissions,
   onSelectPermissions
 }: Props) {

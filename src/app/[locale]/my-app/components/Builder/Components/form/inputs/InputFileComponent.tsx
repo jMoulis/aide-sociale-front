@@ -1,19 +1,9 @@
-import Input from '@/components/form/Input';
 import { PropsWithChildrenAndContext } from '@/lib/interfaces/interfaces';
 import { useFormContext } from '../../FormContext';
 import Button from '@/components/buttons/Button';
-import ImageUpload from '@/components/form/ImageUpload/ImageUpload';
-import { uploadFile } from '@/app/[locale]/actions';
-import { useMongoUser } from '@/lib/mongo/MongoUserContext/MongoUserContext';
 import { useCallback, useState } from 'react';
 import FileUpload from '@/components/form/ImageUpload/FileUpload';
-import { Progress } from '@/components/ui/progress';
-import {
-  getStorage,
-  ref,
-  uploadBytesResumable,
-  getDownloadURL
-} from 'firebase/storage';
+import { ref, uploadBytesResumable, getDownloadURL } from 'firebase/storage';
 import { storage } from '@/lib/firebase/firebaseClient';
 
 export interface FileUploadProgress {

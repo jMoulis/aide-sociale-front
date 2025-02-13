@@ -5,9 +5,8 @@ import Dialog from '@/components/dialog/Dialog';
 import { useEffect, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import DetailRole from '../[id]/components/DetailRole';
-
 import client from '@/lib/mongo/initMongoClient';
-import { IPage, IRessource } from '@/lib/interfaces/interfaces';
+import { IPage } from '@/lib/interfaces/interfaces';
 import { ENUM_COLLECTIONS } from '@/lib/mongo/interfaces';
 
 type Props = {

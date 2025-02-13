@@ -102,8 +102,7 @@ function AiPromptTemplate() {
       } = await generateTemplate(updatedHistory);
 
       if (rawResponse) {
-        // eslint-disable-next-line no-console
-        console.log('rawResponse', rawResponse);
+        console.info('rawResponse', rawResponse);
       }
       if (error) {
         toast({

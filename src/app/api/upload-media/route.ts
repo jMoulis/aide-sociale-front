@@ -24,7 +24,7 @@ export async function POST(_request: Request): Promise<NextResponse> {
     //     // Get notified of client upload completion
     //     // ⚠️ This will not work during development (localhost),
     //     // Unless you use ngrok or a similar service to expose and test your local server
-    //     // eslint-disable-next-line no-console
+    //
     //     console.log('blob upload completed', blob, tokenPayload)
     //   },
     // })
