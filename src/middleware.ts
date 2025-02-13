@@ -5,7 +5,7 @@ import { COOKIE_SERVER_AUTH } from './lib/utils/auth/utils';
 import getToken from '@/lib/auth/JWTToken';
 
 const intlMiddleware = createMiddleware(routing);
-const isProtectedRoute = createRouteMatcher(['/admin(.*)', '/:locale/admin(.*)', '/dashboard(.*)', '/:locale/dashboard(.*)']);
+const isProtectedRoute = createRouteMatcher(['/admin(.*)', '/:locale/admin(.*)', '/dashboard(.*)', '/:locale/dashboard(.*), /my-app(.*)', '/:locale/my-app(.*)']);
 
 export default clerkMiddleware(async (auth, request) => {
   const { userId, redirectToSignIn } = await auth();

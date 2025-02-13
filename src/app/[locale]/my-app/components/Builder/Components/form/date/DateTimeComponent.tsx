@@ -5,7 +5,8 @@ import DateBuilderPlaceholder from './DateBuilderPlaceholder';
 
 function DateTimeComponent({ props, context }: PropsWithChildrenAndContext) {
   const { onUpdateForm, getFormFieldValue } = useFormContext();
-  const value = getFormFieldValue(context.dataset);
+  const value = getFormFieldValue(context);
+
   const handleDateInputChange = (date?: Date) => {
     const collectionSlug = context.dataset?.collectionSlug;
     const filedName = context.dataset?.connexion?.field;

@@ -1,12 +1,13 @@
 import React from 'react';
 import { PropsWithChildrenAndContext } from '@/lib/interfaces/interfaces';
-import { IVDOMNode } from '../../interfaces';
+import { ENUM_COMPONENTS, IVDOMNode } from '../../interfaces';
 import { ComponentsMap } from './ComponentsMap';
 
 export function renderVNode(
   node: IVDOMNode,
   path: string[],
-  routeParams?: Record<string, string>
+  routeParams?: Record<string, string>,
+  listIndex?: number
 ): React.ReactNode {
   const { type, children, props, _id } = node;
   const Component = ComponentsMap[type] || type || 'div';
@@ -26,11 +27,13 @@ export function renderVNode(
   // Recursively render children
   let childElements: React.ReactNode = null;
 
+  if (node.type === ENUM_COMPONENTS.LIST) {
+  }
   if (Array.isArray(children)) {
     childElements = children.map((childNode, i) => {
       return (
         <React.Fragment key={childNode._id ?? i}>
-          {renderVNode(childNode, newPath, routeParams)}
+          {renderVNode(childNode, newPath, routeParams, listIndex)}
         </React.Fragment>
       );
     });
@@ -39,6 +42,7 @@ export function renderVNode(
   const mergedProps: PropsWithChildrenAndContext = {
     context: {
       ...node.context,
+      listIndex,
       routeParams,
       path: newPath
     },

@@ -26,6 +26,7 @@ const FormComponent = forwardRef<HTMLFormElement, PropsWithChildrenAndContext>(
       }
 
       const collectionSlug = context.dataset?.collectionSlug;
+      console.log(context);
       if (!context.routeParams) {
         toast({
           title: 'Erreur',
@@ -55,15 +56,21 @@ const FormComponent = forwardRef<HTMLFormElement, PropsWithChildrenAndContext>(
       async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
         if (!context.dataset || context.isBuilderMode) {
+          toast({
+            title: 'Erreur',
+            description: 'Les données du formulaire sont manquantes'
+          });
           return;
         }
         const formElement = e.target as HTMLFormElement;
-        if (formElement.id !== formRef.current?.id) return; // Prevent form submission from other forms
+        if (formElement.id !== formRef.current?.id) {
+          console.warn('Form submission from other forms');
+          return;
+        } // Prevent form submission from other forms
         const collectionSlug = context.dataset.collectionSlug;
 
         if (!collectionSlug) {
-          // eslint-disable-next-line no-console
-          console.error('Collection slug is missing');
+          console.warn('Collection slug is missing');
           return;
         }
 
@@ -78,7 +85,7 @@ const FormComponent = forwardRef<HTMLFormElement, PropsWithChildrenAndContext>(
               _id: id,
               createdBy: user ? getUserSummary(user) : undefined,
               createdAt: new Date(),
-              data: { _id: id, ...formToSave.data },
+              data: { id: id, ...formToSave.data },
               templatePageVersionId: context.dataset.pageTemplateVersionId,
               collectionSlug
             };
@@ -120,7 +127,7 @@ const FormComponent = forwardRef<HTMLFormElement, PropsWithChildrenAndContext>(
     );
     return (
       <Form
-        ref={ref || formRef}
+        ref={context.isBuilderMode ? ref : formRef}
         id={formId}
         onSubmit={handleSubmit}
         className={cn('p-1', className)}

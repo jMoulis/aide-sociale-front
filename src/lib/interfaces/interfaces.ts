@@ -62,6 +62,7 @@ export interface ICollectionField {
   label: string;
   key: string;
   new: boolean;
+  system?: boolean;
 }
 export interface ICollection {
   _id: string;
@@ -96,12 +97,24 @@ export interface IDataset {
 export type VDOMProps = {
   [key: string]: any;
 }
+
+export type LinkAttributes = {
+  attr: string;
+  value?: string;
+  label: string,
+  page?: {
+    slug: string,
+    route: string,
+    name: string
+  }
+};
 export type VDOMContext = {
   [key: string]: any;
   styling?: {
     style?: CSSProperties;
     className?: string;
   },
+  "options-link"?: LinkAttributes[];
   isBuilderMode?: boolean;
   dataset?: IDataset;
   routeParams?: Record<string, string>;
@@ -318,3 +331,4 @@ export interface IContactInfo {
   type: string;
 }
 
+export type AsyncPayloadMap = { forms: Record<string, FormType>, lists: Record<string, any[]> };

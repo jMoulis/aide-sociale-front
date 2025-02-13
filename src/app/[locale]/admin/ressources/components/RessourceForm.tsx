@@ -11,7 +11,7 @@ import Actions from './Actions';
 import FormFooterAction from '@/components/dialog/FormFooterAction';
 import Button from '@/components/buttons/Button';
 import { IRessource } from '@/lib/interfaces/interfaces';
-import { ActionKey, ENUM_ACTIONS } from '@/lib/interfaces/enums';
+import { ActionKey } from '@/lib/interfaces/enums';
 
 type Props = {
   ressource: IRessource;
@@ -28,22 +28,6 @@ function RessourceForm({ ressource, onSave, onUpdateRessource }: Props) {
     onUpdateRessource((prev) => ({ ...prev, [name]: value }));
   };
   const handleSelectAction = (action: ActionKey, checked: boolean) => {
-    if (action === ENUM_ACTIONS.ALL) {
-      return onUpdateRessource((prev) => {
-        if (checked) {
-          return {
-            ...prev,
-            mandatoryPermissions: Object.values(ENUM_ACTIONS).filter(
-              (enumAction) => enumAction !== ENUM_ACTIONS.ALL
-            )
-          };
-        }
-        return {
-          ...prev,
-          mandatoryPermissions: []
-        };
-      });
-    }
     onUpdateRessource((prev) => {
       if (checked) {
         return {

@@ -44,7 +44,6 @@ function DetailRole({
   pages
 }: Props) {
   const tree = buildPageTree(pages || []);
-  console.log(tree);
   const organizationId = useOrganization();
   const defaultRole = {
     _id: nanoid(),
@@ -63,7 +62,6 @@ function DetailRole({
   const t = useTranslations('RoleSection');
   const tGlobal = useTranslations('GlobalSection');
 
-  console.log(pages);
   const handleSelectPermissions = (
     ressourceName: string,
     action: ENUM_ACTIONS,
@@ -71,24 +69,6 @@ function DetailRole({
   ) => {
     if (checked === 'indeterminate') {
       return;
-    }
-    if (action === ENUM_ACTIONS.ALL) {
-      return setPermissions((prev) => {
-        if (checked) {
-          return {
-            ...prev,
-            [ressourceName]: [
-              ENUM_ACTIONS.READ,
-              ENUM_ACTIONS.WRITE,
-              ENUM_ACTIONS.DELETE
-            ]
-          };
-        }
-        return {
-          ...prev,
-          [ressourceName]: []
-        };
-      });
     }
     setPermissions((prev) => {
       const current = prev[ressourceName] ?? [];

@@ -50,14 +50,20 @@ export const getUsersListExcerpt = async (users: User[]): Promise<UserExcerpt[]>
 
 export const getServerSideCurrentUserOrganizationId: () => Promise<string> = async () => {
   const authUser = await currentUser();
-  return authUser?.publicMetadata?.organizationId || "undefined";
+  try {
+    if (!authUser) throw new Error('No user found');
+
+    return authUser.publicMetadata?.organizationId || 'public';
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  } catch (error) {
+    redirect(ENUM_APP_ROUTES.SIGN_IN);
+  }
 }
 
 type WithOrganizationIdCallback<T> = (organizationFilter: { organizationId: string }) => Promise<T>;
 
 export async function withOrganizationId<T>(callback: WithOrganizationIdCallback<T>): Promise<T> {
   const organizationId = await getServerSideCurrentUserOrganizationId();
-
   return callback({ organizationId });
 }
 

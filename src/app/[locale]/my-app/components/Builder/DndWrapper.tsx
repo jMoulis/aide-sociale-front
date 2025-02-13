@@ -66,6 +66,7 @@ const DndWrapper: React.FC<DndWrapperProps> = ({
       const childElements = Array.from(
         childrenContainerRef.current.querySelectorAll('[data-id]')
       );
+      console.log(childElements.length);
       // For each child, get its bounding box.
       const bounds = childElements.map((el) => el.getBoundingClientRect());
       // Now, find the index where clientOffset.y is less than the midpoint of the child's vertical range.

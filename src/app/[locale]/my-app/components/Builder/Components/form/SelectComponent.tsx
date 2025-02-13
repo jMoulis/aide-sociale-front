@@ -7,7 +7,7 @@ function SelectComponent({ props, context }: PropsWithChildrenAndContext) {
   const [options, setOptions] = useState<SelectboxOption[]>([]);
   const { onInputChange, getFormFieldValue, getMultichoiceOptions } =
     useFormContext();
-  const value = getFormFieldValue(context.dataset);
+  const value = getFormFieldValue(context);
 
   useEffect(() => {
     getMultichoiceOptions(context.dataset).then((choices) =>

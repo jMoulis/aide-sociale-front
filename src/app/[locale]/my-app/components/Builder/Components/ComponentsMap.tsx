@@ -5,7 +5,7 @@ import React from 'react';
 import { PropsWithChildrenAndContext } from '@/lib/interfaces/interfaces';
 import FormComponent from './form/FormComponent';
 import InputComponent from './form/inputs/InputComponent';
-import RepeatComponent from './RepeatComponent';
+import ListComponent from './ListComponent';
 import TextComponent from './TextComponent';
 import TextareaComponent from './form/inputs/TextareaComponent';
 import RangeComponent from './form/RangeComponent';
@@ -20,6 +20,7 @@ import CheckboxComponent from './form/inputs/CheckboxComponent';
 import InputFileComponent from './form/inputs/InputFileComponent';
 import BlockComponent from './BlockComponent';
 import ButtonComponent from './ButtonComponent';
+import LinkComponent from './LinkComponent';
 
 type ComponentMapProps = {
   [key: string]: (params: PropsWithChildrenAndContext) => React.ReactNode;
@@ -53,6 +54,7 @@ export const ComponentsMap: ComponentMapProps = {
   [ENUM_COMPONENTS.FILE]: InputFileComponent,
   [ENUM_COMPONENTS.FORM]: FormComponent,
   [ENUM_COMPONENTS.INPUT]: InputComponent,
+  [ENUM_COMPONENTS.LINK]: LinkComponent,
   [ENUM_COMPONENTS.NUMERIC]: ({ props, context, node }) => (
     <InputComponent
       node={node}
@@ -66,7 +68,7 @@ export const ComponentsMap: ComponentMapProps = {
   [ENUM_COMPONENTS.RADIO]: RadioComponent,
   [ENUM_COMPONENTS.RANGE]: RangeComponent,
   [ENUM_COMPONENTS.RATING]: RatingComponent,
-  [ENUM_COMPONENTS.REPEAT]: RepeatComponent,
+  [ENUM_COMPONENTS.LIST]: ListComponent,
   [ENUM_COMPONENTS.SELECT]: SelectComponent,
   [ENUM_COMPONENTS.TEXT]: TextComponent,
   [ENUM_COMPONENTS.TEXTAREA]: TextareaComponent,

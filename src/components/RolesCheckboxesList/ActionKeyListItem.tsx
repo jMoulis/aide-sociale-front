@@ -1,6 +1,5 @@
 import { ActionKey, ENUM_ACTIONS } from '@/lib/interfaces/enums';
 import {
-  faCheck,
   faEdit,
   faEye,
   faTrash
@@ -11,8 +10,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 const actionKeyMap: Record<ActionKey, IconDefinition> = {
   [ENUM_ACTIONS.READ]: faEye,
   [ENUM_ACTIONS.WRITE]: faEdit,
-  [ENUM_ACTIONS.DELETE]: faTrash,
-  [ENUM_ACTIONS.ALL]: faCheck
+  [ENUM_ACTIONS.DELETE]: faTrash
 };
 type Props = {
   actionKey: ActionKey;

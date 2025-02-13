@@ -4,7 +4,8 @@ import Textarea from '@/components/form/Textarea';
 
 function TextareaComponent({ props, context }: PropsWithChildrenAndContext) {
   const { onInputChange, getFormFieldValue } = useFormContext();
-  const value = getFormFieldValue(context.dataset);
+  const value = getFormFieldValue(context);
+
   return (
     <Textarea
       {...props}

@@ -5,7 +5,7 @@ import { cn } from '@/lib/utils/shadcnUtils';
 
 function RangeComponent({ props, context }: PropsWithChildrenAndContext) {
   const { onUpdateForm, getFormFieldValue } = useFormContext();
-  const value = getFormFieldValue(context.dataset);
+  const value = getFormFieldValue(context);
 
   const handleChangeValue = (values: number[]) => {
     const collectionSlug = context.dataset?.collectionSlug;

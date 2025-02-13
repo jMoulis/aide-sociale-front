@@ -1,4 +1,9 @@
-import { IDataset, IUserSummary } from '@/lib/interfaces/interfaces';
+import {
+  AsyncPayloadMap,
+  IDataset,
+  IUserSummary,
+  VDOMContext
+} from '@/lib/interfaces/interfaces';
 import client from '@/lib/mongo/initMongoClient';
 import { ENUM_COLLECTIONS } from '@/lib/mongo/interfaces';
 import React, {
@@ -32,12 +37,13 @@ export type FormType = {
 };
 interface FormContextProps {
   forms: Record<string, FormType>;
+  lists: Record<string, any[]>;
   onInputChange: (
     e: React.ChangeEvent<
       HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
     >
   ) => void;
-  getFormFieldValue: (dataset?: IDataset) => Value;
+  getFormFieldValue: (context?: VDOMContext) => Value;
   getMultichoiceOptions: (
     dataset?: IDataset
   ) => Promise<{ label: string; value: string }[]>;
@@ -50,6 +56,7 @@ interface FormContextProps {
 // Define Context
 const FormContext = createContext<FormContextProps>({
   forms: {},
+  lists: {},
   onInputChange: () => {},
   getFormFieldValue: () => '',
   onUpdateForm: () => {},
@@ -64,16 +71,17 @@ export const useFormContext = () => {
   const memoizedContext = useMemo(() => context, [context]);
   return memoizedContext;
 };
+type FormProviderProps = {
+  children: React.ReactNode;
+  asyncData: AsyncPayloadMap;
+  isBuilderMode?: boolean;
+};
 export const FormProvider = ({
   children,
-  forms: initialForms,
+  asyncData: initialAsyncData,
   isBuilderMode
-}: {
-  children: React.ReactNode;
-  forms: Record<string, FormType>;
-  isBuilderMode?: boolean;
-}) => {
-  const [forms, setForms] = useState<Record<string, FormType>>(initialForms);
+}: FormProviderProps) => {
+  const [asyncData, setAsyncData] = useState<AsyncPayloadMap>(initialAsyncData);
 
   const onInputChange = useCallback(
     (
@@ -86,24 +94,25 @@ export const FormProvider = ({
       const collectionSlug = e.target.dataset.collection;
 
       if (!collectionSlug) {
-        // eslint-disable-next-line no-console
         console.error('Collection slug is missing');
         return;
       }
       if (!name) {
-        // eslint-disable-next-line no-console
         console.error('Name is missing');
         return;
       }
-      setForms((prev) => {
-        const formToUpdate = prev[collectionSlug] || { data: {} };
+      setAsyncData((prev) => {
+        const formToUpdate = prev.forms[collectionSlug] || { data: {} };
         return {
           ...prev,
-          [collectionSlug]: {
-            ...formToUpdate,
-            data: {
-              ...formToUpdate.data,
-              [name]: value
+          forms: {
+            ...prev.forms,
+            [collectionSlug]: {
+              ...formToUpdate,
+              data: {
+                ...formToUpdate.data,
+                [name]: value
+              }
             }
           }
         };
@@ -113,15 +122,18 @@ export const FormProvider = ({
   );
   const onUpdateForm = useCallback(
     (collectionSlug: string, fieldName: string, value?: Value) => {
-      setForms((prev) => {
-        const formToUpdate = prev[collectionSlug] || { data: {} };
+      setAsyncData((prev) => {
+        const formToUpdate = prev.forms[collectionSlug] || { data: {} };
         return {
           ...prev,
-          [collectionSlug]: {
-            ...formToUpdate,
-            data: {
-              ...formToUpdate.data,
-              [fieldName]: value
+          forms: {
+            ...prev.forms,
+            [collectionSlug]: {
+              ...formToUpdate,
+              data: {
+                ...formToUpdate.data,
+                [fieldName]: value
+              }
             }
           }
         };
@@ -130,16 +142,22 @@ export const FormProvider = ({
     []
   );
   const getFormFieldValue = useCallback(
-    (dataset?: IDataset) => {
+    (context?: VDOMContext) => {
       if (isBuilderMode) return '';
+      if (!context) return '';
+      const { dataset, listIndex } = context;
       if (!dataset?.connexion?.field) return '';
       if (!dataset?.collectionSlug) return '';
 
-      const form = forms[dataset.collectionSlug];
+      if (listIndex !== undefined) {
+        const list = asyncData.lists[dataset.collectionSlug];
+        return list?.[listIndex]?.data?.[dataset.connexion.field] || '';
+      }
+      const form = asyncData.forms[dataset.collectionSlug];
 
       return form?.data?.[dataset.connexion.field] || '';
     },
-    [forms, isBuilderMode]
+    [asyncData.forms, isBuilderMode, asyncData.lists]
   );
   const getMultichoiceOptions = useCallback(async (dataset: IDataset) => {
     const connexion = dataset?.connexion;
@@ -177,14 +195,15 @@ export const FormProvider = ({
   const value = useMemo(
     () =>
       ({
-        forms,
+        forms: asyncData.forms,
+        lists: asyncData.lists,
         onInputChange,
         getFormFieldValue,
         onUpdateForm,
         getMultichoiceOptions
       } as FormContextProps),
     [
-      forms,
+      asyncData,
       onInputChange,
       getFormFieldValue,
       onUpdateForm,

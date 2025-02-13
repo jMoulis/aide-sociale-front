@@ -1,17 +1,21 @@
 import React from 'react';
-import { IPageTemplateVersion } from '@/lib/interfaces/interfaces';
+import {
+  AsyncPayloadMap,
+  IPageTemplateVersion
+} from '@/lib/interfaces/interfaces';
 import { FormProvider } from '../../my-app/components/Builder/Components/FormContext';
 import { renderVNode } from '../../my-app/components/Builder/Components/renderVode';
 
 interface RenderLayoutProps {
   pageVersion: IPageTemplateVersion;
   routeParams?: any;
-  forms: Record<string, any>;
+  asyncData: AsyncPayloadMap;
 }
 
 export default function RenderLayout({
   pageVersion,
-  forms
+  asyncData,
+  routeParams
 }: RenderLayoutProps) {
   // Start with the root node's ID in the path array (or "root" if missing)
   const rootNode = pageVersion.vdom;
@@ -19,8 +23,8 @@ export default function RenderLayout({
   const initialPath = [initialId];
 
   return (
-    <FormProvider forms={forms}>
-      {renderVNode(rootNode, initialPath)}
+    <FormProvider asyncData={asyncData}>
+      {renderVNode(rootNode, initialPath, routeParams)}
     </FormProvider>
   );
 }

@@ -21,9 +21,9 @@ export default function IDE({ onChange, value, lang }: Props) {
     onChange(value || '');
   }
   return (
-    <div className='flex justify-center items-start pt-10'>
+    <div className='flex justify-center items-start pt-10 h-full'>
       <Editor
-        height='50vh'
+        height='100%'
         theme='vs-dark'
         defaultLanguage={lang ?? 'css'}
         onChange={handleEditorChange}

@@ -23,6 +23,7 @@ async function RenderPage({ slug }: Props) {
     user,
     templateSearch
   });
+
   if (templates.length === 0) {
     notFound();
   }
@@ -50,14 +51,14 @@ async function RenderPage({ slug }: Props) {
   if (!publishedVersion) {
     notFound();
   }
-  const forms = await collectAsyncPayloads(publishedVersion.vdom, routeParams);
+  const datas = await collectAsyncPayloads(publishedVersion.vdom, routeParams);
 
   return (
     <MainLayout>
       <DynamicPage
         page={publishedVersion}
         routeParams={routeParams}
-        forms={forms}
+        asyncData={datas}
       />
     </MainLayout>
   );

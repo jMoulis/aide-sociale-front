@@ -52,7 +52,7 @@ function InputFileComponent({ props, context }: PropsWithChildrenAndContext) {
   const [downloadURLs, setDownloadURLs] = useState<string[]>([]);
   const [progress, setProgress] = useState<Record<string, number>>({});
   const { getFormFieldValue, onUpdateForm } = useFormContext();
-  const value = getFormFieldValue(context.dataset);
+  const value = getFormFieldValue(context);
 
   const handleInputFileChange = useCallback(
     async (files: File[]) => {

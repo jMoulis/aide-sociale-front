@@ -9,7 +9,7 @@ function DateRangePickerComponent({
   context
 }: PropsWithChildrenAndContext) {
   const { onUpdateForm, getFormFieldValue } = useFormContext();
-  const value = getFormFieldValue(context.dataset);
+  const value = getFormFieldValue(context);
 
   const handleDateInputChange = (date?: DateRange) => {
     const collectionSlug = context.dataset?.collectionSlug;

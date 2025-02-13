@@ -92,28 +92,6 @@ function useColumnPermissionsRessources() {
             />
           );
         }
-      },
-      {
-        id: 'all',
-        header: t('all'),
-        cell: ({ row, table }) => {
-          const ressource = row.original;
-          const onSelectPermissions = table.options.meta?.onSelectPermissions;
-          const permissions = table.options.meta?.permissions;
-          return (
-            <Checkbox
-              name={row.original.name}
-              onCheckedChange={(checkState) =>
-                onSelectPermissions?.(
-                  ressource.name,
-                  ENUM_ACTIONS.ALL,
-                  checkState
-                )
-              }
-              checked={permissions?.[ressource.name]?.length === 3 || false}
-            />
-          );
-        }
       }
     ],
     // eslint-disable-next-line react-hooks/exhaustive-deps

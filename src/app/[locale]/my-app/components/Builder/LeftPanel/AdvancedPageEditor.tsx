@@ -1,5 +1,5 @@
 import { usePageBuilderStore } from '../../stores/pagebuilder-store-provider';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { IPageTemplateVersion } from '@/lib/interfaces/interfaces';
 import IDE from '../Properties/IDE';
 import Dialog from '@/components/dialog/Dialog';
@@ -12,6 +12,7 @@ import RenderLayout from '@/app/[locale]/app/components/RenderLayout';
 import { nanoid } from 'nanoid';
 
 function AdvancedPageEditor() {
+  const fullScreenRef = useRef<HTMLDivElement>(null);
   const selectedPageVersion = usePageBuilderStore((state) => state.pageVersion);
   const onEditPageTemplateVersion = usePageBuilderStore(
     (state) => state.onEditPageTemplateVersion
@@ -48,6 +49,12 @@ function AdvancedPageEditor() {
   const handleCopy = () => {
     navigator.clipboard.writeText(generatedUuid);
   };
+  const handleFullScreen = () => {
+    const elem = fullScreenRef.current;
+    if (elem) {
+      elem.requestFullscreen();
+    }
+  };
   if (!pageVersion) return null;
   return (
     <Dialog
@@ -63,13 +70,27 @@ function AdvancedPageEditor() {
       title={t('labels.advancedPageEditor')}
       Trigger={<Button>{t('labels.advancedPageEditor')}</Button>}>
       <div>
+        <Button onClick={handleFullScreen}>Full Screen</Button>
+
         <div className='grid grid-cols-2 gap-4'>
-          <IDE
-            onChange={handleChange}
-            lang='json'
-            value={JSON.stringify(pageVersion?.vdom || {}, undefined, 2)}
+          <div ref={fullScreenRef} className='h-[70vh]'>
+            <FormFooterAction>
+              <Button type='button' onClick={handleGenerateUuid}>
+                Generate id
+              </Button>
+              <code onClick={handleCopy}>{generatedUuid}</code>
+              <SaveButton type='button' onClick={handleSave} />
+            </FormFooterAction>
+            <IDE
+              onChange={handleChange}
+              lang='json'
+              value={JSON.stringify(pageVersion?.vdom || {}, undefined, 2)}
+            />
+          </div>
+          <RenderLayout
+            pageVersion={pageVersion}
+            asyncData={{ forms: {}, lists: {} }}
           />
-          <RenderLayout pageVersion={pageVersion} forms={[]} />
         </div>
         <FormFooterAction>
           <Button type='button' onClick={handleGenerateUuid}>

@@ -14,10 +14,11 @@ import MasterTemplateForm from '../MasterTemplateForm';
 import { useTranslations } from 'next-intl';
 
 type Props = {
+  parentPage?: ITreePage;
   page: ITreePage;
   add: boolean;
 };
-function PageListItem({ page, add }: Props) {
+function PageListItem({ page, add, parentPage }: Props) {
   const setSelectedPage = usePageBuilderStore((state) => state.setSelectedPage);
   const selectedPage = usePageBuilderStore((state) => state.selectedPage);
   const t = useTranslations('WebsiteSection');
@@ -40,14 +41,14 @@ function PageListItem({ page, add }: Props) {
           icon={faCog}
           create={false}
           initialPage={page}
-          parentId={page._id}
+          parentPage={parentPage}
         />
         {add ? (
           <DialogPageForm
             icon={faAdd}
             create={true}
             initialPage={null}
-            parentId={page._id}
+            parentPage={page}
           />
         ) : null}
       </div>

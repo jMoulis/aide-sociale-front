@@ -178,10 +178,9 @@ function MasterTemplateForm({ initialMasterTemplate, page }: Props) {
           />
         </FormField>
         <FormField>
-          <FormLabel required>{tMaster('labels.description')}</FormLabel>
+          <FormLabel>{tMaster('labels.description')}</FormLabel>
           <Textarea
             name='description'
-            required
             value={masterTemplate?.description || ''}
             onChange={handleInputChange}
           />

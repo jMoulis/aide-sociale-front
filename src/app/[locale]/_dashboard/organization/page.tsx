@@ -9,6 +9,10 @@ import { ENUM_APP_ROUTES } from '@/lib/interfaces/enums';
 export default async function OrganizationsHome() {
   const organizationId = await getServerSideCurrentUserOrganizationId();
 
+  if (!organizationId) {
+    redirect(`${ENUM_APP_ROUTES.ORGANIZATIONS}/create`);
+  }
+
   const { data: prevOrganization } = await clientMongoServer.get<IOrganization>(
     ENUM_COLLECTIONS.ORGANIZATIONS,
     {

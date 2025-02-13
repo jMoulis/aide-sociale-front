@@ -13,11 +13,12 @@ export enum ENUM_COMPONENTS {
   FILE = 'FILE',
   FORM = 'FORM',
   INPUT = 'INPUT',
+  LINK = "LINK",
   NUMERIC = 'NUMERIC',
   RADIO = 'RADIO',
   RANGE = 'RANGE',
   RATING = 'RATING',
-  REPEAT = 'REPEAT',
+  LIST = 'LIST',
   SELECT = 'SELECT',
   TEXT = 'TEXT',
   TEXTAREA = 'TEXTAREA',
@@ -38,6 +39,7 @@ export enum ENUM_PROPERTIES_COMPONENTS {
   AS = 'AS',
   DATASET = 'DATASET',
   GENERIC_INPUT = 'GENERIC_INPUT',
+  LINK_OPTIONS = 'LINK_OPTIONS'
 }
 export interface IVDOMNode {
   _id: string;

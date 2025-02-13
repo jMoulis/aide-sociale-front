@@ -80,7 +80,7 @@ function FieldDialogForm({
           </FormFooterAction>
         </Form>
       </Dialog>
-      {typeof onDeleteField === 'function' ? (
+      {typeof onDeleteField === 'function' && !field.system ? (
         <DeleteButton onClick={() => onDeleteField(field)}>
           <FontAwesomeIcon icon={faTrash} />
         </DeleteButton>

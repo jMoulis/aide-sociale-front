@@ -1,13 +1,13 @@
 'use server';
 
-import { IPage, IUser } from "@/lib/interfaces/interfaces";
+import { AsyncPayloadMap, IPage, IUser } from "@/lib/interfaces/interfaces";
 import clientMongoServer from "@/lib/mongo/initMongoServer";
 import { ENUM_COLLECTIONS } from "@/lib/mongo/interfaces";
 import { IMasterTemplate } from "@/lib/TemplateBuilder/interfaces";
 import { getServerSideCurrentUserOrganizationId, hasPermissions } from "@/lib/utils/auth/serverUtils";
 import { notFound } from "next/navigation";
 import { pathToRegexp } from "path-to-regexp";
-import { IVDOMNode } from "../my-app/components/interfaces";
+import { ENUM_COMPONENTS, IVDOMNode } from "../my-app/components/interfaces";
 import { FormType } from "../my-app/components/Builder/Components/FormContext";
 import { mergePermissions } from "@/lib/utils/auth/utils";
 
@@ -22,7 +22,7 @@ export async function matchRoute(segments: string[], organizationId: string) {
       params: {}
     };
   }
-  const path = `/${segments.join("/")}`;
+  const path = `${segments.join("/")}`;
   for (const page of pages) {
     const { regexp, keys } = pathToRegexp(page.route);
     const match = regexp.exec(path);
@@ -36,7 +36,6 @@ export async function matchRoute(segments: string[], organizationId: string) {
       return { page, params };
     }
   }
-
   return { page: null, params: {} };
 }
 export const fetchTemplateVersions = async (templateId: string, user: IUser) => {
@@ -84,7 +83,9 @@ export const resolveTemplates = async (page: IPage, user: IUser) => {
 export async function getPublishedMasterTemplates({ slug, user, templateSearch }: { slug: string[], user: IUser, templateSearch?: string | null }) {
   // const { rootRoute, childRoute } = isDetailPage(slug);
   const organizationId = await getServerSideCurrentUserOrganizationId();
-
+  if (!organizationId) {
+    notFound();
+  }
   try {
     const { page, params } = await matchRoute(slug, organizationId);
 
@@ -93,7 +94,9 @@ export async function getPublishedMasterTemplates({ slug, user, templateSearch }
     if (!page) {
       notFound();
     }
+
     if (!permissions[page?.slug]?.length) {
+      console.error('No permissions found for page', page);
       notFound();
     }
 
@@ -114,20 +117,47 @@ export async function getPublishedMasterTemplates({ slug, user, templateSearch }
 }
 
 
-type AsyncPayloadMap = Record<string, FormType>;
 
 // This function recursively traverses the vDOM and builds the payload map.
 export const collectAsyncPayloads = async (
   vdom: IVDOMNode,
   routeParams: Record<string, string>
 ): Promise<AsyncPayloadMap> => {
-  const resultMap: AsyncPayloadMap = {};
+  const resultMap: AsyncPayloadMap = {
+    forms: {},
+    lists: {}
+  };
 
+  const listTypeComponents = [ENUM_COMPONENTS.LIST, ENUM_COMPONENTS.RADIO];
   // Recursive helper function.
   const traverse = async (node: IVDOMNode) => {
     const dataset = node.context?.dataset;
 
-    if (dataset) {
+    if (listTypeComponents.includes(node.type) && dataset) {
+      if (
+        dataset.collectionSlug &&
+        dataset.connexion?.externalDataOptions?.labelField &&
+        dataset.connexion?.externalDataOptions?.valueField
+      ) {
+        const { collectionSlug } = dataset.connexion.externalDataOptions;
+
+        const { data } = await clientMongoServer.list<FormType>(
+          collectionSlug as ENUM_COLLECTIONS
+        );
+
+        if (data) {
+          resultMap.lists[collectionSlug] = data;
+        }
+      } else {
+        await clientMongoServer
+          .list<FormType>(dataset.collectionSlug as ENUM_COLLECTIONS)
+          .then(({ data }) => {
+            if (data) {
+              resultMap.lists[dataset.collectionSlug] = data;
+            }
+          });
+      }
+    } else if (dataset) {
       const { collectionSlug, connexion } = dataset;
       if (collectionSlug && connexion) {
         const { routeParam } = connexion;
@@ -139,10 +169,9 @@ export const collectAsyncPayloads = async (
               { _id: param }
             );
             if (form) {
-              resultMap[collectionSlug] = form;
+              resultMap.forms[collectionSlug] = form;
             }
           } catch (error) {
-            // eslint-disable-next-line no-console
             console.error(`Error fetching data for node ${node._id}:`, error);
           }
         }

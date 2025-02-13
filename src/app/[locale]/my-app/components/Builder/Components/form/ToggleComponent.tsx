@@ -5,7 +5,7 @@ import { cn } from '@/lib/utils/shadcnUtils';
 
 function ToggleComponent({ props, context }: PropsWithChildrenAndContext) {
   const { onUpdateForm, getFormFieldValue } = useFormContext();
-  const value = getFormFieldValue(context.dataset);
+  const value = getFormFieldValue(context);
 
   const handleChangeValue = (value: boolean) => {
     const collectionSlug = context.dataset?.collectionSlug;

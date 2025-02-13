@@ -1,20 +1,60 @@
-import { PropsWithChildrenAndContext } from '@/lib/interfaces/interfaces';
+import {
+  PropsWithChildrenAndContext,
+  VDOMContext
+} from '@/lib/interfaces/interfaces';
 import { useFormContext } from '../../FormContext';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { useEffect, useState } from 'react';
 import { SelectboxOption } from '@/components/form/Selectbox';
 import FormLabel from '@/components/form/FormLabel';
 
+const buildOptions = (
+  lists: Record<string, any[]>,
+  context: VDOMContext
+): SelectboxOption[] => {
+  const connexion = context?.dataset?.connexion;
+  if (!connexion) return [];
+
+  const externalDataOptions = connexion.externalDataOptions;
+  const staticDataOptions = connexion.staticDataOptions;
+  if (!externalDataOptions && !staticDataOptions) return [];
+
+  if (
+    externalDataOptions?.collectionSlug &&
+    externalDataOptions?.labelField &&
+    externalDataOptions?.valueField
+  ) {
+    const list = lists[externalDataOptions.collectionSlug];
+    if (!list) return [] as any;
+    const options = list.reduce((acc: SelectboxOption[], item) => {
+      if (!item[externalDataOptions.labelField]) return acc;
+      return [
+        ...acc,
+        {
+          label: item[externalDataOptions.labelField],
+          value: item[externalDataOptions.valueField]
+        }
+      ];
+    }, []);
+    return options;
+  }
+  if (staticDataOptions) {
+    return staticDataOptions.map((option) => ({
+      value: option,
+      label: option
+    }));
+  }
+  return [] as any;
+};
 function RadioComponent({ context, props }: PropsWithChildrenAndContext) {
-  const { onInputChange, getFormFieldValue, getMultichoiceOptions } =
-    useFormContext();
-  const [options, setOptions] = useState<SelectboxOption[]>([]);
-  const value = getFormFieldValue(context.dataset);
+  const { onInputChange, getFormFieldValue, lists } = useFormContext();
+  const [options, setOptions] = useState<SelectboxOption[]>(
+    buildOptions(lists, context)
+  );
+  const value = getFormFieldValue(context);
 
   useEffect(() => {
-    getMultichoiceOptions(context.dataset).then((choices) =>
-      setOptions(choices)
-    );
+    setOptions(buildOptions(lists, context));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [context.dataset]);
 
@@ -48,28 +88,26 @@ function RadioComponent({ context, props }: PropsWithChildrenAndContext) {
       </RadioGroup>
     );
   }
+
   return (
-    <>
-      {/* <FormLabel required={props.required}>{field.label}</FormLabel> */}
-      <RadioGroup
-        name={context.dataset?.connexion?.field}
-        defaultValue={value as string | undefined}
-        onValueChange={handleSelectOption}>
-        {options.map((opt: { label: string; value: string }, i: number) => (
-          <div key={i} className='flex items-center space-x-2'>
-            <RadioGroupItem
-              value={opt.value}
-              id={`${i}-${context.dataset?.connexion?.field}`}
-            />
-            <FormLabel
-              className='mb-0'
-              htmlFor={`${i}-${context.dataset?.connexion?.field}`}>
-              {opt.label}
-            </FormLabel>
-          </div>
-        ))}
-      </RadioGroup>
-    </>
+    <RadioGroup
+      name={context.dataset?.connexion?.field}
+      defaultValue={value as string | undefined}
+      onValueChange={handleSelectOption}>
+      {options.map((opt: { label: string; value: string }, i: number) => (
+        <div key={i} className='flex items-center space-x-2'>
+          <RadioGroupItem
+            value={opt.value}
+            id={`${i}-${context.dataset?.connexion?.field}`}
+          />
+          <FormLabel
+            className='mb-0'
+            htmlFor={`${i}-${context.dataset?.connexion?.field}`}>
+            {opt.label}
+          </FormLabel>
+        </div>
+      ))}
+    </RadioGroup>
   );
 }
 

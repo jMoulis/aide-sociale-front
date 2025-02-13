@@ -24,13 +24,11 @@ function RightPanel() {
       <h2 className='text-xl font-bold'>Properties</h2>
       {selectedNode ? (
         <>
-          <p className='text-gray-500 text-sm'>
+          <p className='text-gray-500 text-sm mb-2'>
             {`Editing "${selectedNode.type}" node (id: ${selectedNode._id})`}
           </p>
+          <DeleteButton onClick={() => onDeleteNode(selectedNodeId || null)} />
           <RenderParameters />
-          <DeleteButton onClick={() => onDeleteNode(selectedNodeId || null)}>
-            Delete
-          </DeleteButton>
         </>
       ) : (
         <p className='text-gray-500'>No element selected.</p>

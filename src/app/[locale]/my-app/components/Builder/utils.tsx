@@ -168,7 +168,6 @@ export function getBuilderEnhancements(
       builderContext.onClick(e, node);
     };
   }
-
   // Figure out if this node is selected
   const isSelected = node._id && node._id === builderContext.selectedNodeId;
   const selectionClass = isSelected

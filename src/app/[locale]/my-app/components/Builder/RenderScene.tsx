@@ -30,7 +30,9 @@ export const RenderScene = () => {
         head={
           <>
             <style
-              dangerouslySetInnerHTML={{ __html: `.frame-root { flex: 1; }` }}
+              dangerouslySetInnerHTML={{
+                __html: `.frame-root { flex: 1; } .frame-content { height: 100%; }`
+              }}
             />
             {stylesheets.map((href, index) => (
               <link key={index} rel='stylesheet' href={href} />

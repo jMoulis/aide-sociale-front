@@ -4,7 +4,8 @@ import { useFormContext } from '../../FormContext';
 
 function InputComponent({ props, context }: PropsWithChildrenAndContext) {
   const { onInputChange, getFormFieldValue } = useFormContext();
-  const value = getFormFieldValue(context.dataset);
+  const value = getFormFieldValue(context);
+
   return (
     <Input
       {...props}

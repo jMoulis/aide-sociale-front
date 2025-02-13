@@ -13,7 +13,7 @@ function PagesMenu() {
           <ul className='ml-4'>
             {page.children.map((subPage) => (
               <li key={subPage._id} className='flex mt-2'>
-                <PageListItem page={subPage} add={false} />
+                <PageListItem parentPage={page} page={subPage} add={false} />
               </li>
             ))}
           </ul>

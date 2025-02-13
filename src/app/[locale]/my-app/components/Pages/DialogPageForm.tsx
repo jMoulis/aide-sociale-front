@@ -18,18 +18,19 @@ import { nanoid } from 'nanoid';
 import { usePageBuilderStore } from '../stores/pagebuilder-store-provider';
 import SaveButton from '@/components/buttons/SaveButton';
 import CancelButton from '@/components/buttons/CancelButton';
+import DeleteButton from '@/components/buttons/DeleteButton';
 
 type Props = {
   icon: IconProp;
   create: boolean;
-  parentId?: string;
+  parentPage?: ITreePage;
   initialPage: ITreePage | null;
   buttonLabel?: string;
 };
 function DialogPageForm({
   icon,
   create,
-  parentId,
+  parentPage,
   initialPage,
   buttonLabel
 }: Props) {
@@ -45,7 +46,10 @@ function DialogPageForm({
     if (initialPage && !create) {
       setPage(initialPage);
     } else {
-      if (!organizationId || !website?._id) return;
+      if (!organizationId || !website?._id) {
+        console.warn('OrganizationId or websiteId is missing');
+        return;
+      }
       const defaultPage: ITreePage = {
         _id: nanoid(),
         name: '',
@@ -54,7 +58,7 @@ function DialogPageForm({
         organizationId,
         websiteId: website._id,
         route: '',
-        parentId,
+        parentId: parentPage?._id,
         masterTemplateIds: [],
         props: {},
         menus: [],
@@ -62,10 +66,13 @@ function DialogPageForm({
       };
       setPage(defaultPage);
     }
-  }, [initialPage, create, organizationId, website?._id, parentId]);
+  }, [initialPage, create, organizationId, website?._id, parentPage?._id]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (!page) return;
+    if (!page) {
+      console.warn('Page is missing');
+      return;
+    }
     const { name, value } = e.target;
     if (name === 'name') {
       setPage({ ...page, [name]: value, slug: slugifyFunction(value) });
@@ -77,7 +84,10 @@ function DialogPageForm({
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
-    if (!page) return;
+    if (!page) {
+      console.warn('Page is missing');
+      return;
+    }
     if (!create) {
       toastPromise(
         client.update<IPage>(
@@ -115,6 +125,15 @@ function DialogPageForm({
     }
     setOpen(false);
   };
+  const handleDeletePage = async () => {
+    if (initialPage) {
+      toastPromise(
+        client.delete(ENUM_COLLECTIONS.PAGES, initialPage._id),
+        t,
+        'delete'
+      );
+    }
+  };
   return (
     <Dialog
       open={open}
@@ -129,15 +148,23 @@ function DialogPageForm({
       <Form onSubmit={handleSubmit}>
         <FormField>
           <FormLabel>Name</FormLabel>
-          <Input name='name' value={page?.name} onChange={handleInputChange} />
-          <span>{page?.slug}</span>
+          <Input
+            name='name'
+            value={page?.name || ''}
+            onChange={handleInputChange}
+          />
+          <span className='text-xs text-gray-600 ml-2 mt-1'>{page?.slug}</span>
         </FormField>
         <FormField>
           <FormLabel>route</FormLabel>
-          <div>
+          <div className='flex'>
+            <span className='text-xs p-1 flex items-center border border-r-0 rounded-tl shadow-sm rounded-bl bg-gray-300'>
+              {parentPage?.route}
+            </span>
             <Input
+              className='rounded-tr rounded-br rounded-l-none'
               name='route'
-              value={page?.route}
+              value={page?.route || ''}
               onChange={handleInputChange}
               placeholder='route'
             />
@@ -145,6 +172,7 @@ function DialogPageForm({
         </FormField>
         <FormFooterAction>
           <SaveButton />
+          <DeleteButton onClick={handleDeletePage} />
           <CancelButton onClick={handleCancel} />
         </FormFooterAction>
       </Form>

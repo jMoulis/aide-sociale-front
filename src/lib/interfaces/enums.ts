@@ -43,8 +43,7 @@ export enum ENUM_API_ROUTES {
 export enum ENUM_ACTIONS {
   READ = 'READ',
   WRITE = 'WRITE',
-  DELETE = 'DELETE',
-  ALL = 'ALL'
+  DELETE = 'DELETE'
 }
 
 export type ActionKey = keyof typeof ENUM_ACTIONS;

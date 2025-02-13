@@ -5,7 +5,7 @@ import { CheckedState } from '@radix-ui/react-checkbox';
 
 function CheckboxComponent({ props, context }: PropsWithChildrenAndContext) {
   const { onInputChange, getFormFieldValue } = useFormContext();
-  const value = getFormFieldValue(context.dataset);
+  const value = getFormFieldValue(context);
 
   const handleInputChange = (state: CheckedState) => {
     onInputChange({
