@@ -93,11 +93,60 @@ export function getProjectSummary(project: IProject): IProjectSummary {
   };
 }
 
+// export function buildPageTree(pages: IPage[]): ITreePage[] {
+//   const pageMap = new Map<string, ITreePage>();
+//   pages.forEach((page) => {
+//     pageMap.set(page._id, { ...page, children: [] });
+//   });
+//   const tree: ITreePage[] = [];
+//   pages.forEach((page) => {
+//     if (page.parentId) {
+//       const parent = pageMap.get(page.parentId);
+//       if (parent) {
+//         parent.children.push(pageMap.get(page._id)!);
+//       }
+//     } else {
+//       tree.push(pageMap.get(page._id)!);
+//     }
+//   });
+//   const sorted = sortArray(tree.map((child) => ({
+//     ...child,
+//     children: sortArray(child.children, 'name')
+//   })), 'name');
+//   return sorted;
+// }
+
+
+function sortPages(pages: ITreePage[]): ITreePage[] {
+  pages.sort((a, b) => {
+    if (a.position !== undefined && b.position !== undefined) {
+      return a.position - b.position;
+    } else if (a.position !== undefined) {
+      return -1;
+    } else if (b.position !== undefined) {
+      return 1;
+    } else {
+      return 0;
+    }
+  });
+
+  pages.forEach((page) => {
+    if (page.children.length > 0) {
+      page.children = sortPages(page.children);
+    }
+  });
+
+  return pages;
+}
 export function buildPageTree(pages: IPage[]): ITreePage[] {
   const pageMap = new Map<string, ITreePage>();
+
+  // Initialize map with pages and empty children arrays
   pages.forEach((page) => {
     pageMap.set(page._id, { ...page, children: [] });
   });
+
+  // Build the tree structure
   const tree: ITreePage[] = [];
   pages.forEach((page) => {
     if (page.parentId) {
@@ -109,9 +158,7 @@ export function buildPageTree(pages: IPage[]): ITreePage[] {
       tree.push(pageMap.get(page._id)!);
     }
   });
-  const sorted = sortArray(tree.map((child) => ({
-    ...child,
-    children: sortArray(child.children, 'name')
-  })), 'name');
-  return sorted;
+
+  // Recursively sort the tree by position only
+  return sortPages(tree);
 }

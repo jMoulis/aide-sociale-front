@@ -8,11 +8,10 @@ type Props = {
   vdom: IVDOMNode | null;
   selectedNode: IVDOMNode | null;
 };
-export function useProperties({
-  config
-}: {
-  config: ElementConfigProps;
-}): Props {
+type UsePropertiesProps = {
+  config?: ElementConfigProps;
+};
+export function useProperties(params?: UsePropertiesProps): Props {
   const selectedNodeId = usePageBuilderStore(
     (state) => state.selectedNode?._id
   );
@@ -24,16 +23,12 @@ export function useProperties({
     [vdom, selectedNodeId]
   );
   const value = useMemo(() => {
-    if (config.context) {
-      return selectedNode?.context?.[config.propKey] || '';
+    if (!params?.config) return '';
+    if (params.config?.context) {
+      return selectedNode?.context?.[params.config.propKey] || '';
     }
-    return selectedNode?.props?.[config.propKey] || '';
-  }, [
-    config.propKey,
-    selectedNode?.props,
-    selectedNode?.context,
-    config.context
-  ]);
+    return selectedNode?.props?.[params.config.propKey] || '';
+  }, [selectedNode?.props, selectedNode?.context, params]);
 
   return {
     value,

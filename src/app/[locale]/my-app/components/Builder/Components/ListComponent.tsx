@@ -16,11 +16,10 @@ function ListComponent({
 }: PropsWithChildrenAndContext) {
   const { lists } = useFormContext();
   const [items, setItems] = useState<any[]>(
-    context.dataset?.collectionSlug
-      ? lists[context.dataset?.collectionSlug]
-      : []
+    (context.dataset?.collectionSlug &&
+      lists[context.dataset?.collectionSlug]) ||
+      []
   );
-
   const { className, ...rest } = props || {};
   const CustomTag = `${context.as || 'div'}` as any;
 
@@ -41,17 +40,17 @@ function ListComponent({
     },
     [context.path, context.routeParams]
   );
+
   const renderListChildren = useCallback(() => {
     const listChild = node.children?.[0];
-
-    return items.map((_, index) => {
+    return (items || []).map((_, index) => {
       return renderRecursiveNodeWithIndex(listChild, index);
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [items, node.children]);
 
   return (
-    <CustomTag className={cn('p-3', className)} {...rest}>
+    <CustomTag className={cn('p-1', className)} {...rest}>
       <ChildrenDndWrapper ref={dndChildrenContainerRef}>
         {context.isBuilderMode ? children : renderListChildren()}
       </ChildrenDndWrapper>

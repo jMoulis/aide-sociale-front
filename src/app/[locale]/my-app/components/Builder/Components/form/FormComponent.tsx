@@ -77,21 +77,41 @@ const FormComponent = forwardRef<HTMLFormElement, PropsWithChildrenAndContext>(
         const formToSave = forms[collectionSlug] || { data: {} };
         const isCreation = context.dataset?.isCreation;
 
+        const params = context.dataset?.connexion?.parametersToSave?.reduce(
+          (acc: Record<string, string>, param) => {
+            if (!context.routeParams) {
+              return acc;
+            }
+            if (!context.routeParams[param]) {
+              return acc;
+            }
+            acc[param] = context.routeParams[param];
+            return acc;
+          },
+          {}
+        );
+
         try {
-          if (isCreation) {
+          if (!user) {
+            console.warn('User is missing');
+            return;
+          }
+          if (!formToSave._id || isCreation) {
             const id = nanoid();
             const newEntry: FormType = {
               _id: id,
-              createdBy: user ? getUserSummary(user) : undefined,
+              createdBy: getUserSummary(user),
               createdAt: new Date(),
-              data: { id: id, ...formToSave.data },
+              data: { id, ...formToSave.data, ...params },
               templatePageVersionId: context.dataset.pageTemplateVersionId,
-              collectionSlug
+              collectionSlug,
+              organizationId: user.organizationId
             };
             await client.create<FormType>(
               collectionSlug as ENUM_COLLECTIONS,
               newEntry
             );
+            formElement.reset();
           } else if (formToSave._id) {
             await client.update<FormType>(
               collectionSlug as ENUM_COLLECTIONS,
@@ -101,7 +121,7 @@ const FormComponent = forwardRef<HTMLFormElement, PropsWithChildrenAndContext>(
               {
                 $set: {
                   updatedAt: new Date(),
-                  updatedBy: user ? getUserSummary(user) : undefined,
+                  updatedBy: getUserSummary(user),
                   data: formToSave.data,
                   templatePageVersionId: context.dataset.pageTemplateVersionId
                 }
@@ -113,7 +133,6 @@ const FormComponent = forwardRef<HTMLFormElement, PropsWithChildrenAndContext>(
             description: 'Sauvegardé avec succès',
             variant: 'success'
           });
-          formElement.reset();
         } catch (error: any) {
           toast({
             title: 'Erreur',
@@ -122,8 +141,9 @@ const FormComponent = forwardRef<HTMLFormElement, PropsWithChildrenAndContext>(
           });
         }
       },
-      [context.dataset, forms, user, context.isBuilderMode]
+      [context.dataset, context.isBuilderMode, context.routeParams, forms, user]
     );
+
     return (
       <Form
         ref={context.isBuilderMode ? ref : formRef}

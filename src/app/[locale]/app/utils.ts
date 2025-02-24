@@ -6,38 +6,12 @@ import { ENUM_COLLECTIONS } from "@/lib/mongo/interfaces";
 import { IMasterTemplate } from "@/lib/TemplateBuilder/interfaces";
 import { getServerSideCurrentUserOrganizationId, hasPermissions } from "@/lib/utils/auth/serverUtils";
 import { notFound } from "next/navigation";
-import { pathToRegexp } from "path-to-regexp";
 import { ENUM_COMPONENTS, IVDOMNode } from "../my-app/components/interfaces";
 import { FormType } from "../my-app/components/Builder/Components/FormContext";
 import { mergePermissions } from "@/lib/utils/auth/utils";
+import { isValidJSON } from "@/lib/utils/utils";
+import { matchRoute } from "./matchRouter";
 
-
-export async function matchRoute(segments: string[], organizationId: string) {
-  const { data: pages } = await clientMongoServer.list<IPage>(ENUM_COLLECTIONS.PAGES, {
-    organizationId,
-  });
-  if (!pages) {
-    return {
-      page: null,
-      params: {}
-    };
-  }
-  const path = `${segments.join("/")}`;
-  for (const page of pages) {
-    const { regexp, keys } = pathToRegexp(page.route);
-    const match = regexp.exec(path);
-
-    if (match) {
-      // Extract dynamic parameters
-      const params = keys.reduce((acc: any, key, index) => {
-        acc[key.name] = match[index + 1];
-        return acc;
-      }, {});
-      return { page, params };
-    }
-  }
-  return { page: null, params: {} };
-}
 export const fetchTemplateVersions = async (templateId: string, user: IUser) => {
   const { data: masterTemplates } = await clientMongoServer.list<IMasterTemplate>(
     ENUM_COLLECTIONS.TEMPLATES_MASTER,
@@ -88,13 +62,13 @@ export async function getPublishedMasterTemplates({ slug, user, templateSearch }
   }
   try {
     const { page, params } = await matchRoute(slug, organizationId);
-
     // Check is user can access to route page. (in roles admin page)
-    const permissions = mergePermissions(user?.roles || []);
     if (!page) {
+      console.warn('No page found for slug', slug);
       notFound();
     }
 
+    const permissions = mergePermissions(user?.roles || []);
     if (!permissions[page?.slug]?.length) {
       console.error('No permissions found for page', page);
       notFound();
@@ -106,6 +80,7 @@ export async function getPublishedMasterTemplates({ slug, user, templateSearch }
       const masterTemplate = publishedMasterTemplateVersions.find((masterTemplate) => masterTemplate.publishedVersion?._id === templateSearch);
 
       if (!masterTemplate) {
+        console.warn('No template found for slug', slug);
         notFound();
       }
       return { templates: [masterTemplate], routeParams: params };
@@ -116,22 +91,49 @@ export async function getPublishedMasterTemplates({ slug, user, templateSearch }
   }
 }
 
+const extractAndReplacePlaceholders = (query: string | null, systemParams: Record<string, string>): Record<string, any> | null => {
+  if (!query) return null;
+  const placeholders = query.match(/{{:([a-zA-Z0-9]+)}}/g);
+  if (!placeholders) {
+    if (isValidJSON(query)) {
+      return JSON.parse(query);
+    }
+    return null;
+  }
+  const queryBuilt = placeholders.reduce((acc, placeholder) => {
+    const key = placeholder.replace(/{{:|}}/g, '');
+    return acc.replace(placeholder, systemParams[key]);
+  }, query);
 
+  if (isValidJSON(queryBuilt)) {
+    return JSON.parse(queryBuilt);
+  }
+  return null;
+};
+
+const getParamValue = (param: string, systemParams: Record<string, string>, routeParams: Record<string, string>, staticDataOptions?: string[]) => {
+  if (systemParams[param]) {
+    return systemParams[param];
+  }
+  return routeParams[param] || staticDataOptions?.find((option) => option === param);
+}
 
 // This function recursively traverses the vDOM and builds the payload map.
 export const collectAsyncPayloads = async (
   vdom: IVDOMNode,
-  routeParams: Record<string, string>
+  routeParams: Record<string, string>,
+  systemParams: Record<string, string>
 ): Promise<AsyncPayloadMap> => {
   const resultMap: AsyncPayloadMap = {
     forms: {},
     lists: {}
   };
 
-  const listTypeComponents = [ENUM_COMPONENTS.LIST, ENUM_COMPONENTS.RADIO];
+  const listTypeComponents = [ENUM_COMPONENTS.LIST, ENUM_COMPONENTS.RADIO, ENUM_COMPONENTS.SELECT];
   // Recursive helper function.
   const traverse = async (node: IVDOMNode) => {
     const dataset = node.context?.dataset;
+    const query = extractAndReplacePlaceholders(dataset?.connexion?.query || null, systemParams);
 
     if (listTypeComponents.includes(node.type) && dataset) {
       if (
@@ -140,17 +142,18 @@ export const collectAsyncPayloads = async (
         dataset.connexion?.externalDataOptions?.valueField
       ) {
         const { collectionSlug } = dataset.connexion.externalDataOptions;
-
-        const { data } = await clientMongoServer.list<FormType>(
-          collectionSlug as ENUM_COLLECTIONS
-        );
-
-        if (data) {
-          resultMap.lists[collectionSlug] = data;
+        if (query) {
+          const { data } = await clientMongoServer.list<FormType>(
+            collectionSlug as ENUM_COLLECTIONS,
+            query
+          );
+          if (data) {
+            resultMap.lists[collectionSlug] = data;
+          }
         }
-      } else {
+      } else if (query) {
         await clientMongoServer
-          .list<FormType>(dataset.collectionSlug as ENUM_COLLECTIONS)
+          .list<FormType>(dataset.collectionSlug as ENUM_COLLECTIONS, query)
           .then(({ data }) => {
             if (data) {
               resultMap.lists[dataset.collectionSlug] = data;
@@ -161,7 +164,8 @@ export const collectAsyncPayloads = async (
       const { collectionSlug, connexion } = dataset;
       if (collectionSlug && connexion) {
         const { routeParam } = connexion;
-        const param = routeParam ? routeParams[routeParam] : undefined;
+        const param = getParamValue(routeParam as string, systemParams, routeParams, connexion.staticDataOptions);
+
         if (param) {
           try {
             const { data: form } = await clientMongoServer.get<FormType>(

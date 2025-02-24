@@ -1,4 +1,7 @@
-import { getMongoUser } from '@/lib/utils/auth/serverUtils';
+import {
+  getMongoUser,
+  getServerSideCurrentUserOrganizationId
+} from '@/lib/utils/auth/serverUtils';
 import { headers } from 'next/headers';
 import { collectAsyncPayloads, getPublishedMasterTemplates } from './utils';
 import { notFound } from 'next/navigation';
@@ -12,6 +15,7 @@ type Props = {
 async function RenderPage({ slug }: Props) {
   const TEMPLATE_SEARCH_NAME = 'template';
   const user = await getMongoUser();
+  const organizationId = await getServerSideCurrentUserOrganizationId();
   const headerList = await headers();
   // set in middleware
   const pathname = headerList.get('x-current-path');
@@ -25,6 +29,7 @@ async function RenderPage({ slug }: Props) {
   });
 
   if (templates.length === 0) {
+    console.warn('No templates found for page', slug);
     notFound();
   }
   if (templates.length > 1) {
@@ -48,10 +53,16 @@ async function RenderPage({ slug }: Props) {
     );
   }
   const publishedVersion = templates[0]?.publishedVersion;
+
   if (!publishedVersion) {
     notFound();
   }
-  const datas = await collectAsyncPayloads(publishedVersion.vdom, routeParams);
+
+  const datas = await collectAsyncPayloads(publishedVersion.vdom, routeParams, {
+    organizationId,
+    userId: user._id,
+    ...routeParams
+  });
 
   return (
     <MainLayout>

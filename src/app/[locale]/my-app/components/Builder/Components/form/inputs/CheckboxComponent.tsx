@@ -13,7 +13,8 @@ function CheckboxComponent({ props, context }: PropsWithChildrenAndContext) {
         name: context.dataset?.connexion?.field,
         value: state,
         dataset: {
-          collection: context.dataset?.collectionSlug
+          collection: context.dataset?.collectionSlug,
+          listindex: context.listIndex
         } as any
       }
     } as React.ChangeEvent<HTMLInputElement>);

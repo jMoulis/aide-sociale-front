@@ -5,6 +5,7 @@ import PageBuilderHeader from './PageBuilderHeader';
 import PageBuilderSkeleton from './PageBuilderSkeleton';
 import { useInitializeBuilder } from './useInitializeBuilder';
 import { RenderScene } from './RenderScene';
+import AppProvider from '@atlaskit/app-provider';
 
 export const PageBuilderEditor = () => {
   const loading = useInitializeBuilder();
@@ -13,9 +14,11 @@ export const PageBuilderEditor = () => {
     <div className='flex-col flex'>
       <PageBuilderHeader />
       <div className='flex max-w-[calc(100vw_-_250px)]'>
-        <LeftPanel />
-        <RenderScene />
-        <RightPanel />
+        <AppProvider>
+          <LeftPanel />
+          <RenderScene />
+          <RightPanel />
+        </AppProvider>
       </div>
     </div>
   );

@@ -2,7 +2,7 @@ import Button from '@/components/buttons/Button';
 import Dialog from '@/components/dialog/Dialog';
 import { IconProp } from '@fortawesome/fontawesome-svg-core';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { IPage, ITreePage } from '@/lib/interfaces/interfaces';
 import Form from '@/components/form/Form';
 import FormField from '@/components/form/FormField';
@@ -42,31 +42,34 @@ function DialogPageForm({
   const website = usePageBuilderStore((state) => state.website);
   const organizationId = usePageBuilderStore((state) => state.organizationId);
 
+  const defaultPage = useMemo(() => {
+    if (!organizationId || !website?._id) {
+      console.warn('OrganizationId or websiteId is missing');
+      return;
+    }
+    return {
+      _id: nanoid(),
+      name: '',
+      slug: '',
+      createdAt: new Date(),
+      organizationId,
+      websiteId: website._id,
+      route: parentPage?.route ? `${parentPage.route}` : '',
+      parentId: parentPage?._id,
+      masterTemplateIds: [],
+      props: {},
+      menus: [],
+      children: []
+    };
+  }, [organizationId, website?._id, parentPage?._id, parentPage?.route]);
   useEffect(() => {
     if (initialPage && !create) {
       setPage(initialPage);
     } else {
-      if (!organizationId || !website?._id) {
-        console.warn('OrganizationId or websiteId is missing');
-        return;
-      }
-      const defaultPage: ITreePage = {
-        _id: nanoid(),
-        name: '',
-        slug: '',
-        createdAt: new Date(),
-        organizationId,
-        websiteId: website._id,
-        route: '',
-        parentId: parentPage?._id,
-        masterTemplateIds: [],
-        props: {},
-        menus: [],
-        children: []
-      };
+      if (!defaultPage) return;
       setPage(defaultPage);
     }
-  }, [initialPage, create, organizationId, website?._id, parentPage?._id]);
+  }, [create, defaultPage, initialPage]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!page) {
@@ -119,7 +122,8 @@ function DialogPageForm({
 
   const handleCancel = () => {
     if (create) {
-      setPage(null);
+      if (!defaultPage) return;
+      setPage(defaultPage);
     } else {
       setPage(initialPage);
     }
@@ -169,6 +173,16 @@ function DialogPageForm({
               placeholder='route'
             />
           </div>
+        </FormField>
+        <FormField>
+          <FormLabel>Position</FormLabel>
+          <Input
+            name='position'
+            type='number'
+            value={page?.position || ''}
+            onChange={handleInputChange}
+            placeholder='position'
+          />
         </FormField>
         <FormFooterAction>
           <SaveButton />

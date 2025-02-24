@@ -21,7 +21,7 @@ function LeftPanel() {
           </li>
         ))}
       </ul>
-      <div className='w-[250px] flex'>
+      <div className='flex'>
         {selectedTab === 'elements' ? <ElementsTab /> : null}
         {selectedTab === 'styles' ? <StylesTab /> : null}
       </div>

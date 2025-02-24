@@ -18,6 +18,7 @@ export enum ENUM_COLLECTIONS {
   WEB_APP_ELEMENTS = 'web-app-elements',
   PAGE_TEMPLATES = 'page-templates',
   PAGES = 'pages',
+  SYSTEM_PARAMS = 'system-params',
 }
 
 export interface IAutocompleteResponse<T> {

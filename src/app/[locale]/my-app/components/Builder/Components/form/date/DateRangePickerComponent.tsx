@@ -15,7 +15,7 @@ function DateRangePickerComponent({
     const collectionSlug = context.dataset?.collectionSlug;
     const filedName = context.dataset?.connexion?.field;
     if (!collectionSlug || !filedName) return;
-    onUpdateForm(collectionSlug, filedName, date);
+    onUpdateForm(collectionSlug, filedName, date, context.listIndex);
   };
 
   if (context.isBuilderMode) return <DateBuilderPlaceholder {...props} />;

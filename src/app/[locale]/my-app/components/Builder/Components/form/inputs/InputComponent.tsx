@@ -11,6 +11,7 @@ function InputComponent({ props, context }: PropsWithChildrenAndContext) {
       {...props}
       {...context.input}
       data-collection={context.dataset?.collectionSlug}
+      data-listindex={context.listIndex}
       onChange={onInputChange}
       value={value}
       name={context.dataset?.connexion?.field}

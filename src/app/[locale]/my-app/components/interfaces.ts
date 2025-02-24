@@ -5,32 +5,38 @@ export enum ENUM_COMPONENTS {
   BLOCK = 'BLOCK',
   BUTTON = 'BUTTON',
   CHECKBOX = 'CHECKBOX',
+  COLLAPSE = 'COLLAPSE',
+  COLLAPSECONTENT = 'COLLAPSECONTENT',
+  COLLAPSETRIGGER = 'COLLAPSETRIGGER',
   COLOR = 'COLOR',
   DATE = 'DATE',
   DATETIME = 'DATETIME',
   DATERANGE = 'DATERANGE',
+  DIALOG = 'DIALOG',
+  DIALOGTRIGGER = 'DIALOGTRIGGER',
+  DIALOGCONTENT = 'DIALOGCONTENT',
   EMAIL = 'EMAIL',
   FILE = 'FILE',
   FORM = 'FORM',
   INPUT = 'INPUT',
+  IMAGE = 'IMAGE',
   LINK = "LINK",
   NUMERIC = 'NUMERIC',
   RADIO = 'RADIO',
   RANGE = 'RANGE',
   RATING = 'RATING',
   LIST = 'LIST',
+  SCHEDULER = 'SCHEDULER',
+  SCHEDULER_FORM = 'SCHEDULER_FORM',
   SELECT = 'SELECT',
+  TABS = 'TABS',
+  TABSLIST = 'TABSLIST',
+  TABSCONTENT = 'TABSCONTENT',
+  TABSTRIGGER = 'TABSTRIGGER',
   TEXT = 'TEXT',
   TEXTAREA = 'TEXTAREA',
   TIME = 'TIME',
   TOGGLE = 'TOGGLE',
-
-  // temp
-  ROW = 'ROW',
-  COLUMN = 'COLUMN',
-  COMPONENT = 'COMPONENT',
-  SIDEBAR_ITEM = 'SIDEBAR_ITEM',
-
 }
 
 export enum ENUM_PROPERTIES_COMPONENTS {
@@ -39,16 +45,19 @@ export enum ENUM_PROPERTIES_COMPONENTS {
   AS = 'AS',
   DATASET = 'DATASET',
   GENERIC_INPUT = 'GENERIC_INPUT',
-  LINK_OPTIONS = 'LINK_OPTIONS'
+  LINK_OPTIONS = 'LINK_OPTIONS',
+  AI_FORM = 'AI_FORM',
 }
 export interface IVDOMNode {
   _id: string;
   inline?: boolean;
   type: ENUM_COMPONENTS;
+  name?: string;
   context: VDOMContext;
   props: VDOMProps
   path?: string[];
   children: IVDOMNode[];
+  isOpen?: boolean;
 }
 export interface RenderElementProps {
   node: IVDOMNode;
@@ -63,13 +72,17 @@ export type ElementConfigProps = {
   propKey: string;
   component: ENUM_PROPERTIES_COMPONENTS;
   context: boolean;
-  options?: ('SELECT_COLLECTION' | 'FIELDS' | 'CREATE' | 'ROUTE_PARAM' | 'STATIC_OPTIONS')[];
+  options?: ('SELECT_COLLECTION' | 'FIELDS' | 'CREATE' | 'ROUTE_PARAM' | 'STATIC_OPTIONS' | 'QUERY' | 'AI_FORM')[];
 }
 export interface IElementConfig {
   _id: string;
   inline?: boolean;
   label: string;
   type: ENUM_COMPONENTS;
+  categories?: string[];
+  tags?: { tag: string; types: string[], default?: boolean }[];
+  instructions?: string;
+  exampleHtml?: string;
   parameters?: ElementConfigProps[];
   vdom: IVDOMNode;
 }

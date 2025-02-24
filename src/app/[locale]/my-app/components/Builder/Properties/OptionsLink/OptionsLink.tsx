@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import FormField from '@/components/form/FormField';
 import FormLabel from '@/components/form/FormLabel';
 import Input from '@/components/form/Input';
@@ -9,6 +9,8 @@ import Selectbox from '@/components/form/Selectbox';
 import DeleteButton from '@/components/buttons/DeleteButton';
 import { IPage, LinkAttributes } from '@/lib/interfaces/interfaces';
 import SelectPages from './SelectPages';
+// import { CheckedState } from '@radix-ui/react-checkbox';
+// import { useDataset } from '../Dataset/useDataset';
 
 const options = [
   {
@@ -74,10 +76,14 @@ type Props = {
 function OptionsLink({ config }: Props) {
   const { value } = useProperties({ config });
   const [attributes, setAttributes] = useState<LinkAttributes[]>(value || []);
+
+  useEffect(() => {
+    setAttributes(value || []);
+  }, [value]);
+
   const onUpdateNodeProperty = usePageBuilderStore(
     (state) => state.onUpdateNodeProperty
   );
-
   const handleSelectValue = (event: React.ChangeEvent<HTMLSelectElement>) => {
     const selectedOption = options.find(
       (option) => option.value === event.target.value
@@ -112,22 +118,34 @@ function OptionsLink({ config }: Props) {
 
   const handleSelectPage = (page: IPage | null, index: number) => {
     if (!page) return;
-    const newAttributes = [...attributes];
-    newAttributes[index].page = {
-      route: page.route,
-      slug: page.slug,
-      name: page.name
-    };
+    const newAttributes = [...attributes].map((attribute, i) => {
+      if (i === index) {
+        return {
+          ...attribute,
+          page: {
+            route: page.route,
+            slug: page.slug,
+            name: page.name
+          }
+        };
+      }
+      return attribute;
+    });
     setAttributes(newAttributes);
     onUpdateNodeProperty({ [config.propKey]: newAttributes }, config.context);
   };
 
   const handleDeletePageLink = (index: number) => {
-    const newAttributes = [...attributes];
-    newAttributes[index].page = undefined;
+    const newAttributes = [...attributes].map((attribute, i) => {
+      if (i !== index) {
+        return attribute;
+      }
+      return { ...attribute, page: undefined };
+    });
     setAttributes(newAttributes);
     onUpdateNodeProperty({ [config.propKey]: newAttributes }, config.context);
   };
+
   return (
     <FormField>
       <FormLabel className='block'>

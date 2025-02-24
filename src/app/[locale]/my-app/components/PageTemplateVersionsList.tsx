@@ -71,35 +71,39 @@ function PageTemplateVersionsList({ masterTemplate, page }: Props) {
   };
   return (
     <ul className='ml-2'>
-      <li className='flex gap-2 items-center justify-between'>
-        <span className='text-sm'>Versions</span>
-        <Button onClick={handleCreateVersion}>
+      <li className='gap-2 items-center justify-between'>
+        <Button
+          className='w-full justify-between'
+          onClick={handleCreateVersion}>
+          <span className='text-xs '>Versions</span>
           <FontAwesomeIcon icon={faAdd} />
         </Button>
+        <ul className='ml-4'>
+          {pageTemplateVersions?.map((pageTemplateVersion) => (
+            <li key={pageTemplateVersion._id} className='mt-1'>
+              <Button
+                className={`w-full justify-between ${
+                  pageTemplateVersion.archived
+                    ? 'bg-indigo-500 text-white'
+                    : selectedVersionPage?._id === pageTemplateVersion._id
+                    ? 'bg-black text-white'
+                    : ''
+                }`}
+                onClick={() => handleSelectPageVersion(pageTemplateVersion)}>
+                <span className='text-xs'>
+                  Version: {pageTemplateVersion.version}
+                </span>
+                {pageTemplateVersion.published ? <PublishedDot /> : null}
+                <div>
+                  {pageTemplateVersion.archived ? (
+                    <FontAwesomeIcon icon={faBoxArchive} />
+                  ) : null}
+                </div>
+              </Button>
+            </li>
+          ))}
+        </ul>
       </li>
-      {pageTemplateVersions?.map((pageTemplateVersion) => (
-        <li key={pageTemplateVersion._id} className='mt-1'>
-          <Button
-            className={`w-full justify-between ${
-              pageTemplateVersion.archived
-                ? 'bg-indigo-500 text-white'
-                : selectedVersionPage?._id === pageTemplateVersion._id
-                ? 'bg-black text-white'
-                : ''
-            }`}
-            onClick={() => handleSelectPageVersion(pageTemplateVersion)}>
-            <span className='text-sm'>
-              Version: {pageTemplateVersion.version}
-            </span>
-            {pageTemplateVersion.published ? <PublishedDot /> : null}
-            <div>
-              {pageTemplateVersion.archived ? (
-                <FontAwesomeIcon icon={faBoxArchive} />
-              ) : null}
-            </div>
-          </Button>
-        </li>
-      ))}
     </ul>
   );
 }

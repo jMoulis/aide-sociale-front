@@ -14,7 +14,7 @@ function PageBuilderDesignStyle() {
               }
               .selected-element-block::before {
                 border: 2px dashed green;
-                }
+              }
         `}</style>
   );
 }

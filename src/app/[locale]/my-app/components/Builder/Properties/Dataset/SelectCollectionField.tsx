@@ -48,6 +48,7 @@ function SelectCollectionField({
             onValueChange={onSelectCollection}
             defaultValue={currentDataset?.collectionSlug || ''}
             value={currentDataset?.collectionSlug || ''}
+            selectedCollection={collectionsSelectedCollection}
             triggerLabel={
               parentForm?.context?.dataset?.collectionName ||
               currentDataset?.collectionName ||
@@ -55,7 +56,8 @@ function SelectCollectionField({
             }
           />
 
-          {config.options?.includes('SELECT_COLLECTION') ? (
+          {config.options?.includes('SELECT_COLLECTION') &&
+          !collectionsSelectedCollection?.system ? (
             <>
               {collectionsSelectedCollection ? (
                 <CollectionFormDialog

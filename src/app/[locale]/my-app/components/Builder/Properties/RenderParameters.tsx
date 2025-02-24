@@ -1,4 +1,5 @@
 import { usePageBuilderStore } from '../../stores/pagebuilder-store-provider';
+import DefaultParameters from './DefaultParameters';
 import { PropertiesComponent } from './PropertiesComponent';
 
 function RenderParameters() {
@@ -7,6 +8,7 @@ function RenderParameters() {
   if (!elementConfig) return null;
   return (
     <div>
+      <DefaultParameters />
       {elementConfig?.parameters &&
         elementConfig.parameters.map((config, key) => {
           const PropertyComponent = PropertiesComponent[config.component];

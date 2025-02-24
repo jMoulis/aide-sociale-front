@@ -1,3 +1,4 @@
+import RequiredFlag from '@/components/form/RequiredFlag';
 import {
   Select,
   SelectContent,
@@ -13,6 +14,7 @@ type Props = {
   value?: string;
   triggerLabel: string;
   collections: Record<string, ICollection>;
+  selectedCollection: ICollection | null;
 };
 function SelectboxCollections({
   disabled,
@@ -20,7 +22,8 @@ function SelectboxCollections({
   defaultValue = '',
   value = '',
   triggerLabel,
-  collections
+  collections,
+  selectedCollection
 }: Props) {
   return (
     <Select
@@ -29,12 +32,22 @@ function SelectboxCollections({
       defaultValue={defaultValue}
       value={value}>
       <SelectTrigger className='w-[180px]'>
-        <span style={{ textAlign: 'left' }}>{triggerLabel}</span>
+        <div>
+          <span style={{ textAlign: 'left' }}>{triggerLabel}</span>
+          {selectedCollection?.system ? (
+            <RequiredFlag className='m-0 w-fit' label='System' />
+          ) : null}
+        </div>
       </SelectTrigger>
       <SelectContent>
         {Object.values(collections).map((collection) => (
           <SelectItem key={collection.slug} value={collection.slug}>
-            {collection.name}
+            <div className='flex flex-col'>
+              <span>{collection.name}</span>
+              {collection.system ? (
+                <RequiredFlag className='m-0 w-fit' label='System' />
+              ) : null}
+            </div>
           </SelectItem>
         ))}
       </SelectContent>

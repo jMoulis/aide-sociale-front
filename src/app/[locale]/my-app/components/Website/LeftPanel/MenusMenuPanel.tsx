@@ -33,7 +33,9 @@ const MenusMenuPanel = () => {
           <div className='flex items-center justify-between border disabled:cursor-not-allowed w-full disabled:opacity-50 shadow-sm border-input rounded-md px-3 py-1 md:text-sm text-lg'>
             <button className='grid grid-cols-[20px_1fr] w-full items-center'>
               <FontAwesomeIcon icon={open ? faChevronDown : faChevronRight} />
-              <span className='text-left'>Menus</span>
+              <span className='text-left whitespace-nowrap overflow-hidden'>
+                Menus
+              </span>
             </button>
             <MenusBuilder
               menus={website?.menus ?? []}

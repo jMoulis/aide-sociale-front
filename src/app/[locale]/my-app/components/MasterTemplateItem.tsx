@@ -56,17 +56,14 @@ function MasterTemplateItem({ masterTemplateId, page }: Props) {
           onClick={handleSelectMasterTemplate}
           className='text-left grid grid-cols-[20px_1fr] items-center justify-start w-full'>
           <FontAwesomeIcon icon={open ? faChevronDown : faChevronRight} />
-          <div className='flex flex-col justify-start'>
-            <span className='text-sm block'>{masterTemplate?.title}</span>
-            <span className='text-[8px] block text-gray-500'>Templates</span>
-          </div>
+          <span className='text-xs block'>{masterTemplate?.title}</span>
         </button>
         <MasterTemplateForm
           initialMasterTemplate={masterTemplate}
           page={page}
         />
       </div>
-      <Collapsible className='mt-1' open={open} onOpenChange={setOpen}>
+      <Collapsible open={open} onOpenChange={setOpen}>
         <CollapsibleTrigger asChild>
           <button hidden />
         </CollapsibleTrigger>

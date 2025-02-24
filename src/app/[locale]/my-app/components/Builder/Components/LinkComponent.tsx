@@ -5,17 +5,60 @@ import { cn } from '@/lib/utils/shadcnUtils';
 import { useEffect, useState } from 'react';
 import { pathToRegexp } from 'path-to-regexp';
 import { Link } from '@/i18n/routing';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faExclamation } from '@awesome.me/kit-8441d3fdf2/icons/classic/solid';
 
-const buildUrl = (url = '', param = '', routeParam = '') => {
-  const { keys } = pathToRegexp(url);
-  let parsedUrl = url;
-  const routeParamKey = keys?.find((key) => key.name === routeParam);
-  if (routeParamKey) {
-    parsedUrl = url.replace(`:${routeParam}`, param);
+const isValidParam = (param: string) => {
+  if (param.includes(':')) {
+    return false;
   }
-  return `${parsedUrl}`;
+  return true;
 };
 
+const buildUrl = (
+  url = '',
+  param = '',
+  routeParam = '',
+  routeParams: Record<string, string> = {}
+) => {
+  const routeConfiguredParams = ['unitId'];
+
+  const testRouteParams = {
+    ...routeParams,
+    [routeParam]: param
+  };
+  const { keys } = pathToRegexp(url);
+
+  const allKeys = [...keys.map((key) => key.name), ...routeConfiguredParams];
+
+  const paramsValues = allKeys.reduce((acc: Record<string, string>, key) => {
+    if (testRouteParams[key]) {
+      acc[key] = testRouteParams[key];
+    }
+    return acc;
+  }, {});
+
+  let parsedUrl = url;
+  const isAllParamsAreValid = Object.values(paramsValues).every((param) =>
+    isValidParam(param as string)
+  );
+  if (!isAllParamsAreValid) {
+    return '';
+  }
+  Object.keys(paramsValues).forEach((key) => {
+    parsedUrl = parsedUrl.replace(`:${key}`, paramsValues[key]);
+  });
+  const ROOT = 'app';
+  return `/${ROOT}/${parsedUrl}`;
+};
+
+const Error = () => {
+  return (
+    <span>
+      <FontAwesomeIcon icon={faExclamation} />
+    </span>
+  );
+};
 function LinkComponent({
   props,
   context,
@@ -39,7 +82,8 @@ function LinkComponent({
               href: buildUrl(
                 attr.value || attr.page?.route,
                 value as string,
-                context.dataset?.connexion?.routeParam
+                context?.dataset?.connexion?.routeParam,
+                context.routeParams
               )
             };
           }
@@ -65,6 +109,7 @@ function LinkComponent({
 
   return (
     <Link {...props} {...attributes}>
+      {!props.href && !attributes.href ? <Error /> : null}
       <ChildrenDndWrapper ref={dndChildrenContainerRef}>
         {children}
       </ChildrenDndWrapper>

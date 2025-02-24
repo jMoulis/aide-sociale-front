@@ -49,6 +49,7 @@ export const useDataset = ({ config }: Props) => {
 
   const tTemplate = useTranslations('TemplateSection');
   const pageTemplateVersion = usePageBuilderStore((state) => state.pageVersion);
+  const page = usePageBuilderStore((state) => state.selectedPage);
   const [parentForm, setParentForm] = useState<IVDOMNode | null>(null);
   const optionsSourceTypes = useMemo(
     () => [
@@ -69,7 +70,7 @@ export const useDataset = ({ config }: Props) => {
     []
   );
   const {
-    value: currentDataset,
+    value: currentValue,
     vdom,
     selectedNode
   }: {
@@ -102,7 +103,12 @@ export const useDataset = ({ config }: Props) => {
   const fetchCollections = useCallback(async () => {
     const { data } = await client.list<ICollection>(
       ENUM_COLLECTIONS.COLLECTIONS,
-      { organizationId }
+      {
+        $or: [
+          { organizationId },
+          { system: true }
+        ]
+      }
     );
     if (!data) return;
     const collectionsAsMap = data.reduce(
@@ -123,17 +129,17 @@ export const useDataset = ({ config }: Props) => {
     let collection: ICollection | null = null;
     if (!pageTemplateVersion?._id) return;
 
-    if (parentForm?.context.dataset?.collectionSlug) {
+    if (parentForm?.context?.dataset?.collectionSlug) {
       collection = collections[parentForm.context.dataset.collectionSlug];
-    } else if (currentDataset?.collectionSlug) {
-      collection = collections[currentDataset?.collectionSlug];
+    } else if (currentValue?.collectionSlug) {
+      collection = collections[currentValue?.collectionSlug];
     }
     setCollectionsSelectedCollection(collection);
   }, [
     collections,
     parentForm?.context?.dataset,
     pageTemplateVersion?._id,
-    currentDataset?.collectionSlug
+    currentValue?.collectionSlug
   ]);
 
   return {
@@ -141,10 +147,11 @@ export const useDataset = ({ config }: Props) => {
     collectionsSelectedCollection,
     parentForm,
     optionsSourceTypes,
-    currentDataset,
+    currentValue,
     selectedNode,
     fetchCollections,
     setCollectionsSelectedCollection,
-    pageTemplateVersion
+    pageTemplateVersion,
+    page
   }
 }

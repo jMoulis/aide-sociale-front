@@ -9,6 +9,17 @@
     },
     "addAddress": "Ajouter une adresse"
   },
+  "CalendarSection": {
+    "month": "Mois",
+    "week": "Semaine",
+    "day": "Jour",
+    "today": "Aujourd'hui",
+    "previous": "Précédent",
+    "next": "Suivant",
+    "year": "Année",
+    "allDay": "Toute la journée",
+    "timeline": "Chronologie"
+  },
   "ClerkSection": {
     "errors": {
       "title": "Connexion",
@@ -21,6 +32,7 @@
     "selectCollection": "Sélectionner une collection",
     "parentCollection": "Collection parent {collectionName}",
     "selectValueField": "Sélectionner un champ de valeur",
+    "selectSystemField": "Sélectionner un champ système",
     "valueField": "Champ de valeur",
     "createANewDocument": "Formulaire de création ?",
     "routeParam": "Paramètre de route",
@@ -647,6 +659,14 @@
         "action": "Modifier le modèle principal",
         "success": "Modèle mis à jour avec succès",
         "error": "Une erreur s'est produite lors de la mise à jour du modèle. <code>Erreur {error}</code>"
+      },
+      "delete": {
+        "title": "Supprimer le modèle principal",
+        "description": "Êtes-vous sûr de vouloir supprimer ce modèle principal ?",
+        "action": "Supprimer le modèle principal",
+        "success": "Modèle principal supprimé avec succès",
+        "toConfirm": "Saisissez \"<code>{templateName}</code>\" ci-dessous pour continuer.",
+        "error": "Une erreur s'est produite lors de la suppression du modèle principal. <code>Erreur {error}</code>"
       }
     }
   },
@@ -686,6 +706,14 @@
         "action": "Modifier la page",
         "success": "Page mise à jour avec succès",
         "error": "Une erreur s'est produite lors de la mise à jour de la page. <code>Erreur {error}</code>"
+      },
+      "delete": {
+        "title": "Supprimer la page",
+        "description": "Êtes-vous sûr de vouloir supprimer cette page ?",
+        "action": "Supprimer la page",
+        "success": "Page supprimée avec succès",
+        "toConfirm": "Saisissez \"<code>{pageName}</code>\" ci-dessous pour continuer.",
+        "error": "Une erreur s'est produite lors de la suppression de la page. <code>Erreur {error}</code>"
       }
     },
     "pageVersionForm": {

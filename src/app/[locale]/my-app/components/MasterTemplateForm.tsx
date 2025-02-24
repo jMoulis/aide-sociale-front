@@ -7,7 +7,12 @@ import Form from '@/components/form/Form';
 import FormField from '@/components/form/FormField';
 import FormLabel from '@/components/form/FormLabel';
 import Input from '@/components/form/Input';
-import { IPage, IRole, ITreePage } from '@/lib/interfaces/interfaces';
+import {
+  IPage,
+  IPageTemplateVersion,
+  IRole,
+  ITreePage
+} from '@/lib/interfaces/interfaces';
 import client from '@/lib/mongo/initMongoClient';
 import { ENUM_COLLECTIONS } from '@/lib/mongo/interfaces';
 import { IMasterTemplate } from '@/lib/TemplateBuilder/interfaces';
@@ -24,6 +29,7 @@ import RolesCheckboxesList from '@/components/RolesCheckboxesList/RolesCheckboxe
 import Textarea from '@/components/form/Textarea';
 import Actions from '../../admin/ressources/components/Actions';
 import { ActionKey } from '@/lib/interfaces/enums';
+import DeleteButton from '@/components/buttons/DeleteButton';
 
 type Props = {
   initialMasterTemplate?: IMasterTemplate | null;
@@ -153,13 +159,52 @@ function MasterTemplateForm({ initialMasterTemplate, page }: Props) {
         : [...(masterTemplate.mandatoryPermissions || []), action]
     });
   };
+  const handleDeleteTemplate = async () => {
+    if (!masterTemplate) return;
+    await toastPromise(
+      client.delete(ENUM_COLLECTIONS.TEMPLATES_MASTER, masterTemplate._id),
+      tMaster,
+      'delete'
+    );
+    const { data: versions } = await client.list<IPageTemplateVersion>(
+      ENUM_COLLECTIONS.PAGE_TEMPLATES,
+      {
+        masterTemplateId: masterTemplate._id
+      }
+    );
+    if (!versions) return;
+    // delete linked page templates
+    await Promise.all(
+      versions.map(async (version) =>
+        client.delete(ENUM_COLLECTIONS.PAGE_TEMPLATES, version._id)
+      )
+    );
+    // remove masterTemplateID from current page
+    const updatedMasterTemplateIds = page.masterTemplateIds?.filter(
+      (id) => id !== masterTemplate._id
+    );
+    await client.update<IPage>(
+      ENUM_COLLECTIONS.PAGES,
+      { _id: page._id },
+      {
+        $set: {
+          masterTemplateIds: updatedMasterTemplateIds
+        }
+      }
+    );
+    onEditPage({
+      ...page,
+      masterTemplateIds: updatedMasterTemplateIds
+    });
+    setOpen(false);
+  };
   return (
     <Dialog
       open={open}
       onOpenChange={setOpen}
       title={tMaster('create.title')}
       Trigger={
-        <button onClick={handleOpen}>
+        <button onClick={handleOpen} className='text-xs'>
           {initialMasterTemplate ? (
             <FontAwesomeIcon icon={faEdit} />
           ) : (
@@ -206,6 +251,7 @@ function MasterTemplateForm({ initialMasterTemplate, page }: Props) {
         </div>
         <FormFooterAction>
           <Button type='submit'>{t('save')}</Button>
+          <DeleteButton onClick={handleDeleteTemplate} />
         </FormFooterAction>
       </Form>
     </Dialog>

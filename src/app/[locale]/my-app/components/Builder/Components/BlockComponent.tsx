@@ -12,7 +12,7 @@ const BlockComponent = ({
   const CustomTag = `${context.as || 'div'}` as any;
 
   return (
-    <CustomTag className={cn('p-3', className)} {...rest}>
+    <CustomTag className={cn('p-1', className)} {...rest}>
       <ChildrenDndWrapper ref={dndChildrenContainerRef}>
         {children}
       </ChildrenDndWrapper>

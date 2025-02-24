@@ -11,7 +11,7 @@ function RangeComponent({ props, context }: PropsWithChildrenAndContext) {
     const collectionSlug = context.dataset?.collectionSlug;
     const filedName = context.dataset?.connexion?.field;
     if (!collectionSlug || !filedName) return;
-    onUpdateForm(collectionSlug, filedName, values);
+    onUpdateForm(collectionSlug, filedName, values, context.listIndex);
   };
 
   return (

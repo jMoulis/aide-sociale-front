@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { ElementConfigProps } from '../../interfaces';
 import FormField from '@/components/form/FormField';
 import FormLabel from '@/components/form/FormLabel';
@@ -21,6 +21,10 @@ function AsInput({ config }: Props) {
   const onUpdateNodeProperty = usePageBuilderStore(
     (state) => state.onUpdateNodeProperty
   );
+
+  useEffect(() => {
+    setTempValue(value);
+  }, [value]);
 
   const handleTextContent = (e: React.ChangeEvent<HTMLInputElement>) => {
     setTempValue(e.target.value);

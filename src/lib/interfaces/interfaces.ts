@@ -70,6 +70,7 @@ export interface ICollection {
   slug: string;
   description?: string;
   roles: string[];
+  system?: boolean;
   createdBy?: IUserSummary;
   updatedBy?: IUserSummary;
   updatedAt?: Date;
@@ -83,6 +84,7 @@ export interface IDataset {
   isCreation?: boolean;
   pageTemplateVersionId: string;
   connexion?: {
+    parametersToSave?: string[];
     optionsSourceType?: 'static' | 'database';
     staticDataOptions?: string[];
     externalDataOptions?: {
@@ -92,6 +94,7 @@ export interface IDataset {
     };
     field?: string;
     routeParam?: string;
+    query?: string;
   };
 }
 export type VDOMProps = {
@@ -105,7 +108,11 @@ export type LinkAttributes = {
   page?: {
     slug: string,
     route: string,
-    name: string
+    name: string,
+    dataset?: {
+      field?: string,
+      routeParam?: string
+    }
   }
 };
 export type VDOMContext = {
@@ -118,7 +125,6 @@ export type VDOMContext = {
   isBuilderMode?: boolean;
   dataset?: IDataset;
   routeParams?: Record<string, string>;
-  form?: FormType;
 }
 export interface PropsWithChildrenAndContext extends PropsWithChildren {
   dndChildrenContainerRef?: any;
@@ -268,6 +274,7 @@ export interface IPage {
   masterTemplateIds: string[];
   route: string;
   websiteId: string;
+  position?: number;
   menus: IMenu[];
   props?: {
     style?: string;

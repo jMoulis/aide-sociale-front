@@ -11,7 +11,7 @@ function ToggleComponent({ props, context }: PropsWithChildrenAndContext) {
     const collectionSlug = context.dataset?.collectionSlug;
     const filedName = context.dataset?.connexion?.field;
     if (!collectionSlug || !filedName) return;
-    onUpdateForm(collectionSlug, filedName, value);
+    onUpdateForm(collectionSlug, filedName, value, context.listIndex);
   };
   return (
     <div

@@ -6,11 +6,14 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { CheckedState } from '@radix-ui/react-checkbox';
 import FormLabel from '@/components/form/FormLabel';
 import FormField from '@/components/form/FormField';
-import Input from '@/components/form/Input';
 import FieldList from './FieldList';
 import { useDataset } from './useDataset';
 import DatasetStaticOptionsField from './DatasetStaticOptionsField';
 import SelectCollectionField from './SelectCollectionField';
+import RouteParam from './RouteParam';
+import Query from './Query';
+import ParametersToSave from './ParametersToSave';
+import { useMemo } from 'react';
 
 type Props = {
   config: ElementConfigProps;
@@ -20,11 +23,11 @@ const Dataset = ({ config }: Props) => {
     collections,
     collectionsSelectedCollection,
     parentForm,
-    currentDataset,
     selectedNode,
     fetchCollections,
     setCollectionsSelectedCollection,
-    pageTemplateVersion
+    pageTemplateVersion,
+    page
   } = useDataset({ config });
 
   const onUpdateNodeProperty = usePageBuilderStore(
@@ -42,7 +45,7 @@ const Dataset = ({ config }: Props) => {
       collectionName: selectedCollection.name,
       pageTemplateVersionId: pageTemplateVersion?._id,
       connexion: {
-        ...currentDataset?.connexion,
+        ...selectedNode?.context?.dataset?.connexion,
         field: ''
       }
     };
@@ -58,7 +61,7 @@ const Dataset = ({ config }: Props) => {
     onUpdateNodeProperty(
       {
         [config.propKey]: {
-          ...currentDataset,
+          ...selectedNode?.context?.dataset,
           collectionSlug: '',
           collectionName: ''
         }
@@ -67,24 +70,30 @@ const Dataset = ({ config }: Props) => {
     );
     setCollectionsSelectedCollection(null);
   };
-  const handleSelectField = (state: CheckedState, selectedValue?: string) => {
+
+  const handleSelectField = (
+    state: CheckedState,
+    selectedValue?: string,
+    system?: boolean
+  ) => {
     let collection: ICollection | null = null;
     if (!pageTemplateVersion?._id) return;
 
     if (parentForm?.context.dataset?.collectionSlug) {
       collection = collections[parentForm.context.dataset.collectionSlug];
-    } else if (currentDataset?.collectionSlug) {
-      collection = collections[currentDataset.collectionSlug];
+    } else if (selectedNode?.context?.dataset?.collectionSlug) {
+      collection = collections[selectedNode?.context?.dataset.collectionSlug];
     }
     if (!collection) return;
 
+    const field = system ? selectedValue : `data.${selectedValue}`;
     const updatedCollection: IDataset = {
       collectionSlug: collection.slug,
       collectionName: collection.name,
       pageTemplateVersionId: pageTemplateVersion?._id as string,
       connexion: {
-        ...currentDataset?.connexion,
-        field: state === true ? selectedValue : ''
+        ...selectedNode?.context?.dataset?.connexion,
+        field: state === true ? field : ''
       }
     };
     onUpdateNodeProperty(
@@ -94,14 +103,15 @@ const Dataset = ({ config }: Props) => {
   };
 
   const handleCreateFormChecked = (state: CheckedState) => {
-    if (!currentDataset) return;
-    const collection = collections[currentDataset.collectionSlug];
+    if (!selectedNode?.context?.dataset) return;
+    const collection =
+      collections[selectedNode?.context?.dataset.collectionSlug];
 
     const updatedCollection: IDataset = {
       collectionSlug: collection.slug,
       collectionName: collection.name,
       isCreation: state as unknown as boolean,
-      connexion: currentDataset.connexion,
+      connexion: selectedNode?.context?.dataset.connexion,
       pageTemplateVersionId: pageTemplateVersion?._id as string
     };
     onUpdateNodeProperty(
@@ -115,9 +125,9 @@ const Dataset = ({ config }: Props) => {
   ) => {
     const { name, value } = e.target;
     const updatedDataset: IDataset = {
-      ...(currentDataset || ({} as IDataset)),
+      ...(selectedNode?.context?.dataset || ({} as IDataset)),
       connexion: {
-        ...currentDataset?.connexion,
+        ...selectedNode?.context?.dataset?.connexion,
         [name]: value
       }
     };
@@ -127,6 +137,30 @@ const Dataset = ({ config }: Props) => {
     );
   };
 
+  const handleSetParams = (params: string[]) => {
+    const updatedDataset: IDataset = {
+      ...(selectedNode?.context?.dataset || ({} as IDataset)),
+      connexion: {
+        ...selectedNode?.context?.dataset?.connexion,
+        parametersToSave: params
+      }
+    };
+    onUpdateNodeProperty(
+      { [config.propKey]: updatedDataset || '' },
+      config.context
+    );
+  };
+
+  const pageParams = useMemo(() => {
+    const extractedParams = page?.route?.match(/:\w+/g) || [];
+    return extractedParams
+      .map((param) => param.slice(1))
+      .map((param) => ({
+        label: param,
+        value: param
+      }));
+  }, [page]);
+
   return (
     <div>
       <h3 className='text-sm'>{t('dataset')}</h3>
@@ -135,7 +169,7 @@ const Dataset = ({ config }: Props) => {
           collections,
           config,
           parentForm,
-          currentDataset,
+          currentDataset: selectedNode?.context?.dataset || null,
           collectionsSelectedCollection,
           onSelectCollection: handleSelectCollection,
           onClearSelectedCollection: handleClearSelectedCollection,
@@ -144,16 +178,19 @@ const Dataset = ({ config }: Props) => {
       />
 
       {config.options?.includes('FIELDS') ? (
-        <FieldList
-          onSelectField={handleSelectField}
-          selectedCollection={collectionsSelectedCollection}
-          currentDataset={currentDataset}
-        />
+        <>
+          <FieldList
+            onSelectField={handleSelectField}
+            selectedCollection={collectionsSelectedCollection}
+            currentField={selectedNode?.context?.dataset?.connexion?.field}
+          />
+        </>
       ) : null}
+
       {config.options?.includes('CREATE') ? (
         <FormField className='mt-2 flex flex-row items-center'>
           <Checkbox
-            checked={currentDataset?.isCreation}
+            checked={selectedNode?.context?.dataset?.isCreation}
             onCheckedChange={handleCreateFormChecked}
             id='create-form'
           />
@@ -162,6 +199,14 @@ const Dataset = ({ config }: Props) => {
           </FormLabel>
         </FormField>
       ) : null}
+      <ParametersToSave
+        selectedCollection={collectionsSelectedCollection}
+        onSetParams={handleSetParams}
+        pageParams={pageParams}
+        currentParams={
+          selectedNode?.context?.dataset?.connexion?.parametersToSave || []
+        }
+      />
       {config.options?.includes('STATIC_OPTIONS') ? (
         <DatasetStaticOptionsField
           collections={collections}
@@ -171,14 +216,14 @@ const Dataset = ({ config }: Props) => {
         />
       ) : null}
       {config.options?.includes('ROUTE_PARAM') ? (
-        <FormField>
-          <FormLabel className='text-gray-700'>{t('routeParam')}</FormLabel>
-          <Input
-            name='routeParam'
-            value={currentDataset?.connexion?.routeParam || ''}
-            onChange={handleInputChange}
-          />
-        </FormField>
+        <RouteParam
+          onValueChange={handleInputChange}
+          value={selectedNode?.context?.dataset?.connexion?.routeParam || ''}
+          pageParams={pageParams}
+        />
+      ) : null}
+      {config.options?.includes('QUERY') ? (
+        <Query config={config} selectedNode={selectedNode} />
       ) : null}
     </div>
   );

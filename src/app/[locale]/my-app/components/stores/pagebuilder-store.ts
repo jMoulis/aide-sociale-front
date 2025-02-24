@@ -47,7 +47,7 @@ export type PageBuilderActions = {
     newTree: IVDOMNode | ((prevTree: IVDOMNode) => IVDOMNode)
   ) => void;
   onSelectNode: (event: React.MouseEvent, node: IVDOMNode | null) => void;
-  onUpdateNodeProperty: (value: Record<string, any>, isContext: boolean) => void;
+  onUpdateNodeProperty: (value: Record<string, any>, isContext: boolean, rootParams?: boolean) => void;
   onDeleteNode: (nodeId: string | null) => void;
   setDesignMode: (mode: boolean) => void;
   setGridDisplay: (status: boolean) => void;
@@ -57,6 +57,7 @@ export type PageBuilderActions = {
   onAddPageTemplateVersion: (version: IPageTemplateVersion) => Promise<void>;
   onDeletePageVersion: (pageVersion: IPageTemplateVersion, softDelete?: boolean) => Promise<void>;
   onEditPageTemplateVersion: (version: Partial<IPageTemplateVersion>) => Promise<void>;
+  onAppendAiToPage: (value: IVDOMNode) => void;
   onSavePageTemplate: (silent?: boolean) => Promise<void>;
   onPublish: () => Promise<void>;
   setWebsite: (website: IWebsite) => void;
@@ -329,12 +330,16 @@ export const createPageBuilderStore = (
         },
       });
     },
-    onUpdateNodeProperty: (value: Record<string, any>, isContext: boolean) => {
+    onUpdateNodeProperty: (value: Record<string, any>, isContext: boolean, rootParams?: boolean) => {
       const pageVersion = get().pageVersion;
       const selectedNodeId = get().selectedNode?._id;
       if (!selectedNodeId || !pageVersion) return;
 
       const updatedVDOM = updateNodeById(pageVersion.vdom, selectedNodeId, (node) => {
+        if (rootParams) {
+          const updatedvDom = { ...node, ...value };
+          return updatedvDom;
+        }
         if (isContext) {
           const updatedvDom = { ...node, context: { ...node.context, ...value } };
           return updatedvDom;
@@ -354,7 +359,34 @@ export const createPageBuilderStore = (
       }
       set({ pageVersion: updatedStatePageVersions });
     },
-    onAddComponent: (component: any) => {
+    onAppendAiToPage: (value: IVDOMNode) => {
+      const pageVersion = get().pageVersion;
+      const selectedNode = get().selectedNode;
+      if (!pageVersion) return;
+      if (selectedNode) {
+        const updatedVDOM = updateNodeById(pageVersion.vdom, selectedNode._id, (node) => {
+          const children = node?.children as IVDOMNode[] || [];
+          return { ...node, children: [...children, value] };
+        });
+        set({
+          pageVersion: {
+            ...pageVersion,
+            vdom: updatedVDOM,
+            isDirty: true
+          }
+        });
+        return;
+      }
+      const updatedVDOM = { ...pageVersion.vdom, children: [...pageVersion.vdom.children, value] };
+      set({
+        pageVersion: {
+          ...pageVersion,
+          vdom: updatedVDOM,
+          isDirty: true
+        }
+      });
+    },
+    onAddComponent: (component: ENUM_COMPONENTS) => {
       const pageVersion = get().pageVersion;
       if (!pageVersion) return;
       const config =

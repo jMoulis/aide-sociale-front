@@ -8,6 +8,8 @@ import AsInput from './AsInput';
 import Dataset from './Dataset/Dataset';
 import GenericInput from './GenericInput';
 import OptionsLink from './OptionsLink/OptionsLink';
+import AiFormPrompt from './AiFormPrompt/AiFormPrompt';
+import { aiFormInitialMessage } from '@/lib/TemplateBuilder/AiPromptTemplate/aiFormInstructions';
 
 export const PropertiesComponent: {
   [key: string]: React.FC<{
@@ -29,5 +31,8 @@ export const PropertiesComponent: {
   [ENUM_PROPERTIES_COMPONENTS.GENERIC_INPUT]: (props) => {
     return <GenericInput {...props} />;
   },
-  [ENUM_PROPERTIES_COMPONENTS.LINK_OPTIONS]: OptionsLink
+  [ENUM_PROPERTIES_COMPONENTS.LINK_OPTIONS]: OptionsLink,
+  [ENUM_PROPERTIES_COMPONENTS.AI_FORM]: (props) => (
+    <AiFormPrompt {...props} aiInitMessage={aiFormInitialMessage} />
+  )
 };
