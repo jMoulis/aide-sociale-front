@@ -13,6 +13,7 @@ import { useMongoUser } from '@/lib/mongo/MongoUserContext/MongoUserContext';
 import { faTimes } from '@awesome.me/kit-8441d3fdf2/icons/classic/solid';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { useEffect, useState } from 'react';
+import { usePageBuilderStore } from '../../../stores/pagebuilder-store-provider';
 
 type Props = {
   disabled?: boolean;
@@ -31,20 +32,23 @@ function SelectPages({
 }: Props) {
   const [pages, setPages] = useState<IPage[]>([]);
   const user = useMongoUser();
+  const website = usePageBuilderStore((state) => state.website);
 
   useEffect(() => {
-    if (!user || !user.organizationId) return;
+    if (!user || !user.organizationId || !website?._id) return;
     (async () => {
       const { data: pages } = await client.list<IPage>(ENUM_COLLECTIONS.PAGES, {
-        organizationId: user.organizationId
+        organizationId: user.organizationId,
+        websiteId: website._id
       });
       if (pages) {
         setPages(pages);
       }
     })();
-  }, [user]);
+  }, [user, website?._id]);
+
   const handleSelect = (value: string) => {
-    const page = pages.find((page) => page.slug === value);
+    const page = pages.find((page) => page.route === value);
     if (page) {
       onValueChange(page);
     }
@@ -58,16 +62,20 @@ function SelectPages({
           disabled={disabled}
           onValueChange={handleSelect}
           defaultValue={defaultValue}
-          value={value?.slug}>
+          value={value?.route}>
           <SelectTrigger className='w-[180px]'>
             <span style={{ textAlign: 'left' }}>
               {value?.name || 'Select page'}
             </span>
           </SelectTrigger>
           <SelectContent>
-            {pages.map((page) => (
-              <SelectItem key={page.slug} value={page.slug}>
-                {page.name}
+            {pages.map((page, key) => (
+              <SelectItem
+                className='flex flex-col items-start'
+                key={key}
+                value={page.route}>
+                <span>{page.name}</span>
+                <span className='text-[10px] text-gray-600'>{page.route}</span>
               </SelectItem>
             ))}
           </SelectContent>

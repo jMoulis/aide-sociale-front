@@ -141,10 +141,11 @@ function searchRoute(
  */
 export async function matchRoute(
   segments: string[],
-  organizationId: string
+  organizationId: string,
+  websiteId: string,
 ): Promise<{ page: IPage | null; params: Record<string, string> }> {
   // Fetch pages for this organization.
-  const { data: pages } = await clientMongoServer.list<IPage>(ENUM_COLLECTIONS.PAGES, { organizationId });
+  const { data: pages } = await clientMongoServer.list<IPage>(ENUM_COLLECTIONS.PAGES, { organizationId, websiteId });
   if (!pages || pages.length === 0) return { page: null, params: {} };
 
   // Build the tree (each page may have multiple branches if it uses optional segments).

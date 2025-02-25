@@ -19,6 +19,7 @@ export const buildOptions = (
   ) {
     const list = lists[externalDataOptions.collectionSlug];
     if (!list) return [] as any;
+
     const options = list.reduce((acc: SelectboxOption[], item) => {
       if (!item[externalDataOptions.labelField]) return acc;
       return [

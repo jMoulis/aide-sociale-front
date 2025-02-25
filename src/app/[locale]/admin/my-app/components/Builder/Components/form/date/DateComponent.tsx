@@ -18,7 +18,7 @@ function DateComponent({ props, context }: PropsWithChildrenAndContext) {
     <DatePicker
       data-collection={context.dataset?.collectionSlug}
       onChange={handleDateInputChange}
-      date={value as Date}
+      date={value ? new Date(value as string) : undefined}
     />
   );
 }

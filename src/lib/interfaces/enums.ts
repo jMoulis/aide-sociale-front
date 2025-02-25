@@ -17,6 +17,7 @@ export enum ENUM_APP_ROUTES {
   MY_APP = '/admin/my-app',
   STRUCTURES = '/dashboard/structures',
   EMPLOYEES = 'employees',
+  APP = '/app',
 }
 
 export enum ENUM_RESSOURCES {

@@ -90,7 +90,16 @@ const FormComponent = forwardRef<HTMLFormElement, PropsWithChildrenAndContext>(
           },
           {}
         );
+        if (Object.keys(params || {}).length === 0) {
+          console.warn('Missing parameters to save');
+          toast({
+            title: 'Erreur',
+            description: 'Paramètres manquants',
 
+            variant: 'destructive'
+          });
+          return;
+        }
         try {
           if (!user) {
             console.warn('User is missing');

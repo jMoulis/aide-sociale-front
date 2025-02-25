@@ -22,7 +22,6 @@ const PickerFullNavigation = forwardRef<PickerFullNavigationRef, Props>(
     const pickerNavigationRef = useRef<PickerNavigationRef>(null);
 
     const [month, setMonth] = useState(selectedDate || new Date());
-
     const handleShowYearMonthPicker = () => {
       pickerNavigationRef.current?.selectStep('year');
     };

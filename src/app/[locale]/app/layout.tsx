@@ -21,7 +21,8 @@ export default async function RootLayout({
     ENUM_COLLECTIONS.WEBSITES,
     {
       organizationId,
-      published: true
+      published: true,
+      public: { $ne: true }
     }
   );
   const files = organizationApp?.stylesheets || [];
@@ -45,7 +46,7 @@ export default async function RootLayout({
     uri: entry.uri.length === 1 ? ROOT : `${ROOT}/${entry.uri}`
   });
   const menus =
-    organizationApp?.menus.map((menu) => ({
+    organizationApp?.menus?.map((menu) => ({
       ...menu,
       entries: menu.entries.map(buildRootedEntry)
     })) || [];

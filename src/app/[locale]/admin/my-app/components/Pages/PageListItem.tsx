@@ -24,8 +24,16 @@ type Props = {
   parentPage?: ITreePage;
   page: ITreePage;
   add: boolean;
+  websiteId: string;
+  organizationId: string;
 };
-function PageListItem({ page, add, parentPage }: Props) {
+function PageListItem({
+  page,
+  add,
+  parentPage,
+  websiteId,
+  organizationId
+}: Props) {
   const [open, setOpen] = useState(false);
   const setSelectedPage = usePageBuilderStore((state) => state.setSelectedPage);
   const selectedPage = usePageBuilderStore((state) => state.selectedPage);
@@ -58,6 +66,8 @@ function PageListItem({ page, add, parentPage }: Props) {
           create={false}
           initialPage={page}
           parentPage={parentPage}
+          organizationId={organizationId}
+          websiteId={websiteId}
         />
         {add ? (
           <DialogPageForm
@@ -65,6 +75,8 @@ function PageListItem({ page, add, parentPage }: Props) {
             create={true}
             initialPage={null}
             parentPage={page}
+            organizationId={organizationId}
+            websiteId={websiteId}
           />
         ) : null}
       </div>
@@ -93,7 +105,13 @@ function PageListItem({ page, add, parentPage }: Props) {
           <ul className='ml-4'>
             {page.children.map((subPage) => (
               <li key={subPage._id} className='flex mt-2'>
-                <PageListItem parentPage={page} page={subPage} add={true} />
+                <PageListItem
+                  parentPage={page}
+                  page={subPage}
+                  add={true}
+                  organizationId={organizationId}
+                  websiteId={websiteId}
+                />
               </li>
             ))}
           </ul>

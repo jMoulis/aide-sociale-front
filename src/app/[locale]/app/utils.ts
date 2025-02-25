@@ -18,6 +18,7 @@ export const fetchTemplateVersions = async (templateId: string, user: IUser) => 
     { _id: templateId, roles: { $in: user.roles.map((role) => role._id) } }
   );
   if (!masterTemplates?.length) {
+    console.warn('No master templates found for user roles', templateId);
     notFound();
   }
   return masterTemplates.filter((masterTemplate) => !!masterTemplate.publishedVersion);
@@ -26,6 +27,7 @@ export const resolveTemplates = async (page: IPage, user: IUser) => {
   const permissions = mergePermissions(user?.roles || []);
   const masterTemplateIds = page.masterTemplateIds;
   if (!masterTemplateIds?.length) {
+    console.warn('No master templates found for page', page);
     notFound();
   }
   const masterTemplates = await Promise.all(
@@ -54,14 +56,15 @@ export const resolveTemplates = async (page: IPage, user: IUser) => {
     return acc;
   }, []);
 };
-export async function getPublishedMasterTemplates({ slug, user, templateSearch }: { slug: string[], user: IUser, templateSearch?: string | null }) {
+export async function getPublishedMasterTemplates({ slug, user, templateSearch, websiteId }: { websiteId: string, slug: string[], user: IUser, templateSearch?: string | null }) {
   // const { rootRoute, childRoute } = isDetailPage(slug);
   const organizationId = await getServerSideCurrentUserOrganizationId();
   if (!organizationId) {
+    console.warn('No organization found for user', user);
     notFound();
   }
   try {
-    const { page, params } = await matchRoute(slug, organizationId);
+    const { page, params } = await matchRoute(slug, organizationId, websiteId);
     // Check is user can access to route page. (in roles admin page)
     if (!page) {
       console.warn('No page found for slug', slug);
@@ -73,7 +76,6 @@ export async function getPublishedMasterTemplates({ slug, user, templateSearch }
       console.error('No permissions found for page', page);
       notFound();
     }
-
     const publishedMasterTemplateVersions = await resolveTemplates(page, user);
 
     if (templateSearch) {
@@ -135,18 +137,21 @@ export const collectAsyncPayloads = async (
     const dataset = node.context?.dataset;
     const query = extractAndReplacePlaceholders(dataset?.connexion?.query || null, systemParams);
 
+    console.log(dataset?.connexion)
     if (listTypeComponents.includes(node.type) && dataset) {
       if (
-        dataset.collectionSlug &&
+        dataset.connexion?.externalDataOptions?.collectionSlug &&
         dataset.connexion?.externalDataOptions?.labelField &&
         dataset.connexion?.externalDataOptions?.valueField
       ) {
         const { collectionSlug } = dataset.connexion.externalDataOptions;
+        console.log(query, collectionSlug)
         if (query) {
           const { data } = await clientMongoServer.list<FormType>(
             collectionSlug as ENUM_COLLECTIONS,
             query
           );
+          console.log(data)
           if (data) {
             resultMap.lists[collectionSlug] = data;
           }

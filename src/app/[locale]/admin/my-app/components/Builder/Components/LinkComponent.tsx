@@ -21,15 +21,12 @@ const buildUrl = (
   routeParam = '',
   routeParams: Record<string, string> = {}
 ) => {
-  const routeConfiguredParams = ['unitId'];
-
   const testRouteParams = {
     ...routeParams,
     [routeParam]: param
   };
-  const { keys } = pathToRegexp(url);
-
-  const allKeys = [...keys.map((key) => key.name), ...routeConfiguredParams];
+  const { keys } = pathToRegexp(url, {});
+  const allKeys = [...keys.map((key) => key.name)];
 
   const paramsValues = allKeys.reduce((acc: Record<string, string>, key) => {
     if (testRouteParams[key]) {
@@ -37,7 +34,6 @@ const buildUrl = (
     }
     return acc;
   }, {});
-
   let parsedUrl = url;
   const isAllParamsAreValid = Object.values(paramsValues).every((param) =>
     isValidParam(param as string)
@@ -65,6 +61,7 @@ function LinkComponent({
   children,
   dndChildrenContainerRef
 }: PropsWithChildrenAndContext) {
+  const [init, setInit] = useState(false);
   const { getFormFieldValue } = useFormContext();
   const value = getFormFieldValue(context);
   const { className, ...rest } = props;
@@ -73,6 +70,9 @@ function LinkComponent({
   >({});
 
   useEffect(() => {
+    if (!init) {
+      setInit(true);
+    }
     setAttributes(() => {
       return (context['options-link'] || []).reduce(
         (attrProps: Record<string, string | undefined>, attr) => {
@@ -95,7 +95,7 @@ function LinkComponent({
         {}
       );
     });
-  }, [context, value]);
+  }, [context, value, init]);
 
   if (context.isBuilderMode) {
     return (
@@ -109,7 +109,7 @@ function LinkComponent({
 
   return (
     <Link {...props} {...attributes}>
-      {!props.href && !attributes.href ? <Error /> : null}
+      {!props.href && !attributes.href && init ? <Error /> : null}
       <ChildrenDndWrapper ref={dndChildrenContainerRef}>
         {children}
       </ChildrenDndWrapper>

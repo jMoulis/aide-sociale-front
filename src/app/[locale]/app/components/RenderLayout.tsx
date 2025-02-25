@@ -1,3 +1,5 @@
+'use client';
+
 import React from 'react';
 import {
   AsyncPayloadMap,
@@ -21,7 +23,6 @@ export default function RenderLayout({
   const rootNode = pageVersion.vdom;
   const initialId = rootNode._id || 'root';
   const initialPath = [initialId];
-
   return (
     <FormProvider asyncData={asyncData}>
       {renderVNode(rootNode, initialPath, routeParams)}

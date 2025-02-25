@@ -33,7 +33,6 @@ const PickerNavigation = forwardRef<PickerNavigationRef, Props>(
       onChange(updatedDate);
       setSelectedStep(null);
     };
-
     return (
       <div>
         {selectedStep === 'year' ? (

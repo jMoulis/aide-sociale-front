@@ -4,6 +4,7 @@ import Selectbox from '@/components/form/Selectbox';
 import { useTranslations } from 'next-intl';
 import { ChangeEvent } from 'react';
 import SystemParams from './SystemParams';
+import Input from '@/components/form/Input';
 
 type Props = {
   onValueChange: (
@@ -26,6 +27,7 @@ function RouteParam({ onValueChange, value, pageParams }: Props) {
           onChange={onValueChange}
           value={value}
         />
+        <Input name='routeParam' onChange={onValueChange} value={value} />
       </FormField>
       <SystemParams onValueChange={onValueChange} value={value} />
     </div>

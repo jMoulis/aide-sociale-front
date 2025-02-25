@@ -19,29 +19,46 @@ const Row = ({
   ) => void;
 }) => {
   return (
-    <div className='grid grid-cols-[repeat(5,1fr)] border-b border-gray-200'>
-      <div className='flex flex-col'>
-        <span className='text-sm'>{page.name}</span>
-        <div>
-          <span className='text-xs'>{page.slug}</span>
-          <span className='text-xs'>{page.route}</span>
+    <div>
+      <div className='grid grid-cols-[repeat(5,1fr)] border-b border-gray-200'>
+        <div className='flex flex-col'>
+          <span className='text-sm'>{page.name}</span>
+          <div>
+            <span className='text-xs'>{page.slug}</span>
+            <span className='text-xs'>{page.route}</span>
+          </div>
         </div>
-      </div>
 
-      {Object.values(ENUM_ACTIONS).map((action) => {
-        return (
-          <FormField key={action} className='flex items-center justify-center'>
-            <Checkbox
-              checked={
-                (permissions[page.slug]?.includes(action) ||
-                  permissions?.[page.slug]?.length === 3) ??
-                false
-              }
-              onCheckedChange={(e) => onSelectPermissions(page.slug, action, e)}
+        {Object.values(ENUM_ACTIONS).map((action) => {
+          return (
+            <FormField
+              key={action}
+              className='flex items-center justify-center'>
+              <Checkbox
+                checked={
+                  (permissions[page.slug]?.includes(action) ||
+                    permissions?.[page.slug]?.length === 3) ??
+                  false
+                }
+                onCheckedChange={(e) =>
+                  onSelectPermissions(page.slug, action, e)
+                }
+              />
+            </FormField>
+          );
+        })}
+      </div>
+      <ul className='ml-4'>
+        {page.children.map((child) => (
+          <li key={child._id}>
+            <Row
+              page={child}
+              permissions={permissions}
+              onSelectPermissions={onSelectPermissions}
             />
-          </FormField>
-        );
-      })}
+          </li>
+        ))}
+      </ul>
     </div>
   );
 };
@@ -80,17 +97,6 @@ function TablePermissionsPages({
               permissions={permissions}
               onSelectPermissions={onSelectPermissions}
             />
-            <ul className='ml-4'>
-              {page.children.map((child) => (
-                <li key={child._id}>
-                  <Row
-                    page={child}
-                    permissions={permissions}
-                    onSelectPermissions={onSelectPermissions}
-                  />
-                </li>
-              ))}
-            </ul>
           </li>
         ))}
       </ul>

@@ -115,7 +115,7 @@ export const tree = {
       }
 
       if (tree.hasChildren(item)) {
-        const result = tree.find(item.children, itemId);
+        const result = tree.find(item.children || [], itemId);
         if (result) {
           return result;
         }
@@ -136,7 +136,7 @@ export const tree = {
         return parentIds;
       }
       const nested = tree.getPathToItem({
-        current: item.children,
+        current: item.children || [],
         targetId: targetId,
         parentIds: [...parentIds, item._id],
       });

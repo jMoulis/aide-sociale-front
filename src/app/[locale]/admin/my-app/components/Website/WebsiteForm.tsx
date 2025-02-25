@@ -8,6 +8,8 @@ import FormLabel from '@/components/form/FormLabel';
 import Input from '@/components/form/Input';
 import { useTranslations } from 'next-intl';
 import { usePageBuilderStore } from '../stores/pagebuilder-store-provider';
+import { Checkbox } from '@/components/ui/checkbox';
+import { CheckedState } from '@radix-ui/react-checkbox';
 
 type Props = {
   create?: boolean;
@@ -25,6 +27,12 @@ function WebsiteForm({ create }: Props) {
     setWebsite({ ...website, [name]: value });
   };
 
+  const handlePublicChange = (state: CheckedState) => {
+    if (!website) return;
+    if (typeof state === 'boolean') {
+      setWebsite({ ...website, public: state });
+    }
+  };
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     onSaveWebsite(create || false, t);
@@ -40,6 +48,14 @@ function WebsiteForm({ create }: Props) {
             name='name'
             value={website.name}
             onChange={handleInputChange}
+          />
+        </FormField>
+        <FormField>
+          <FormLabel>Publique</FormLabel>
+          <Checkbox
+            name='public'
+            checked={website.public}
+            onCheckedChange={handlePublicChange}
           />
         </FormField>
         <FormFooterAction>

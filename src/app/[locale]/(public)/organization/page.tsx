@@ -1,12 +1,12 @@
-import { getMongoUser } from '@/lib/utils/auth/serverUtils';
-import { collectAsyncPayloads } from '../../app/utils';
+import { IOrganization, IWebsite } from '@/lib/interfaces/interfaces';
+import clientMongoServer from '@/lib/mongo/initMongoServer';
+import { ENUM_COLLECTIONS } from '@/lib/mongo/interfaces';
 import { matchRoute } from '../../app/matchRouter';
 import { notFound } from 'next/navigation';
-import clientMongoServer from '@/lib/mongo/initMongoServer';
 import { IMasterTemplate } from '@/lib/TemplateBuilder/interfaces';
-import { ENUM_COLLECTIONS } from '@/lib/mongo/interfaces';
-import DynamicPage from '../../app/components/DynamicPage';
-import { IWebsite } from '@/lib/interfaces/interfaces';
+import { collectAsyncPayloads } from '../../app/utils';
+import { getMongoUser } from '@/lib/utils/auth/serverUtils';
+import RenderLayout from '../../app/components/RenderLayout';
 import { nanoid } from 'nanoid';
 
 const fetchTemplateVersions = async (templateId: string) => {
@@ -23,31 +23,44 @@ const fetchTemplateVersions = async (templateId: string) => {
   );
 };
 
-export default async function RootPage({ searchParams }: any) {
-  const { organizationId } = await searchParams;
+type Props = {
+  searchParams: Promise<{ organizationSlug: string }>;
+};
+export default async function RootPage({ searchParams }: Props) {
+  const { organizationSlug } = await searchParams;
   const user = await getMongoUser();
+
+  const { data: organization } = await clientMongoServer.get<IOrganization>(
+    ENUM_COLLECTIONS.ORGANIZATIONS,
+    {
+      slug: organizationSlug
+    }
+  );
+
+  if (!organization) {
+    notFound();
+  }
   const { data: organizationApp } = await clientMongoServer.get<IWebsite>(
     ENUM_COLLECTIONS.WEBSITES,
     {
-      organizationId,
-      published: true
+      organizationId: organization._id,
+      published: true,
+      public: true
     }
   );
+  if (!organizationApp) {
+    notFound();
+  }
   const files = organizationApp?.stylesheets || [];
   const compiledStylesheet = files.find(
     (stylesheet) => stylesheet.name === 'compiled'
   );
 
-  const customHeaders = compiledStylesheet
-    ? [
-        <link
-          key={compiledStylesheet.uri}
-          rel='stylesheet'
-          href={`${compiledStylesheet.uri}?v=${nanoid()}`}
-        />
-      ]
-    : [];
-  const { page, params } = await matchRoute([], organizationId);
+  const { page, params } = await matchRoute(
+    [],
+    organization._id,
+    organizationApp._id
+  );
   if (!page) {
     notFound();
   }
@@ -64,16 +77,28 @@ export default async function RootPage({ searchParams }: any) {
     notFound();
   }
   const datas = await collectAsyncPayloads(publishedVersion.vdom, params, {
-    organizationId,
+    organizationId: organization._id,
     userId: user._id,
     ...params
   });
   return (
-    <DynamicPage
-      page={publishedVersion}
-      routeParams={params}
-      asyncData={datas}
-      headers={compiledStylesheet}
-    />
+    <>
+      {compiledStylesheet ? (
+        <link
+          rel='stylesheet'
+          href={`${compiledStylesheet.uri}?v=${nanoid()}`}
+          title={compiledStylesheet.name}
+        />
+      ) : null}
+      <RenderLayout
+        pageVersion={publishedVersion}
+        routeParams={{
+          organizationId: organization._id,
+          userId: user._id,
+          ...params
+        }}
+        asyncData={datas}
+      />
+    </>
   );
 }

@@ -41,6 +41,7 @@ const MenusMenuPanel = () => {
             <MenusBuilder
               menus={website?.menus ?? []}
               onUpdateMenus={handleUpdateMenus}
+              ressources={pages}
             />
           </div>
         </CollapsibleTrigger>

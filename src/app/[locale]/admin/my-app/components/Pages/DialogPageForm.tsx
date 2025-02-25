@@ -26,34 +26,26 @@ type Props = {
   parentPage?: ITreePage;
   initialPage: ITreePage | null;
   buttonLabel?: string;
+  websiteId: string;
+  organizationId: string;
 };
 function DialogPageForm({
   icon,
   create,
   parentPage,
   initialPage,
-  buttonLabel
+  buttonLabel,
+  websiteId,
+  organizationId
 }: Props) {
-  const [open, setOpen] = useState(false);
-  const t = useTranslations('WebsiteSection.pageForm');
-  const [page, setPage] = useState<ITreePage | null>(initialPage);
-  const addPage = usePageBuilderStore((state) => state.addPage);
-  const onEditPage = usePageBuilderStore((state) => state.onEditPage);
-  const website = usePageBuilderStore((state) => state.website);
-  const organizationId = usePageBuilderStore((state) => state.organizationId);
-
   const defaultPage = useMemo(() => {
-    if (!organizationId || !website?._id) {
-      console.warn('OrganizationId or websiteId is missing');
-      return;
-    }
     return {
       _id: nanoid(),
       name: '',
       slug: '',
       createdAt: new Date(),
       organizationId,
-      websiteId: website._id,
+      websiteId,
       route: parentPage?.route ? `${parentPage.route}` : '',
       parentId: parentPage?._id,
       masterTemplateIds: [],
@@ -61,12 +53,18 @@ function DialogPageForm({
       menus: [],
       children: []
     };
-  }, [organizationId, website?._id, parentPage?._id, parentPage?.route]);
+  }, [organizationId, websiteId, parentPage?._id, parentPage?.route]);
+
+  const [open, setOpen] = useState(false);
+  const t = useTranslations('WebsiteSection.pageForm');
+  const [page, setPage] = useState<ITreePage>(initialPage || defaultPage);
+  const addPage = usePageBuilderStore((state) => state.addPage);
+  const onEditPage = usePageBuilderStore((state) => state.onEditPage);
+
   useEffect(() => {
     if (initialPage && !create) {
       setPage(initialPage);
     } else {
-      if (!defaultPage) return;
       setPage(defaultPage);
     }
   }, [create, defaultPage, initialPage]);
@@ -117,14 +115,14 @@ function DialogPageForm({
       );
       addPage(page);
     }
+    setPage(defaultPage);
     setOpen(false);
   };
 
   const handleCancel = () => {
     if (create) {
-      if (!defaultPage) return;
       setPage(defaultPage);
-    } else {
+    } else if (initialPage) {
       setPage(initialPage);
     }
     setOpen(false);

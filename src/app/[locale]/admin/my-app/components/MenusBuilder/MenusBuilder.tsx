@@ -9,8 +9,9 @@ import { faAdd } from '@awesome.me/kit-8441d3fdf2/icons/classic/solid';
 type Props = {
   menus: IMenu[];
   onUpdateMenus: (updatedMenus: IMenu[]) => void;
+  ressources: { name: string; route: string }[];
 };
-function MenusBuilder({ menus, onUpdateMenus }: Props) {
+function MenusBuilder({ menus, onUpdateMenus, ressources }: Props) {
   const [open, setOpen] = useState(false);
   const t = useTranslations('RoleSection.ressource.menu');
 
@@ -32,7 +33,11 @@ function MenusBuilder({ menus, onUpdateMenus }: Props) {
           <FontAwesomeIcon icon={faAdd} />
         </button>
       }>
-      <MenuForm onSubmit={handleCreateMenu} onCancel={() => setOpen(false)} />
+      <MenuForm
+        ressources={ressources}
+        onSubmit={handleCreateMenu}
+        onCancel={() => setOpen(false)}
+      />
     </Dialog>
   );
 }

@@ -73,7 +73,7 @@ function Header() {
                   <Link href={ENUM_APP_ROUTES.PROFILE}>{t('profile')}</Link>
                 </li>
                 <li className='mb-2'>
-                  <Link href={ENUM_APP_ROUTES.DASHBOARD}>{t('dashboard')}</Link>
+                  <Link href={ENUM_APP_ROUTES.APP}>{t('dashboard')}</Link>
                 </li>
                 <li className='mb-2'>
                   <Link href={ENUM_APP_ROUTES.MY_APP}>{t('myApp')}</Link>

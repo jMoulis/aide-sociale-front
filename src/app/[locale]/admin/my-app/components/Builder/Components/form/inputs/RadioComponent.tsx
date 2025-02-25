@@ -32,6 +32,7 @@ function RadioComponent({ context, props }: PropsWithChildrenAndContext) {
       }
     } as React.ChangeEvent<HTMLInputElement>);
   };
+
   if (context.isBuilderMode) {
     return (
       <RadioGroup

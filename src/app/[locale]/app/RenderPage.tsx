@@ -7,7 +7,10 @@ import { collectAsyncPayloads, getPublishedMasterTemplates } from './utils';
 import { notFound } from 'next/navigation';
 import MainLayout from '../components/MainLayout';
 import { Link } from '@/i18n/routing';
-import DynamicPage from './components/DynamicPage';
+import clientMongoServer from '@/lib/mongo/initMongoServer';
+import { IWebsite } from '@/lib/interfaces/interfaces';
+import { ENUM_COLLECTIONS } from '@/lib/mongo/interfaces';
+import RenderLayout from './components/RenderLayout';
 
 type Props = {
   slug: string[];
@@ -21,11 +24,23 @@ async function RenderPage({ slug }: Props) {
   const pathname = headerList.get('x-current-path');
   const searchParams = new URL(pathname || '').searchParams;
   const templateSearch = searchParams.get(TEMPLATE_SEARCH_NAME);
-
+  const { data: organizationApp } = await clientMongoServer.get<IWebsite>(
+    ENUM_COLLECTIONS.WEBSITES,
+    {
+      organizationId,
+      published: true,
+      public: { $ne: true }
+    }
+  );
+  if (!organizationApp) {
+    console.warn('No organization app found');
+    notFound();
+  }
   const { templates, routeParams } = await getPublishedMasterTemplates({
     slug,
     user,
-    templateSearch
+    templateSearch,
+    websiteId: organizationApp._id
   });
 
   if (templates.length === 0) {
@@ -55,6 +70,7 @@ async function RenderPage({ slug }: Props) {
   const publishedVersion = templates[0]?.publishedVersion;
 
   if (!publishedVersion) {
+    console.warn('No published version');
     notFound();
   }
 
@@ -66,9 +82,13 @@ async function RenderPage({ slug }: Props) {
 
   return (
     <MainLayout>
-      <DynamicPage
-        page={publishedVersion}
-        routeParams={routeParams}
+      <RenderLayout
+        pageVersion={publishedVersion}
+        routeParams={{
+          organizationId,
+          userId: user._id,
+          ...routeParams
+        }}
         asyncData={datas}
       />
     </MainLayout>

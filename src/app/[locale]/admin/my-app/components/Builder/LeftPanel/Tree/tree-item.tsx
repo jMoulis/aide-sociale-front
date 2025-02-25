@@ -53,7 +53,7 @@ function GroupIcon({ isOpen }: { isOpen: boolean }) {
 }
 
 function Icon({ item }: { item: IVDOMNode }) {
-  if (!item.children.length) {
+  if (!item.children?.length) {
     return <ChildIcon />;
   }
   return <GroupIcon isOpen={(item as any).isOpen ?? false} />;
@@ -318,7 +318,7 @@ const TreeItem = memo(function TreeItem({
   }, [selectedNode, item, dispatch]);
 
   const aria = (() => {
-    if (!item.children.length) {
+    if (!item.children?.length) {
       return undefined;
     }
     return {

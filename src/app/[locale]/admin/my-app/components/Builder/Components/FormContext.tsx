@@ -314,14 +314,14 @@ export const FormProvider = ({
       externalDataOptions?.labelField &&
       externalDataOptions?.valueField
     ) {
-      const { data } = await client.list<any>(
+      const { data } = await client.list<FormType>(
         externalDataOptions?.collectionSlug as ENUM_COLLECTIONS
       );
 
-      if (!data) return [] as any;
+      if (!data) return [];
       const options = data.map((item) => ({
-        label: item[externalDataOptions.labelField],
-        value: item[externalDataOptions.valueField]
+        label: item.data[externalDataOptions.labelField],
+        value: item.data[externalDataOptions.valueField]
       }));
       return options;
     }

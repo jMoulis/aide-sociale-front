@@ -260,6 +260,7 @@ export interface IOrganization {
   modifications?: IModification[]; // History of changes
   addresses: IAddress[];
   contactsInfo: IContactInfo[];
+  slug: string;
 }
 
 
@@ -316,6 +317,7 @@ export interface IWebsite {
   stylesheets?: IStylesheet[];
   menus: IMenu[];
   published: boolean;
+  public?: boolean;
 }
 
 export interface IAddress {
