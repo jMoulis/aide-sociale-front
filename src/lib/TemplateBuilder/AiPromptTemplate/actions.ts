@@ -3,7 +3,7 @@
 import { client } from "@/lib/openAi/openAiClient";
 import { isValidJSON } from "@/lib/utils/utils";
 import { IAiMessage } from "./interfaces";
-import { IVDOMNode } from "@/app/[locale]/my-app/components/interfaces";
+import { IVDOMNode } from "@/app/[locale]/admin/my-app/components/interfaces";
 
 export async function generateAiForm(messages: IAiMessage[]) {
   try {

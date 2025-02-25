@@ -3,8 +3,8 @@ import {
   AsyncPayloadMap,
   IPageTemplateVersion
 } from '@/lib/interfaces/interfaces';
-import { FormProvider } from '../../my-app/components/Builder/Components/FormContext';
-import { renderVNode } from '../../my-app/components/Builder/Components/renderVode';
+import { FormProvider } from '../../admin/my-app/components/Builder/Components/FormContext';
+import { renderVNode } from '../../admin/my-app/components/Builder/Components/renderVode';
 
 interface RenderLayoutProps {
   pageVersion: IPageTemplateVersion;

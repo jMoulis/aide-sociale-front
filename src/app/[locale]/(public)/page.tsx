@@ -1,7 +1,7 @@
 import { IOrganization } from '@/lib/interfaces/interfaces';
 import clientMongoServer from '@/lib/mongo/initMongoServer';
 import { ENUM_COLLECTIONS } from '@/lib/mongo/interfaces';
-import { FormType } from '../my-app/components/Builder/Components/FormContext';
+import { FormType } from '../admin/my-app/components/Builder/Components/FormContext';
 import { Link } from '@/i18n/routing';
 
 export default async function RootPage() {

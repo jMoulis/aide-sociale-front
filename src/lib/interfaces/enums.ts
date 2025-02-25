@@ -14,7 +14,7 @@ export enum ENUM_APP_ROUTES {
   DEPARTMENTS = '/dashboard/departments',
   TEMPLATES = '/admin/templates',
   COLLECTIONS = '/admin/collections',
-  MY_APP = '/my-app',
+  MY_APP = '/admin/my-app',
   STRUCTURES = '/dashboard/structures',
   EMPLOYEES = 'employees',
 }

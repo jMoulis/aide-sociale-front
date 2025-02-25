@@ -1,8 +1,8 @@
-import { IVDOMNode } from "@/app/[locale]/my-app/components/interfaces";
+import { IVDOMNode } from "@/app/[locale]/admin/my-app/components/interfaces";
 import { ActionKey, ENUM_ACTIONS } from "./enums";
 import { TemplateDiff } from "../TemplateBuilder/interfaces";
 import { CSSProperties, PropsWithChildren } from "react";
-import { FormType } from "@/app/[locale]/my-app/components/Builder/Components/FormContext";
+import { FormType } from "@/app/[locale]/admin/my-app/components/Builder/Components/FormContext";
 
 export type UserExcerpt = {
   id: string;

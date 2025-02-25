@@ -1,4 +1,4 @@
-import { ENUM_COMPONENTS } from "@/app/[locale]/my-app/components/interfaces";
+import { ENUM_COMPONENTS } from "@/app/[locale]/admin/my-app/components/interfaces";
 import { IAiMessage } from "./interfaces"
 
 const elementConfiguration = `[

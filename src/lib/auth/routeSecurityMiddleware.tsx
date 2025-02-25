@@ -59,6 +59,7 @@ export const routeSecurityMiddleware = async (
     }
   );
   const routePermissions = permissions[route];
+
   const isAllowed = await hasPermissions(
     permissions[route],
     data?.mandatoryPermissions || [],

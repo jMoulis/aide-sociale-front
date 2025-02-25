@@ -16,7 +16,7 @@ type Props = {
   initialRessource: IRessource | null;
   organizationId: string;
 };
-function PageStudio({ initialRessource, organizationId }: Props) {
+function RessourceConfig({ initialRessource, organizationId }: Props) {
   const defaultRessource: IRessource = {
     _id: nanoid(),
     name: '',
@@ -84,4 +84,4 @@ function PageStudio({ initialRessource, organizationId }: Props) {
     </div>
   );
 }
-export default PageStudio;
+export default RessourceConfig;

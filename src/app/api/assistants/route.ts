@@ -1,15 +1,51 @@
-import { ENUM_COMPONENTS } from "@/app/[locale]/admin/my-app/components/interfaces";
-import { IAiMessage } from "./interfaces"
+import { client } from "@/lib/openAi/openAiClient";
 
-export const aiHTMLInstructions = (config: { instructions: string, tags: any[], type: ENUM_COMPONENTS }) => `
-You are a web page generator AI. Your job is to produce a HTML:
+export const runtime = "nodejs";
+
+
+// Create a new assistant
+export async function POST() {
+  const assistant = await client.beta.assistants.create({
+    // instructions,
+    name: "UI, UX Designer",
+    model: "gpt-4o",
+    tools: [
+      { type: "file_search" },
+      // {
+      //   type: "function",
+      //   function: {
+      //     "name": "search_images",
+      //     "description": "My assistant is a webpage builder.",
+      //     "strict": true,
+      //     "parameters": {
+      //       "type": "object",
+      //       "required": [
+      //         "query",
+      //       ],
+      //       "properties": {
+      //         "query": {
+      //           "type": "string",
+      //           "description": "The search string to find relevant images. One or more search terms separated by spaces; you can use NOT to filter out images that match a term"
+      //         },
+      //       },
+      //       "additionalProperties": false
+      //     }
+      //   }
+      // }
+    ],
+  });
+  return Response.json({ assistantId: assistant.id });
+}
+
+const instructions = `
+You are an UI and UX ninja. Your job is to produce a HTML:
 
 **Instructions:**
-** Here you will find instructions, html example and mappings tags for components, that will help you to generate the HTML.**
-${JSON.stringify(config)}
+** Mappings and components: **
+you will all the definitions in the vector components.json file.
 
 **ENUM_COMPONENTS:**
-${Object.values(ENUM_COMPONENTS).join(", ")}
+BLOCK, BUTTON, CHECKBOX, COLLAPSE, COLLAPSECONTENT, COLLAPSETRIGGER, COLOR, DATE, DATETIME, DATERANGE, DIALOG, DIALOGTRIGGER, DIALOGCONTENT, EMAIL, FILE, FORM, INPUT, IMAGE, LINK, NUMERIC, RADIO, RANGE, RATING, LIST, SCHEDULER, SCHEDULER_FORM, SELECT, TABS, TABSLIST, TABSCONTENT, TABSTRIGGER, TEXT, TEXTAREA, TIME, TOGGLE
 
 Example JSON structure:
 {
@@ -34,6 +70,10 @@ Where:
 5. **Content**:
   - Button text should be in a text type dom element.
   - Anchor text should be in a text type dom element.
+
+6. **Images**:
+ - You can use the \`search_images\` function to search images, if needed.
+ - By passing the query as coma seperated words. You will receive an stringify array of 20 image objects of type { description: string;  url: string}. The description is pretty useful to get which image is the best choice.
 
   When I give you a request such as:
 "Build me landing page."
@@ -100,11 +140,5 @@ Remember:
 - Output **only** valid JSON with the specified keys and structure without any markdown syntax.
 - If the user asks for extra fields or changes, just adapt the JSON accordingly without commentary.
 - You can use the "summaryAiAction" field to provide a summary of the changes you made. And you can use a casual tone in your responses. Good luck! 🤖
-`
 
-export const aiHTMLInitialMessage: (config: any) => IAiMessage = (config) => {
-  return ({
-    role: "system",
-    content: aiHTMLInstructions(config)
-  })
-}
+`
