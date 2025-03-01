@@ -4,16 +4,22 @@ import { useTranslations } from 'next-intl';
 import { usePageBuilderStore } from '../../../stores/pagebuilder-store-provider';
 import { ElementConfigProps, IVDOMNode } from '../../../interfaces';
 import { ChangeEvent, useEffect, useState } from 'react';
-import { ICollection } from '@/lib/interfaces/interfaces';
+import { ICollection, IDatasetConnexion } from '@/lib/interfaces/interfaces';
 import Selectbox from '@/components/form/Selectbox';
 
 type Props = {
   config: ElementConfigProps;
   collections: Record<string, ICollection>;
   selectedNode: IVDOMNode | null;
+  datasetKey: 'input' | 'output';
 };
 
-function ExternalDataOptions({ config, collections, selectedNode }: Props) {
+function ExternalDataOptions({
+  config,
+  collections,
+  selectedNode,
+  datasetKey
+}: Props) {
   const onUpdateNodeProperty = usePageBuilderStore(
     (state) => state.onUpdateNodeProperty
   );
@@ -24,27 +30,28 @@ function ExternalDataOptions({ config, collections, selectedNode }: Props) {
 
   useEffect(() => {
     const collectionSlug =
-      selectedNode?.context?.dataset?.connexion?.externalDataOptions
-        ?.collectionSlug;
+      selectedNode?.context?.dataset?.connexion?.[datasetKey]
+        ?.externalDataOptions?.collectionSlug;
     if (collectionSlug) {
       setSelectedCollection(collections[collectionSlug]);
     }
-  }, [
-    selectedNode?.context?.dataset?.connexion?.externalDataOptions
-      ?.collectionSlug,
-    collections
-  ]);
+  }, [collections, datasetKey, selectedNode?.context?.dataset?.connexion]);
+
   const handleSelectCollection = (event: ChangeEvent<HTMLSelectElement>) => {
     const { value } = event.target;
     const collection = collections[value];
     if (!collection) return;
 
     setSelectedCollection(collection);
-    const updatedDatasetConnexion = {
+    const updatedDatasetConnexion: IDatasetConnexion = {
       ...selectedNode?.context?.dataset?.connexion,
-      externalDataOptions: {
-        ...selectedNode?.context?.dataset?.connexion?.externalDataOptions,
-        collectionSlug: collection.slug
+      [datasetKey]: {
+        ...selectedNode?.context?.dataset?.connexion?.[datasetKey],
+        externalDataOptions: {
+          ...selectedNode?.context?.dataset?.connexion?.[datasetKey]
+            ?.externalDataOptions,
+          collectionSlug: collection.slug
+        }
       }
     };
 
@@ -63,7 +70,8 @@ function ExternalDataOptions({ config, collections, selectedNode }: Props) {
     const updatedDatasetConnexion = {
       ...selectedNode?.context?.dataset?.connexion,
       externalDataOptions: {
-        ...selectedNode?.context?.dataset?.connexion?.externalDataOptions,
+        ...selectedNode?.context?.dataset?.connexion?.input
+          ?.externalDataOptions,
         [name]: value
       }
     };
@@ -98,8 +106,8 @@ function ExternalDataOptions({ config, collections, selectedNode }: Props) {
         <Selectbox
           name='labelField'
           value={
-            selectedNode?.context?.dataset?.connexion?.externalDataOptions
-              ?.labelField || ''
+            selectedNode?.context?.dataset?.connexion?.input
+              ?.externalDataOptions?.labelField || ''
           }
           options={(selectedCollection?.fields || []).map((field) => ({
             label: field.label,
@@ -113,8 +121,8 @@ function ExternalDataOptions({ config, collections, selectedNode }: Props) {
         <Selectbox
           name='valueField'
           value={
-            selectedNode?.context?.dataset?.connexion?.externalDataOptions
-              ?.valueField || ''
+            selectedNode?.context?.dataset?.connexion?.input
+              ?.externalDataOptions?.valueField || ''
           }
           options={(selectedCollection?.fields || []).map((field) => ({
             label: field.label,

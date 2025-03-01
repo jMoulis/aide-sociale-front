@@ -6,8 +6,9 @@ import { useTranslations } from 'next-intl';
 
 type Props = {
   parentForm?: IVDOMNode | null;
+  datasetKey: 'input' | 'output';
 };
-function DatasetPopupInfo({ parentForm }: Props) {
+function DatasetPopupInfo({ parentForm, datasetKey }: Props) {
   const t = useTranslations('CollectionSection');
   if (!parentForm) return null;
   return (
@@ -16,7 +17,8 @@ function DatasetPopupInfo({ parentForm }: Props) {
         <span className='mt-1 text-xs text-gray-700 block text-left'>
           <FontAwesomeIcon icon={faInfoCircle} className='mr-1 text-blue-600' />
           {t('parentCollection', {
-            collectionName: parentForm?.context?.dataset?.collectionName
+            collectionName:
+              parentForm?.context?.dataset?.connexion?.[datasetKey]?.storeId
           })}
         </span>
       }>

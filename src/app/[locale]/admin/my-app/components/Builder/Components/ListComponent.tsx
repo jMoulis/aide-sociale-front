@@ -14,21 +14,41 @@ function ListComponent({
   node,
   dndChildrenContainerRef
 }: PropsWithChildrenAndContext) {
-  const { lists } = useFormContext();
+  const { lists, queryResults } = useFormContext();
   const [items, setItems] = useState<any[]>(
-    (context.dataset?.collectionSlug &&
-      lists[context.dataset?.collectionSlug]) ||
+    (context.dataset?.connexion?.input?.storeId &&
+      lists[context.dataset?.connexion?.input?.storeId]?.list) ||
       []
   );
+
   const { className, ...rest } = props || {};
   const CustomTag = `${context.as || 'div'}` as any;
 
   useEffect(() => {
     if (context.isBuilderMode) return;
-    if (!context.dataset?.collectionSlug) return;
-    const datas = lists[context.dataset?.collectionSlug] || [];
+
+    // if (context.dataset?.connexion?.input?.plugToQuery) {
+    //   const queryKey = context.dataset?.connexion?.input?.plugToQuery;
+    //   if (queryResults && queryResults[queryKey]) {
+    //     const result = queryResults[queryKey];
+    //     if (Array.isArray(result)) {
+    //       setItems(queryResults[queryKey]);
+    //     }
+    //   }
+    //   return;
+    // }
+    if (!context.dataset?.connexion?.input?.storeId) return;
+
+    const datas = lists[context.dataset?.connexion?.input?.storeId]?.list || [];
     setItems(datas);
-  }, [context.dataset?.collectionSlug, context.isBuilderMode, lists]);
+  }, [
+    context.dataset?.connexion?.input?.storeId,
+    // context.dataset?.connexion?.input?.plugToQuery,
+    context.isBuilderMode,
+    lists,
+    queryResults,
+    context.dataset?.connexion?.input
+  ]);
 
   const renderRecursiveNodeWithIndex = useCallback(
     (item: IVDOMNode, index: number) => {

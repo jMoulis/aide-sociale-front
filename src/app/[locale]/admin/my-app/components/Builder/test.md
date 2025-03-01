@@ -1,201 +1,273 @@
+Both `Overlapping placements with male filters (booked institutions)`and `Overlapping placements with female filters`don't pass.
+
+
+Ok here is the query code
 ```typescript
-import update from 'immutability-helper'
-import type { FC } from 'react'
-import { useCallback, useState } from 'react'
+    function buildDynamicQueryRecursive(
+      filters: Record<string, any>,
+      configs: FieldConfig[],
+      prefix: string = 'data'
+    ): any {
+      const query: any = {};
+      for (const field of configs) {
+        const value = filters[field.key];
+        if (value === undefined || value === null) continue;
 
-import { Card } from './Card'
+        // Build the key (using dot notation if prefix is provided)
+        const queryKey = prefix ? `${prefix}.${field.key}` : field.key;
 
-const style = {
-  width: 400,
-}
+        switch (field.type) {
+          case 'boolean':
+          case 'string':
+          case 'number':
+          case 'date':
+            // For simple types, we assume an equality check (or you could extend this)
+            query[queryKey] = value;
+            break;
+          case 'object':
+            // If the field is an object and a value was provided, recursively build the query
+            if (typeof value === 'object') {
+              const nestedQuery = buildDynamicQueryRecursive(
+                value,
+                field.fields || [],
+                ''
+              );
+              // Merge the nested query keys with the current key as a prefix.
+              for (const nestedKey in nestedQuery) {
+                query[`${queryKey}.${nestedKey}`] = nestedQuery[nestedKey];
+              }
+            }
+            break;
+          case 'array':
+            // For arrays, if we have a description for the elements we could handle it differently.
+            // For now, assume an array of simple types and use $in.
+            if (Array.isArray(value)) {
+              query[queryKey] = { $in: value };
+            } else {
+              query[queryKey] = value;
+            }
+            break;
+          default:
+            query[queryKey] = value;
+        }
+      }
+      return query;
+    }
 
-export interface Item {
-  id: number
-  text: string
-}
-
-export interface ContainerState {
-  cards: Item[]
-}
-
-export const Container: FC = () => {
-  {
-    const [cards, setCards] = useState([
+    const testScenariosWithFilters = [
       {
-        id: 1,
-        text: 'Write a cool JS library',
+        description: 'Before placements with male filters',
+        from: new Date('2025-02-27T00:00:00Z'),
+        to: new Date('2025-02-28T00:00:00Z'),
+        userFilters: {
+          gender: 'male',
+          age: ['0-3', '3-6'],
+          hcp: true
+        },
+        expected: ['Institution A', 'Institution B'],
+        expectedSize: 2
       },
       {
-        id: 2,
-        text: 'Make it generic enough',
+        description: 'After placements with female filters',
+        from: new Date('2025-03-26T00:00:00Z'),
+        to: new Date('2025-03-27T00:00:00Z'),
+        userFilters: {
+          gender: 'female',
+          age: ['6-9'],
+          hcp: false
+        },
+        expected: ['Institution C', 'Institution D'],
+        expectedSize: 2
       },
       {
-        id: 3,
-        text: 'Write README',
+        description:
+          'Overlapping placements with male filters (booked institutions)',
+        from: new Date('2025-03-06T00:00:00Z'),
+        to: new Date('2025-03-07T00:00:00Z'),
+        userFilters: {
+          gender: 'male',
+          age: ['0-3', '3-6'],
+          hcp: true
+        },
+        expected: [],
+        expectedSize: 0
       },
       {
-        id: 4,
-        text: 'Create some examples',
+        description: 'Overlapping placements with female filters',
+        from: new Date('2025-03-10T00:00:00Z'),
+        to: new Date('2025-03-11T00:00:00Z'),
+        userFilters: {
+          gender: 'female',
+          age: ['6-9'],
+          hcp: false
+        },
+        // In this range, Institution C is booked (by placement p4),
+        // so only Institution D remains available.
+        expected: ['Institution D'],
+        expectedSize: 1
       },
       {
-        id: 5,
-        text: 'Spam in Twitter and IRC to promote it (note that this element is taller than the others)',
-      },
-      {
-        id: 6,
-        text: '???',
-      },
-      {
-        id: 7,
-        text: 'PROFIT',
-      },
-    ])
+        description: 'Before placements with non-matching filters',
+        from: new Date('2025-02-27T00:00:00Z'),
+        to: new Date('2025-02-28T00:00:00Z'),
+        userFilters: {
+          gender: 'male',
+          age: ['9-12'],
+          hcp: false
+        },
+        expected: [],
+        expectedSize: 0
+      }
+    ];
+    const responses = await Promise.all(
+      testScenariosWithFilters.map(async (searchedData) => {
+        const response: any = {
+          title: searchedData.description,
+          expected: searchedData.expected,
+          expectedSize: searchedData.expectedSize
+        };
+        const filters = [
+          ...Object.entries(
+            Object.keys(
+              buildDynamicQueryRecursive(searchedData.userFilters, fieldConfigs)
+            ).reduce((acc, key) => {
+              acc[`${key}`] = buildDynamicQueryRecursive(
+                // don't need to prefix, we do it in the previous step
+                searchedData.userFilters,
+                fieldConfigs,
+                'data'
+              )[key];
+              return acc;
+            }, {} as Record<string, any>)
+          ).map(([k, v]) => ({ [k]: v }))
+        ];
 
-    const moveCard = useCallback((dragIndex: number, hoverIndex: number) => {
-      setCards((prevCards: Item[]) =>
-        update(prevCards, {
-          $splice: [
-            [dragIndex, 1],
-            [hoverIndex, 0, prevCards[dragIndex] as Item],
-          ],
-        }),
-      )
-    }, [])
+        const query: IQuery = {
+          method: 'search',
+          collection: 'etablissements' as ENUM_COLLECTIONS,
+          filters: {},
+          aggregateOptions: [
+            {
+              $lookup: {
+                from: 'Yjk0ZjAz_placements',
+                localField: '_id',
+                foreignField: 'data.etablissement',
+                as: 'placements'
+              }
+            },
+            {
+              $match: {
+                $and: [
+                  {
+                    $expr: {
+                      $eq: [
+                        {
+                          $size: {
+                            $filter: {
+                              input: '$placements',
+                              as: 'pl',
+                              cond: {
+                                $and: [
+                                  {
+                                    $lte: [
+                                      '$$pl.data.periode_placement.from',
+                                      searchedData.to
+                                    ]
+                                  },
+                                  {
+                                    $gte: [
+                                      '$$pl.data.periode_placement.to',
+                                      searchedData.from
+                                    ]
+                                  }
+                                ]
+                              }
+                            }
+                          }
+                        },
+                        0
+                      ]
+                    }
+                  },
+                  // Spread in dynamic filters (assuming they already have the 'data.' prefix)
+                  ...filters
+                ]
+              }
+            },
+            { $project: { _id: 1, data: 1 } }
+          ]
+        };
 
-    const renderCard = useCallback(
-      (card: { id: number; text: string }, index: number) => {
-        return (
-          <Card
-            key={card.id}
-            index={index}
-            id={card.id}
-            text={card.text}
-            moveCard={moveCard}
-          />
-        )
-      },
-      [],
-    )
-
-    return (
-      <>
-        <div style={style}>{cards.map((card, i) => renderCard(card, i))}</div>
-      </>
-    )
-  }
-}
-
+        const availableInstitutionsPayload = await getMethod(query, {}, {});
+        const availableInstitutions = availableInstitutionsPayload?.data || [];
+        response['institutions'] = availableInstitutions.map(
+          (i: FormType) => i.data.name
+        );
+        response['matchSize'] =
+          availableInstitutions?.length === searchedData.expectedSize;
+        return response;
+      })
+    );
+    console.log(responses);
 ```
-# CARD
-```typescript
-import type { Identifier, XYCoord } from 'dnd-core'
-import type { FC } from 'react'
-import { useRef } from 'react'
-import { useDrag, useDrop } from 'react-dnd'
 
-import { ItemTypes } from './ItemTypes'
-
-const style = {
-  border: '1px dashed gray',
-  padding: '0.5rem 1rem',
-  marginBottom: '.5rem',
-  backgroundColor: 'white',
-  cursor: 'move',
-}
-
-export interface CardProps {
-  id: any
-  text: string
-  index: number
-  moveCard: (dragIndex: number, hoverIndex: number) => void
-}
-
-interface DragItem {
-  index: number
-  id: string
-  type: string
-}
-
-export const Card: FC<CardProps> = ({ id, text, index, moveCard }) => {
-  const ref = useRef<HTMLDivElement>(null)
-  const [{ handlerId }, drop] = useDrop<
-    DragItem,
-    void,
-    { handlerId: Identifier | null }
-  >({
-    accept: ItemTypes.CARD,
-    collect(monitor) {
-      return {
-        handlerId: monitor.getHandlerId(),
-      }
+The output:
+```json
+[
+    {
+        "title": "Before placements with male filters",
+        "expected": [
+            "Institution A",
+            "Institution B"
+        ],
+        "expectedSize": 2,
+        "institutions": [
+            "Institution A",
+            "Institution B"
+        ],
+        "matchSize": true
     },
-    hover(item: DragItem, monitor) {
-      if (!ref.current) {
-        return
-      }
-      const dragIndex = item.index
-      const hoverIndex = index
-
-      // Don't replace items with themselves
-      if (dragIndex === hoverIndex) {
-        return
-      }
-
-      // Determine rectangle on screen
-      const hoverBoundingRect = ref.current?.getBoundingClientRect()
-
-      // Get vertical middle
-      const hoverMiddleY =
-        (hoverBoundingRect.bottom - hoverBoundingRect.top) / 2
-
-      // Determine mouse position
-      const clientOffset = monitor.getClientOffset()
-
-      // Get pixels to the top
-      const hoverClientY = (clientOffset as XYCoord).y - hoverBoundingRect.top
-
-      // Only perform the move when the mouse has crossed half of the items height
-      // When dragging downwards, only move when the cursor is below 50%
-      // When dragging upwards, only move when the cursor is above 50%
-
-      // Dragging downwards
-      if (dragIndex < hoverIndex && hoverClientY < hoverMiddleY) {
-        return
-      }
-
-      // Dragging upwards
-      if (dragIndex > hoverIndex && hoverClientY > hoverMiddleY) {
-        return
-      }
-
-      // Time to actually perform the action
-      moveCard(dragIndex, hoverIndex)
-
-      // Note: we're mutating the monitor item here!
-      // Generally it's better to avoid mutations,
-      // but it's good here for the sake of performance
-      // to avoid expensive index searches.
-      item.index = hoverIndex
+    {
+        "title": "After placements with female filters",
+        "expected": [
+            "Institution C",
+            "Institution D"
+        ],
+        "expectedSize": 2,
+        "institutions": [
+            "Institution C",
+            "Institution D"
+        ],
+        "matchSize": true
     },
-  })
-
-  const [{ isDragging }, drag] = useDrag({
-    type: ItemTypes.CARD,
-    item: () => {
-      return { id, index }
+    {
+        "title": "Overlapping placements with male filters (booked institutions)",
+        "expected": [],
+        "expectedSize": 0,
+        "institutions": [
+            "Institution A",
+            "Institution B"
+        ],
+        "matchSize": false
     },
-    collect: (monitor: any) => ({
-      isDragging: monitor.isDragging(),
-    }),
-  })
-
-  const opacity = isDragging ? 0 : 1
-  drag(drop(ref))
-  return (
-    <div ref={ref} style={{ ...style, opacity }} data-handler-id={handlerId}>
-      {text}
-    </div>
-  )
-}
-
+    {
+        "title": "Overlapping placements with female filters",
+        "expected": [
+            "Institution D"
+        ],
+        "expectedSize": 1,
+        "institutions": [
+            "Institution C",
+            "Institution D"
+        ],
+        "matchSize": false
+    },
+    {
+        "title": "Before placements with non-matching filters",
+        "expected": [],
+        "expectedSize": 0,
+        "institutions": [],
+        "matchSize": true
+    }
+]
 ```

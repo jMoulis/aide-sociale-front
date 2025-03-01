@@ -64,6 +64,7 @@ export default async function WebsiteDetailPage({ params }: Props) {
     (version) =>
       version.masterTemplateId === masterTemplate?._id && version.published
   );
+
   return (
     <>
       <PagebuilderProvider

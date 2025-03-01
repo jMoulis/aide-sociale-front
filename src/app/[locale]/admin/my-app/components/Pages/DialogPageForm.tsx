@@ -38,7 +38,7 @@ function DialogPageForm({
   websiteId,
   organizationId
 }: Props) {
-  const defaultPage = useMemo(() => {
+  const defaultPage: ITreePage = useMemo(() => {
     return {
       _id: nanoid(),
       name: '',

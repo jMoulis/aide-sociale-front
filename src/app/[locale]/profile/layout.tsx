@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
-import DefaultLayoutRender from '../../defaultLayoutRender';
-import MainLayout from '../../components/MainLayout';
+import DefaultLayoutRender from '../defaultLayoutRender';
+import MainLayout from '../components/MainLayout';
 
 export const metadata: Metadata = {
   title: 'Profile',

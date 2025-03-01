@@ -79,16 +79,18 @@ const SchedulerComponent = ({
       const query = buildQuery(currentDate);
       if (context.isBuilderMode) return;
 
-      if (!context.dataset?.collectionSlug) return;
+      if (!context.dataset?.connexion?.input?.storeId) return;
+      const store = lists[context.dataset?.connexion?.input?.storeId]?.store;
 
+      if (!store?.collection?.name) return;
       client
-        .list<FormType>(
-          context.dataset.collectionSlug as ENUM_COLLECTIONS,
-          query
-        )
+        .list<FormType>(store.collection.name as ENUM_COLLECTIONS, query)
         .then(({ data }) => {
           if (data) {
-            onUpdateList(context.dataset?.collectionSlug as string, data);
+            onUpdateList(
+              context.dataset?.connexion?.input?.storeId as string,
+              data
+            );
             setEvents(
               data.reduce((acc: any, { _id, data }) => {
                 if (!data.start) return acc;
@@ -106,7 +108,12 @@ const SchedulerComponent = ({
           }
         });
     },
-    [context.dataset?.collectionSlug, context.isBuilderMode, onUpdateList]
+    [
+      context.dataset?.connexion?.input?.storeId,
+      context.isBuilderMode,
+      lists,
+      onUpdateList
+    ]
   );
 
   useEffect(() => {
@@ -145,36 +152,47 @@ const SchedulerComponent = ({
         return;
       }
 
-      const collectionSlug = context.dataset.collectionSlug;
+      const storeId = context.dataset.connexion?.input?.storeId;
 
-      if (!collectionSlug) {
+      if (!storeId) {
         console.warn('Collection slug is missing');
         return;
       }
+      const asyncList = lists[storeId] || [];
       // get the right from store
-      const formToSave = lists[collectionSlug]?.find((item) => item._id === id);
+      const formToSave =
+        asyncList?.list?.find((item) => item._id === id) ||
+        ({
+          data: {}
+        } as FormType);
       const isCreation = context.dataset?.isCreation;
 
-      const params = context.dataset?.connexion?.parametersToSave?.reduce(
-        (acc: Record<string, string>, param) => {
-          if (!context.routeParams) {
+      const params =
+        context.dataset?.connexion?.input?.parametersToSave?.reduce(
+          (acc: Record<string, string>, param) => {
+            if (!context.routeParams) {
+              return acc;
+            }
+            if (!context.routeParams[param]) {
+              return acc;
+            }
+            acc[param] = context.routeParams[param];
             return acc;
-          }
-          if (!context.routeParams[param]) {
-            return acc;
-          }
-          acc[param] = context.routeParams[param];
-          return acc;
-        },
-        {}
-      );
+          },
+          {}
+        );
 
       try {
         if (!user) {
           console.warn('User is missing');
           return;
         }
+        const collectionSlug = asyncList.store.collection?.name;
 
+        if (!collectionSlug) {
+          console.warn('Collection slug is missing');
+          return;
+        }
         if (!formToSave?._id || isCreation) {
           const id = nanoid();
           const event = {
@@ -242,7 +260,14 @@ const SchedulerComponent = ({
   );
   const handleAddEvent = useCallback(
     (event: CalendarEvent) => {
-      const collectionSlug = context.dataset?.collectionSlug;
+      const storeId = context.dataset?.connexion?.input?.storeId;
+      if (!storeId) {
+        console.warn('Collection slug is missing');
+        return;
+      }
+      const asyncList = lists[storeId] || [];
+      const collectionSlug = asyncList.store.collection?.name;
+
       const pageTemplateVersionId = context.dataset?.pageTemplateVersionId;
       if (!user) return;
       if (!collectionSlug) {
@@ -253,19 +278,20 @@ const SchedulerComponent = ({
         console.warn('Page template version id is missing');
         return;
       }
-      const params = context.dataset?.connexion?.parametersToSave?.reduce(
-        (acc: Record<string, string>, param) => {
-          if (!context.routeParams) {
+      const params =
+        context.dataset?.connexion?.input?.parametersToSave?.reduce(
+          (acc: Record<string, string>, param) => {
+            if (!context.routeParams) {
+              return acc;
+            }
+            if (!context.routeParams[param]) {
+              return acc;
+            }
+            acc[param] = context.routeParams[param];
             return acc;
-          }
-          if (!context.routeParams[param]) {
-            return acc;
-          }
-          acc[param] = context.routeParams[param];
-          return acc;
-        },
-        {}
-      );
+          },
+          {}
+        );
       const newEntry: FormType = generateDefaultFormEntry(
         user,
         {
@@ -280,10 +306,11 @@ const SchedulerComponent = ({
       onAddListItem(collectionSlug, newEntry);
     },
     [
-      context.dataset?.collectionSlug,
-      context.dataset?.connexion?.parametersToSave,
+      context.dataset?.connexion?.input?.parametersToSave,
+      context.dataset?.connexion?.input?.storeId,
       context.dataset?.pageTemplateVersionId,
       context.routeParams,
+      lists,
       onAddListItem,
       user
     ]

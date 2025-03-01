@@ -5,11 +5,11 @@ import {
 import Styling from './Styling/Styling';
 import PropertyInput from './PropertyInput';
 import AsInput from './AsInput';
-import Dataset from './Dataset/Dataset';
 import GenericInput from './GenericInput';
 import OptionsLink from './OptionsLink/OptionsLink';
 import AiFormPrompt from './AiFormPrompt/AiFormPrompt';
 import { aiFormInitialMessage } from '@/lib/TemplateBuilder/AiPromptTemplate/aiFormInstructions';
+import Datasets from './Dataset/Datasets';
 
 export const PropertiesComponent: {
   [key: string]: React.FC<{
@@ -26,7 +26,7 @@ export const PropertiesComponent: {
     return <AsInput {...props} />;
   },
   [ENUM_PROPERTIES_COMPONENTS.DATASET]: (props) => {
-    return <Dataset {...props} />;
+    return <Datasets {...props} />;
   },
   [ENUM_PROPERTIES_COMPONENTS.GENERIC_INPUT]: (props) => {
     return <GenericInput {...props} />;

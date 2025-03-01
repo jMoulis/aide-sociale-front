@@ -4,6 +4,7 @@ import { FilterType, IMongoRealtimeConfig, IUpsertResponse, ENUM_COLLECTIONS, ID
 import { cookies } from 'next/headers';
 import { COOKIE_SERVER_AUTH } from '@/lib/utils/auth/utils';
 import { IUser } from '@/lib/interfaces/interfaces';
+import { convertDates } from '@/lib/utils/utils';
 
 interface ApiResponse<T> {
   data: T | null;
@@ -46,7 +47,8 @@ class MongoServerClient {
       if (!response.ok) {
         throw new Error(data.error || response.statusText);
       }
-      return { ...data, error: null };
+      const parsedPaylod = { ...data, data: convertDates(data.data) };
+      return { ...parsedPaylod, error: null };
     } catch (error: any) {
       return { data: null, error: error.message };
     }
@@ -149,16 +151,15 @@ class MongoServerClient {
     });
   }
 
-  async search<T = any>(collection: ENUM_COLLECTIONS, query: any[]): Promise<ApiResponse<T>> {
+  async search<T = any>(collection: ENUM_COLLECTIONS, query: any[], distinct?: boolean): Promise<ApiResponse<T>> {
     return this.request(`search`, {
       method: 'POST',
-      body: JSON.stringify({ collection, query }),
+      body: JSON.stringify({ collection, query, distinct }),
     });
   }
   // Method to list all documents in a collection with an optional filter
 
   async list<T>(collection: ENUM_COLLECTIONS, filter: FilterType = {}, requestOptions?: RequestInit): Promise<ApiResponse<T[]>> {
-
     return this.request(`list`, {
       method: 'POST',
       body: JSON.stringify({ collection, filter }),

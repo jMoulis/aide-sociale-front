@@ -1,6 +1,7 @@
 import { format, isToday, isYesterday, Locale } from 'date-fns';
 import slugify from 'slugify';
-import { IPage, IProject, IProjectSummary, ITeam, ITeamSummary, ITreePage, IUser, IUserSummary } from '../interfaces/interfaces';
+import { IPage, IProject, IProjectSummary, ITeam, ITeamSummary, ITreePage, IUser, IUserSummary, VDOMContext } from '../interfaces/interfaces';
+import { parseISO, isValid } from "date-fns";
 
 export const slugifyFunction = (value: string) => {
   return slugify(value, {
@@ -93,31 +94,7 @@ export function getProjectSummary(project: IProject): IProjectSummary {
   };
 }
 
-// export function buildPageTree(pages: IPage[]): ITreePage[] {
-//   const pageMap = new Map<string, ITreePage>();
-//   pages.forEach((page) => {
-//     pageMap.set(page._id, { ...page, children: [] });
-//   });
-//   const tree: ITreePage[] = [];
-//   pages.forEach((page) => {
-//     if (page.parentId) {
-//       const parent = pageMap.get(page.parentId);
-//       if (parent) {
-//         parent.children.push(pageMap.get(page._id)!);
-//       }
-//     } else {
-//       tree.push(pageMap.get(page._id)!);
-//     }
-//   });
-//   const sorted = sortArray(tree.map((child) => ({
-//     ...child,
-//     children: sortArray(child.children, 'name')
-//   })), 'name');
-//   return sorted;
-// }
-
-
-function sortPages(pages: ITreePage[]): ITreePage[] {
+export function sortPages(pages: ITreePage[]): ITreePage[] {
   pages.sort((a, b) => {
     if (a.position !== undefined && b.position !== undefined) {
       return a.position - b.position;
@@ -161,4 +138,37 @@ export function buildPageTree(pages: IPage[]): ITreePage[] {
 
   // Recursively sort the tree by position only
   return sortPages(tree);
+}
+
+
+export const convertDates = (obj: any): any => {
+  if (!obj || typeof obj !== "object") return obj;
+
+  if (Array.isArray(obj)) {
+    return obj.map(convertDates);
+  }
+
+  const newObj: any = {};
+  for (const key in obj) {
+    if (typeof obj[key] === "string") {
+      const parsedDate = parseISO(obj[key]); // Try to parse as ISO date
+      if (isValid(parsedDate)) {
+        newObj[key] = parsedDate; // Convert only if it's a real date
+        continue;
+      }
+    }
+
+    if (typeof obj[key] === "object" && obj[key] !== null) {
+      newObj[key] = convertDates(obj[key]); // Recursively handle nested objects
+    } else {
+      newObj[key] = obj[key];
+    }
+  }
+  return newObj;
+};
+
+
+export const getContextStoreDataset = (datasetKey: 'input' | 'output', context?: VDOMContext) => {
+  if (!context?.dataset?.connexion?.[datasetKey]?.storeId) return null;
+  return context?.dataset?.connexion?.[datasetKey]
 }

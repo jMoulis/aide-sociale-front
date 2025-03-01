@@ -49,6 +49,7 @@ function PageVersionForm({ initialPageVersion }: Props) {
     await onEditPageTemplateVersion(pageVersion);
     setOpen(false);
   };
+
   return (
     <Dialog
       open={open}

@@ -308,7 +308,8 @@ function CollectionFormDialog({ prevCollection, onSubmit }: Props) {
                 field={{
                   key: '',
                   label: '',
-                  new: true
+                  new: true,
+                  type: 'string'
                 }}
                 onUpsertField={handleUpsertField}
               />

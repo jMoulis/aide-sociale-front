@@ -3,6 +3,7 @@ import { ActionKey, ENUM_ACTIONS } from "./enums";
 import { TemplateDiff } from "../TemplateBuilder/interfaces";
 import { CSSProperties, PropsWithChildren } from "react";
 import { FormType } from "@/app/[locale]/admin/my-app/components/Builder/Components/FormContext";
+import { ENUM_COLLECTIONS } from "../mongo/interfaces";
 
 export type UserExcerpt = {
   id: string;
@@ -63,6 +64,9 @@ export interface ICollectionField {
   key: string;
   new: boolean;
   system?: boolean;
+  type: 'string' | 'number' | 'boolean' | 'date' | 'object' | 'array';
+  of?: ICollectionField
+  fields?: ICollectionField[];
 }
 export interface ICollection {
   _id: string;
@@ -78,24 +82,30 @@ export interface ICollection {
   organizationId: string;
   fields: ICollectionField[];
 }
+
+export interface IDatasetConnexion {
+  input?: IDatasetConnexionItem;
+  output?: IDatasetConnexionItem;
+}
+export interface IDatasetConnexionItem {
+  storeId?: string;
+  parametersToSave?: string[];
+  optionsSourceType?: 'static' | 'database';
+  staticDataOptions?: string[];
+  // plugToQuery?: string;
+  externalDataOptions?: {
+    collectionSlug: string;
+    labelField: string;
+    valueField: string;
+  };
+  field?: string;
+  routeParam?: string;
+  query?: string;
+}
 export interface IDataset {
-  collectionSlug: string;
-  collectionName: string;
   isCreation?: boolean;
   pageTemplateVersionId: string;
-  connexion?: {
-    parametersToSave?: string[];
-    optionsSourceType?: 'static' | 'database';
-    staticDataOptions?: string[];
-    externalDataOptions?: {
-      collectionSlug: string;
-      labelField: string;
-      valueField: string;
-    };
-    field?: string;
-    routeParam?: string;
-    query?: string;
-  };
+  connexion?: IDatasetConnexion;
 }
 export type VDOMProps = {
   [key: string]: any;
@@ -263,6 +273,16 @@ export interface IOrganization {
   slug: string;
 }
 
+export interface IStore {
+  _id: string;
+  slug: string;
+  name: string;
+  description?: string;
+  collection?: ICollection;
+  routeParam?: string;
+  virtual?: boolean;
+  type: 'list' | 'form';
+}
 
 export interface IPage {
   _id: string;
@@ -302,6 +322,7 @@ export interface IPageTemplateVersion {
   isDirty?: boolean;
   hasUnpublishedChanges?: boolean;
   archived?: boolean;
+  stores?: IStore[];
 }
 export interface IStylesheet {
   name: string;
@@ -340,4 +361,33 @@ export interface IContactInfo {
   type: string;
 }
 
-export type AsyncPayloadMap = { forms: Record<string, FormType>, lists: Record<string, any[]> };
+export type AsyncForms = Record<string, { store: IStore, form: FormType }>;
+export type AsyncLists = Record<string, { store: IStore, list: FormType[] }>;
+export type AsyncPayloadMap = { forms: AsyncForms, lists: AsyncLists };
+
+export type Method =
+  | 'update'
+  | 'create'
+  | 'delete'
+  | 'list'
+  | 'get'
+  | 'search'
+  | 'update-many';
+
+export interface IQuery {
+  method: Method;
+  collection: ENUM_COLLECTIONS;
+  filters?: Record<string, any>;
+  updateOptions?: Record<string, any>;
+  aggregateOptions?: any[];
+  matchQuery?: Record<string, any>;
+  upsertQuery?: Record<string, any>;
+  upsertOptions?: Record<string, any>;
+  output?: {
+    name: string;
+    operation: 'map' | 'reduce' | 'filter' | 'sort';
+    input: string;
+    mapper: string;
+    type: 'form' | 'list';
+  };
+}

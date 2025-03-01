@@ -90,6 +90,7 @@ function AdvancedPageEditor() {
           <RenderLayout
             pageVersion={pageVersion}
             asyncData={{ forms: {}, lists: {} }}
+            preview
           />
         </div>
         <FormFooterAction>

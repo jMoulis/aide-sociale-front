@@ -2,17 +2,21 @@ import { PropsWithChildrenAndContext } from '@/lib/interfaces/interfaces';
 import { useFormContext } from '../FormContext';
 import { Slider } from '@/components/ui/slider';
 import { cn } from '@/lib/utils/shadcnUtils';
+import { useCallback } from 'react';
 
 function RangeComponent({ props, context }: PropsWithChildrenAndContext) {
   const { onUpdateForm, getFormFieldValue } = useFormContext();
   const value = getFormFieldValue(context);
 
-  const handleChangeValue = (values: number[]) => {
-    const collectionSlug = context.dataset?.collectionSlug;
-    const filedName = context.dataset?.connexion?.field;
-    if (!collectionSlug || !filedName) return;
-    onUpdateForm(collectionSlug, filedName, values, context.listIndex);
-  };
+  const handleChangeValue = useCallback(
+    (values: number[]) => {
+      const storeId = context.dataset?.connexion?.input?.storeId;
+      const filedName = context.dataset?.connexion?.input?.field;
+      if (!storeId || !filedName) return;
+      onUpdateForm(context, storeId, filedName, values);
+    },
+    [context, onUpdateForm]
+  );
 
   return (
     <div {...props} className={cn('flex m-1 p-1', props.className)}>

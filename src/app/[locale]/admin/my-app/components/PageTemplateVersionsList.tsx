@@ -64,7 +64,6 @@ function PageTemplateVersionsList({ masterTemplate, page }: Props) {
       pageTemplateVersion
     );
     onAddPageTemplateVersion(pageTemplateVersion);
-    // fetchPageTemplateVersions();
   };
   const handleSelectPageVersion = (version: IPageTemplateVersion) => {
     setSelectedVersionPage(version, masterTemplate, page);

@@ -12,12 +12,14 @@ type Props = {
   selectedNode: IVDOMNode | null;
   onInputChange: (event: ChangeEvent<HTMLSelectElement>) => void;
   collections: Record<string, any>;
+  datasetKey: 'input' | 'output';
 };
 function DatasetStaticOptionsField({
   config,
   selectedNode,
   onInputChange,
-  collections
+  collections,
+  datasetKey
 }: Props) {
   const tTemplate = useTranslations('TemplateSection');
   const optionsSourceTypes = useMemo(
@@ -46,24 +48,29 @@ function DatasetStaticOptionsField({
         <Selectbox
           name='optionsSourceType'
           value={
-            selectedNode?.context?.dataset?.connexion?.optionsSourceType ||
-            'static'
+            selectedNode?.context?.dataset?.connexion?.[datasetKey]
+              ?.optionsSourceType || ''
           }
           options={optionsSourceTypes}
           onChange={onInputChange}
         />
       </FormField>
-      {selectedNode?.context?.dataset?.connexion?.optionsSourceType ===
-      'database' ? (
+      {selectedNode?.context?.dataset?.connexion?.[datasetKey]
+        ?.optionsSourceType === 'database' ? (
         <ExternalDataOptions
           config={config}
           collections={collections}
           selectedNode={selectedNode}
+          datasetKey={datasetKey}
         />
       ) : null}
-      {selectedNode?.context?.dataset?.connexion?.optionsSourceType ===
-      'static' ? (
-        <StaticDataOptions config={config} selectedNode={selectedNode} />
+      {selectedNode?.context?.dataset?.connexion?.[datasetKey]
+        ?.optionsSourceType === 'static' ? (
+        <StaticDataOptions
+          datasetKey={datasetKey}
+          config={config}
+          selectedNode={selectedNode}
+        />
       ) : null}
     </>
   );

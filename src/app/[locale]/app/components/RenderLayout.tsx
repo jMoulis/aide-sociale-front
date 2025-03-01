@@ -12,19 +12,21 @@ interface RenderLayoutProps {
   pageVersion: IPageTemplateVersion;
   routeParams?: any;
   asyncData: AsyncPayloadMap;
+  preview?: boolean;
 }
 
 export default function RenderLayout({
   pageVersion,
   asyncData,
-  routeParams
+  routeParams,
+  preview
 }: RenderLayoutProps) {
   // Start with the root node's ID in the path array (or "root" if missing)
   const rootNode = pageVersion.vdom;
   const initialId = rootNode._id || 'root';
   const initialPath = [initialId];
   return (
-    <FormProvider asyncData={asyncData}>
+    <FormProvider asyncData={asyncData} isBuilderMode={preview}>
       {renderVNode(rootNode, initialPath, routeParams)}
     </FormProvider>
   );

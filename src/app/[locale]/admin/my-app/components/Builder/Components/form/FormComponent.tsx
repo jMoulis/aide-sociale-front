@@ -4,7 +4,7 @@ import { PropsWithChildrenAndContext } from '@/lib/interfaces/interfaces';
 import client from '@/lib/mongo/initMongoClient';
 import { ENUM_COLLECTIONS } from '@/lib/mongo/interfaces';
 import { cn } from '@/lib/utils/shadcnUtils';
-import { forwardRef, useCallback, useEffect, useId, useRef } from 'react';
+import { forwardRef, useCallback, useId, useRef } from 'react';
 import { nanoid } from 'nanoid';
 import { FormType, useFormContext } from '../FormContext';
 import { useMongoUser } from '@/lib/mongo/MongoUserContext/MongoUserContext';
@@ -18,36 +18,25 @@ const FormComponent = forwardRef<HTMLFormElement, PropsWithChildrenAndContext>(
     const formId = useId();
     const user = useMongoUser();
 
-    useEffect(() => {
-      // Check if the form is in creation mode or builder mode
-      // If so, return early to avoid subsequent controls
-      if (context.dataset?.isCreation || context.isBuilderMode) {
-        return;
-      }
-
-      const collectionSlug = context.dataset?.collectionSlug;
-      if (!context.routeParams) {
-        toast({
-          title: 'Erreur',
-          description: 'Les paramètres de route sont manquants',
-          variant: 'destructive'
-        });
-        return;
-      }
-      if (!collectionSlug) {
-        toast({
-          title: 'Erreur',
-          description: 'La collection est manquante',
-          variant: 'destructive'
-        });
-        return;
-      }
-    }, [
-      context.dataset?.collectionSlug,
-      context.dataset?.isCreation,
-      context.routeParams,
-      context.isBuilderMode
-    ]);
+    // useEffect(() => {
+    //   // Check if the form is in creation mode or builder mode
+    //   // If so, return early to avoid subsequent controls
+    //   if (context.dataset?.isCreation || context.isBuilderMode) {
+    //     return;
+    //   }
+    //   if (!context.routeParams) {
+    //     toast({
+    //       title: 'Erreur',
+    //       description: 'Les paramètres de route sont manquants',
+    //       variant: 'destructive'
+    //     });
+    //     return;
+    //   }
+    // }, [
+    //   context.dataset?.isCreation,
+    //   context.routeParams,
+    //   context.isBuilderMode
+    // ]);
 
     const { className, ...rest } = props;
 
@@ -66,36 +55,45 @@ const FormComponent = forwardRef<HTMLFormElement, PropsWithChildrenAndContext>(
           console.warn('Form submission from other forms');
           return;
         } // Prevent form submission from other forms
-        const collectionSlug = context.dataset.collectionSlug;
 
+        const storeId = context.dataset.connexion?.input?.storeId;
+
+        if (!storeId) {
+          console.warn('Store ID is missing');
+          return;
+        }
+
+        const { form: formToSave, store } = forms[storeId] || {
+          form: {},
+          store: {}
+        };
+
+        const isCreation = context.dataset?.isCreation;
+
+        const collectionSlug = store.collection?.slug;
         if (!collectionSlug) {
           console.warn('Collection slug is missing');
           return;
         }
-
-        // get the right from store
-        const formToSave = forms[collectionSlug] || { data: {} };
-        const isCreation = context.dataset?.isCreation;
-
-        const params = context.dataset?.connexion?.parametersToSave?.reduce(
-          (acc: Record<string, string>, param) => {
-            if (!context.routeParams) {
+        const params =
+          context.dataset?.connexion?.input?.parametersToSave?.reduce(
+            (acc: Record<string, string>, param) => {
+              if (!context.routeParams) {
+                return acc;
+              }
+              if (!context.routeParams[param]) {
+                return acc;
+              }
+              acc[param] = context.routeParams[param];
               return acc;
-            }
-            if (!context.routeParams[param]) {
-              return acc;
-            }
-            acc[param] = context.routeParams[param];
-            return acc;
-          },
-          {}
-        );
-        if (Object.keys(params || {}).length === 0) {
+            },
+            {}
+          );
+        if (params && Object.keys(params || {}).length === 0) {
           console.warn('Missing parameters to save');
           toast({
             title: 'Erreur',
             description: 'Paramètres manquants',
-
             variant: 'destructive'
           });
           return;
@@ -116,26 +114,26 @@ const FormComponent = forwardRef<HTMLFormElement, PropsWithChildrenAndContext>(
               collectionSlug,
               organizationId: user.organizationId
             };
-            await client.create<FormType>(
-              collectionSlug as ENUM_COLLECTIONS,
-              newEntry
-            );
+            // await client.create<FormType>(
+            //   collectionSlug as ENUM_COLLECTIONS,
+            //   newEntry
+            // );
             formElement.reset();
           } else if (formToSave._id) {
-            await client.update<FormType>(
-              collectionSlug as ENUM_COLLECTIONS,
-              {
-                _id: formToSave._id
-              },
-              {
-                $set: {
-                  updatedAt: new Date(),
-                  updatedBy: getUserSummary(user),
-                  data: formToSave.data,
-                  templatePageVersionId: context.dataset.pageTemplateVersionId
-                }
-              }
-            );
+            // await client.update<FormType>(
+            //   collectionSlug as ENUM_COLLECTIONS,
+            //   {
+            //     _id: formToSave._id
+            //   },
+            //   {
+            //     $set: {
+            //       updatedAt: new Date(),
+            //       updatedBy: getUserSummary(user),
+            //       data: formToSave.data,
+            //       templatePageVersionId: context.dataset.pageTemplateVersionId
+            //     }
+            //   }
+            // );
           }
           toast({
             title: 'Succès',

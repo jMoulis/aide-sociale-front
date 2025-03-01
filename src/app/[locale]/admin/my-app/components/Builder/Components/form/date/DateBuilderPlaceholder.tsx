@@ -6,7 +6,7 @@ type Props = Record<string, unknown>;
 function DateBuilderPlaceholder(props: Props) {
   const t = useTranslations('GlobalSection');
   return (
-    <Button variant={'outline'} {...props}>
+    <Button type='button' variant={'outline'} {...props}>
       <CalendarIcon className='opacity-50' />
       <span className='opacity-50'>{t('actions.pickADate')}</span>
     </Button>

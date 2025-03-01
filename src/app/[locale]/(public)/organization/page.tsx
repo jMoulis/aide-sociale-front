@@ -4,7 +4,7 @@ import { ENUM_COLLECTIONS } from '@/lib/mongo/interfaces';
 import { matchRoute } from '../../app/matchRouter';
 import { notFound } from 'next/navigation';
 import { IMasterTemplate } from '@/lib/TemplateBuilder/interfaces';
-import { collectAsyncPayloads } from '../../app/utils';
+import { collectAsyncPayloads } from '../../app/utils/utils';
 import { getMongoUser } from '@/lib/utils/auth/serverUtils';
 import RenderLayout from '../../app/components/RenderLayout';
 import { nanoid } from 'nanoid';
@@ -76,11 +76,16 @@ export default async function RootPage({ searchParams }: Props) {
   if (!publishedVersion) {
     notFound();
   }
-  const datas = await collectAsyncPayloads(publishedVersion.vdom, params, {
-    organizationId: organization._id,
-    userId: user._id,
-    ...params
-  });
+  const datas = await collectAsyncPayloads(
+    publishedVersion.vdom,
+    params,
+    {
+      organizationId: organization._id,
+      userId: user._id,
+      ...params
+    },
+    publishedVersion?.stores || []
+  );
   return (
     <>
       {compiledStylesheet ? (

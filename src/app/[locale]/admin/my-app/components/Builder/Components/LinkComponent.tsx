@@ -82,7 +82,7 @@ function LinkComponent({
               href: buildUrl(
                 attr.value || attr.page?.route,
                 value as string,
-                context?.dataset?.connexion?.routeParam,
+                context?.dataset?.connexion?.input?.routeParam,
                 context.routeParams
               )
             };

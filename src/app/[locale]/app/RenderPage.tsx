@@ -3,7 +3,10 @@ import {
   getServerSideCurrentUserOrganizationId
 } from '@/lib/utils/auth/serverUtils';
 import { headers } from 'next/headers';
-import { collectAsyncPayloads, getPublishedMasterTemplates } from './utils';
+import {
+  collectAsyncPayloads,
+  getPublishedMasterTemplates
+} from './utils/utils';
 import { notFound } from 'next/navigation';
 import MainLayout from '../components/MainLayout';
 import { Link } from '@/i18n/routing';
@@ -74,11 +77,16 @@ async function RenderPage({ slug }: Props) {
     notFound();
   }
 
-  const datas = await collectAsyncPayloads(publishedVersion.vdom, routeParams, {
-    organizationId,
-    userId: user._id,
-    ...routeParams
-  });
+  const datas = await collectAsyncPayloads(
+    publishedVersion.vdom,
+    routeParams,
+    {
+      organizationId,
+      userId: user._id,
+      ...routeParams
+    },
+    publishedVersion?.stores || []
+  );
 
   return (
     <MainLayout>

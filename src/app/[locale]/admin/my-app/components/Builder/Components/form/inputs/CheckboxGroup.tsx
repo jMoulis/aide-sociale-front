@@ -9,27 +9,22 @@ import { SelectboxOption } from '@/components/form/Selectbox';
 import { buildOptions } from '../../utils';
 
 function CheckboxComponent({ props, context }: PropsWithChildrenAndContext) {
-  const {
-    onMultiSelectChange,
-    getFormFieldValue,
-    lists,
-    getMultichoiceOptions
-  } = useFormContext();
+  const { getFormFieldValue, lists, getMultichoiceOptions } = useFormContext();
   const value = getFormFieldValue(context);
   const [options, setOptions] = useState<SelectboxOption[]>(
     buildOptions(lists, context)
   );
-  const handleInputChange = (state: CheckedState) => {
+  const handleInputChange = (_state: CheckedState) => {
     //TODO:  Add the possibility to select multiple options
-    onMultiSelectChange({
-      target: {
-        name: context.dataset?.connexion?.field,
-        value: state,
-        dataset: {
-          collection: context.dataset?.collectionSlug
-        } as any
-      }
-    } as React.ChangeEvent<HTMLInputElement>);
+    // onMultiSelectChange({
+    //   target: {
+    //     name: context.dataset?.connexion?.input?.field,
+    //     value: state,
+    //     dataset: {
+    //       store: context.dataset?.connexion?.input?.storeId
+    //     } as any
+    //   }
+    // } as React.ChangeEvent<HTMLInputElement>);
   };
 
   useEffect(() => {
@@ -50,7 +45,7 @@ function CheckboxComponent({ props, context }: PropsWithChildrenAndContext) {
           />
           <FormLabel
             className='mb-0'
-            htmlFor={`${i}-${context.dataset?.connexion?.field}`}>
+            htmlFor={`${i}-${context.dataset?.connexion?.input?.field}`}>
             {opt.label}
           </FormLabel>
         </div>

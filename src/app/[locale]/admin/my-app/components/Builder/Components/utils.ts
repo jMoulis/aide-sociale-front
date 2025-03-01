@@ -1,15 +1,16 @@
 import { SelectboxOption } from "@/components/form/Selectbox";
-import { VDOMContext } from "@/lib/interfaces/interfaces";
+import { AsyncLists, VDOMContext } from "@/lib/interfaces/interfaces";
 
 export const buildOptions = (
-  lists: Record<string, any[]>,
+  lists: AsyncLists,
   context: VDOMContext
 ): SelectboxOption[] => {
   const connexion = context?.dataset?.connexion;
   if (!connexion) return [];
 
-  const externalDataOptions = connexion.externalDataOptions;
-  const staticDataOptions = connexion.staticDataOptions;
+  const externalDataOptions = connexion.input?.externalDataOptions;
+  const staticDataOptions = connexion.input?.staticDataOptions;
+
   if (!externalDataOptions && !staticDataOptions) return [];
 
   if (
@@ -17,10 +18,10 @@ export const buildOptions = (
     externalDataOptions?.labelField &&
     externalDataOptions?.valueField
   ) {
-    const list = lists[externalDataOptions.collectionSlug];
-    if (!list) return [] as any;
-
-    const options = list.reduce((acc: SelectboxOption[], item) => {
+    const asyncList = lists[externalDataOptions.collectionSlug];
+    if (!asyncList?.list) return [] as any;
+    const list = asyncList.list;
+    const options = list.reduce((acc: SelectboxOption[], item: any) => {
       if (!item[externalDataOptions.labelField]) return acc;
       return [
         ...acc,

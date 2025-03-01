@@ -108,10 +108,12 @@ const Chat = ({}: ChatProps) => {
   };
 
   useEffect(() => {
+    if (!open) return;
     scrollToBottom();
-  }, [messages]);
+  }, [messages, open]);
 
   useEffect(() => {
+    if (!open) return;
     if (!isAnswering && messages.length) {
       const lastMessage = messages[messages.length - 1];
       if (lastMessage.role === 'assistant') {
@@ -123,10 +125,11 @@ const Chat = ({}: ChatProps) => {
         }
       }
     }
-  }, [isAnswering, messages, elementsConfig]);
+  }, [isAnswering, messages, elementsConfig, open]);
 
   // create a new threadID when chat component created
   useEffect(() => {
+    if (!open) return;
     const createThread = async () => {
       const res = await fetch(`/api/assistants/threads`, {
         method: 'POST'
@@ -135,7 +138,7 @@ const Chat = ({}: ChatProps) => {
       setThreadId(data.threadId);
     };
     createThread();
-  }, []);
+  }, [open]);
 
   const sendMessage = async (text: string) => {
     const response = await fetch(

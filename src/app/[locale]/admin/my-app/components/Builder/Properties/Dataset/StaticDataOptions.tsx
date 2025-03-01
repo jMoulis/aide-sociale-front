@@ -13,15 +13,17 @@ import { IDataset } from '@/lib/interfaces/interfaces';
 type Props = {
   config: ElementConfigProps;
   selectedNode: IVDOMNode | null;
+  datasetKey: 'input' | 'output';
 };
 
-function StaticDataOptions({ config, selectedNode }: Props) {
+function StaticDataOptions({ config, selectedNode, datasetKey }: Props) {
   const onUpdateNodeProperty = usePageBuilderStore(
     (state) => state.onUpdateNodeProperty
   );
 
   const [options, setOptions] = useState<string[]>(
-    selectedNode?.context?.dataset?.connexion?.staticDataOptions || []
+    selectedNode?.context?.dataset?.connexion?.[datasetKey]
+      ?.staticDataOptions || []
   );
 
   const t = useTranslations('TemplateSection');
@@ -43,7 +45,10 @@ function StaticDataOptions({ config, selectedNode }: Props) {
             ...selectedNode?.context?.dataset,
             connexion: {
               ...selectedNode?.context?.dataset?.connexion,
-              staticDataOptions: updatedOptions
+              [datasetKey]: {
+                ...selectedNode?.context?.dataset?.connexion?.[datasetKey],
+                staticDataOptions: updatedOptions
+              }
             }
           }
         } as Partial<IDataset>,

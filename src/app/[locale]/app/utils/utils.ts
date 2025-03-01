@@ -1,16 +1,18 @@
 'use server';
 
-import { AsyncPayloadMap, IPage, IUser } from "@/lib/interfaces/interfaces";
+import { AsyncPayloadMap, IPage, IStore, IUser } from "@/lib/interfaces/interfaces";
 import clientMongoServer from "@/lib/mongo/initMongoServer";
-import { ENUM_COLLECTIONS } from "@/lib/mongo/interfaces";
+import { ApiResponse, ENUM_COLLECTIONS } from "@/lib/mongo/interfaces";
 import { IMasterTemplate } from "@/lib/TemplateBuilder/interfaces";
 import { getServerSideCurrentUserOrganizationId, hasPermissions } from "@/lib/utils/auth/serverUtils";
 import { notFound } from "next/navigation";
-import { ENUM_COMPONENTS, IVDOMNode } from "../admin/my-app/components/interfaces";
-import { FormType } from "../admin/my-app/components/Builder/Components/FormContext";
+import { ENUM_COMPONENTS, IVDOMNode } from "../../admin/my-app/components/interfaces";
+import { FormType } from "../../admin/my-app/components/Builder/Components/FormContext";
 import { mergePermissions } from "@/lib/utils/auth/utils";
 import { isValidJSON } from "@/lib/utils/utils";
-import { matchRoute } from "./matchRouter";
+import { matchRoute } from "../matchRouter";
+import { IQuery } from "@/lib/interfaces/interfaces";
+import { getMethod } from "./sharedUtils";
 
 export const fetchTemplateVersions = async (templateId: string, user: IUser) => {
   const { data: masterTemplates } = await clientMongoServer.list<IMasterTemplate>(
@@ -93,100 +95,116 @@ export async function getPublishedMasterTemplates({ slug, user, templateSearch, 
   }
 }
 
-const extractAndReplacePlaceholders = (query: string | null, systemParams: Record<string, string>): Record<string, any> | null => {
-  if (!query) return null;
-  const placeholders = query.match(/{{:([a-zA-Z0-9]+)}}/g);
-  if (!placeholders) {
-    if (isValidJSON(query)) {
-      return JSON.parse(query);
-    }
-    return null;
-  }
-  const queryBuilt = placeholders.reduce((acc, placeholder) => {
-    const key = placeholder.replace(/{{:|}}/g, '');
-    return acc.replace(placeholder, systemParams[key]);
-  }, query);
 
-  if (isValidJSON(queryBuilt)) {
-    return JSON.parse(queryBuilt);
+
+// Helper function to recursively replace placeholders in any value.
+
+const extractAndReplacePlaceholders = (query: string | null, systemParams: Record<string, string>): Promise<ApiResponse<any> | null> | null => {
+  if (!query) return null;
+
+  if (isValidJSON(query)) {
+    const queryParsed = JSON.parse(query) as IQuery;
+    const data = {};
+    const method = getMethod(clientMongoServer, queryParsed, data, systemParams);
+
+    return method;
   }
   return null;
 };
 
-const getParamValue = (param: string, systemParams: Record<string, string>, routeParams: Record<string, string>, staticDataOptions?: string[]) => {
+const getParamValue = (param: string, systemParams: Record<string, string>, routeParams: Record<string, string>) => {
   if (systemParams[param]) {
     return systemParams[param];
   }
-  return routeParams[param] || staticDataOptions?.find((option) => option === param);
+  return routeParams[param];
 }
 
+const getStoreData = async (store: IStore, systemParams: Record<string, string>, routeParams: Record<string, string>): Promise<{ store: IStore, form: FormType | null } | null> => {
+  const { routeParam, collection } = store;
+
+  if (!collection?.name) {
+    if (!store?.virtual) {
+      console.warn('No collection found for store', store?.slug);
+      return null;
+    }
+    // Virtual store no db persistence
+    return {
+      store,
+      form: {} as FormType
+    };
+  };
+
+
+  const param = getParamValue(routeParam as string, systemParams, routeParams);
+
+  if (!param) {
+    console.info('No param found for store', store?.slug);
+    return {
+      store,
+      form: {} as FormType
+    };
+  };
+
+  try {
+    const { data: form } = await clientMongoServer.get<FormType>(
+      collection.slug as ENUM_COLLECTIONS,
+      { _id: param }
+    );
+
+    return {
+      store,
+      form
+    };
+  } catch (error) {
+    console.error(`Error fetching data for node:`, error);
+    return null;
+  };
+}
 // This function recursively traverses the vDOM and builds the payload map.
 export const collectAsyncPayloads = async (
   vdom: IVDOMNode,
   routeParams: Record<string, string>,
-  systemParams: Record<string, string>
+  systemParams: Record<string, string>,
+  stores: IStore[] = []
 ): Promise<AsyncPayloadMap> => {
   const resultMap: AsyncPayloadMap = {
     forms: {},
     lists: {}
   };
 
+  if (stores.length) {
+    await Promise.all(stores.map(async (store) => {
+      const storeData = getStoreData(store, systemParams, routeParams);
+      if (storeData) {
+        resultMap.forms[store.slug] = await storeData || {} as any;
+      }
+    }));
+  }
+
   const listTypeComponents = [ENUM_COMPONENTS.LIST, ENUM_COMPONENTS.RADIO, ENUM_COMPONENTS.SELECT];
   // Recursive helper function.
   const traverse = async (node: IVDOMNode) => {
     const dataset = node.context?.dataset;
-    const query = extractAndReplacePlaceholders(dataset?.connexion?.query || null, systemParams);
+    const query = await extractAndReplacePlaceholders(dataset?.connexion?.input?.query || null, systemParams);
 
-    console.log(dataset?.connexion)
     if (listTypeComponents.includes(node.type) && dataset) {
       if (
-        dataset.connexion?.externalDataOptions?.collectionSlug &&
-        dataset.connexion?.externalDataOptions?.labelField &&
-        dataset.connexion?.externalDataOptions?.valueField
+        dataset.connexion?.input?.externalDataOptions?.collectionSlug &&
+        dataset.connexion?.input?.externalDataOptions?.labelField &&
+        dataset.connexion?.input?.externalDataOptions?.valueField
       ) {
-        const { collectionSlug } = dataset.connexion.externalDataOptions;
-        console.log(query, collectionSlug)
-        if (query) {
-          const { data } = await clientMongoServer.list<FormType>(
-            collectionSlug as ENUM_COLLECTIONS,
-            query
-          );
-          console.log(data)
-          if (data) {
-            resultMap.lists[collectionSlug] = data;
-          }
+        const { collectionSlug } = dataset.connexion.input?.externalDataOptions;
+        if (query?.data) {
+          resultMap.lists[collectionSlug] = query.data;
         }
-      } else if (query) {
-        await clientMongoServer
-          .list<FormType>(dataset.collectionSlug as ENUM_COLLECTIONS, query)
-          .then(({ data }) => {
-            if (data) {
-              resultMap.lists[dataset.collectionSlug] = data;
-            }
-          });
-      }
-    } else if (dataset) {
-      const { collectionSlug, connexion } = dataset;
-      if (collectionSlug && connexion) {
-        const { routeParam } = connexion;
-        const param = getParamValue(routeParam as string, systemParams, routeParams, connexion.staticDataOptions);
-
-        if (param) {
-          try {
-            const { data: form } = await clientMongoServer.get<FormType>(
-              collectionSlug as ENUM_COLLECTIONS,
-              { _id: param }
-            );
-            if (form) {
-              resultMap.forms[collectionSlug] = form;
-            }
-          } catch (error) {
-            console.error(`Error fetching data for node ${node._id}:`, error);
-          }
-        }
+      } else if (query?.data && dataset.connexion?.input?.storeId) {
+        const store = stores.find((store) => store.slug === dataset.connexion?.input?.storeId) as IStore || {};
+        resultMap.lists[dataset.connexion?.input?.storeId] = {
+          store,
+          list: query.data
+        };
       }
     }
-
     // Process all children recursively.
     if (node.children && Array.isArray(node.children)) {
       await Promise.all(node.children.map((child) => traverse(child)));

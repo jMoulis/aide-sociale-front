@@ -4,6 +4,7 @@ import Cookies from 'js-cookie'
 import { ENUM_COLLECTIONS, ENUM_SOCKET_EVENTS, FilterType, IDeleteResponse, IMongoRealtimeConfig, ISocketEventListenCollectionProps, IUpsertResponse } from '../interfaces';
 import { COOKIE_SERVER_AUTH } from '@/lib/utils/auth/utils';
 import { IUser } from '@/lib/interfaces/interfaces';
+import { convertDates } from '@/lib/utils/utils';
 
 interface ApiResponse<T> {
   data: T | null;
@@ -49,7 +50,8 @@ class MongoRealtimeClient {
       if (!response.ok) {
         throw JSON.stringify({ status: response.status, error: data.error });
       }
-      return { ...data, error: null };
+      const parsedPaylod = { ...data, data: convertDates(data.data) };
+      return { ...parsedPaylod, error: null };
     } catch (error: any) {
       throw error;
     }

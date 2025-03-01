@@ -30,6 +30,7 @@
     "dataset": "Ensemble de données",
     "name": "Nom de la collection",
     "selectCollection": "Sélectionner une collection",
+    "selectStore": "Sélectionner un store",
     "parentCollection": "Collection parent {collectionName}",
     "selectValueField": "Sélectionner un champ de valeur",
     "selectSystemField": "Sélectionner un champ système",
