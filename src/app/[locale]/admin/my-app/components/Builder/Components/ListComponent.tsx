@@ -1,7 +1,7 @@
 import { PropsWithChildrenAndContext } from '@/lib/interfaces/interfaces';
 import { cn } from '@/lib/utils/shadcnUtils';
 import React, { Fragment, useCallback, useEffect, useState } from 'react';
-import { useFormContext } from './FormContext';
+import { FormType, useFormContext } from './FormContext';
 import ChildrenDndWrapper from './ChildrenDndWrapper';
 import { IVDOMNode } from '../../interfaces';
 import { renderVNode } from './renderVode';
@@ -14,10 +14,12 @@ function ListComponent({
   node,
   dndChildrenContainerRef
 }: PropsWithChildrenAndContext) {
-  const { lists, queryResults } = useFormContext();
+  const { asyncData } = useFormContext();
   const [items, setItems] = useState<any[]>(
     (context.dataset?.connexion?.input?.storeId &&
-      lists[context.dataset?.connexion?.input?.storeId]?.list) ||
+      (asyncData[context.dataset?.connexion?.input?.storeId]
+        ?.data as FormType[])) ||
+      [] ||
       []
   );
 
@@ -39,14 +41,15 @@ function ListComponent({
     // }
     if (!context.dataset?.connexion?.input?.storeId) return;
 
-    const datas = lists[context.dataset?.connexion?.input?.storeId]?.list || [];
+    const datas =
+      (asyncData[context.dataset?.connexion?.input?.storeId]
+        ?.data as FormType[]) || [];
     setItems(datas);
   }, [
     context.dataset?.connexion?.input?.storeId,
     // context.dataset?.connexion?.input?.plugToQuery,
     context.isBuilderMode,
-    lists,
-    queryResults,
+    asyncData,
     context.dataset?.connexion?.input
   ]);
 

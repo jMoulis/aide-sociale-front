@@ -70,7 +70,7 @@ const SchedulerComponent = ({
 }: PropsWithChildrenAndContext) => {
   const [events, setEvents] = useState<any>([]);
   const [createFormRef, setCreateFormRef] = useState<ReactNode | null>(null);
-  const { lists, onAddListItem, onUpdateList } = useFormContext();
+  const { asyncData, onAddListItem, onUpdateList } = useFormContext();
   const user = useMongoUser();
   const schedulerRef = useRef<any | null>(null);
 
@@ -80,7 +80,8 @@ const SchedulerComponent = ({
       if (context.isBuilderMode) return;
 
       if (!context.dataset?.connexion?.input?.storeId) return;
-      const store = lists[context.dataset?.connexion?.input?.storeId]?.store;
+      const store =
+        asyncData[context.dataset?.connexion?.input?.storeId]?.store;
 
       if (!store?.collection?.name) return;
       client
@@ -111,7 +112,7 @@ const SchedulerComponent = ({
     [
       context.dataset?.connexion?.input?.storeId,
       context.isBuilderMode,
-      lists,
+      asyncData,
       onUpdateList
     ]
   );
@@ -158,10 +159,14 @@ const SchedulerComponent = ({
         console.warn('Collection slug is missing');
         return;
       }
-      const asyncList = lists[storeId] || [];
+      const asyncList = asyncData[storeId] || [];
       // get the right from store
+      if (!Array.isArray(asyncList.data)) {
+        console.warn('List is missing');
+        return;
+      }
       const formToSave =
-        asyncList?.list?.find((item) => item._id === id) ||
+        asyncList?.data?.find((item) => item._id === id) ||
         ({
           data: {}
         } as FormType);
@@ -256,7 +261,13 @@ const SchedulerComponent = ({
         });
       }
     },
-    [context.dataset, context.isBuilderMode, context.routeParams, lists, user]
+    [
+      context.dataset,
+      context.isBuilderMode,
+      context.routeParams,
+      asyncData,
+      user
+    ]
   );
   const handleAddEvent = useCallback(
     (event: CalendarEvent) => {
@@ -265,7 +276,7 @@ const SchedulerComponent = ({
         console.warn('Collection slug is missing');
         return;
       }
-      const asyncList = lists[storeId] || [];
+      const asyncList = asyncData[storeId] || [];
       const collectionSlug = asyncList.store.collection?.name;
 
       const pageTemplateVersionId = context.dataset?.pageTemplateVersionId;
@@ -310,7 +321,7 @@ const SchedulerComponent = ({
       context.dataset?.connexion?.input?.storeId,
       context.dataset?.pageTemplateVersionId,
       context.routeParams,
-      lists,
+      asyncData,
       onAddListItem,
       user
     ]

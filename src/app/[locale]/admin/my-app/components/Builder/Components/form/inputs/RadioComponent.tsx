@@ -7,10 +7,10 @@ import FormLabel from '@/components/form/FormLabel';
 import { buildOptions } from '../../utils';
 
 function RadioComponent({ context, props }: PropsWithChildrenAndContext) {
-  const { onUpdateForm, getFormFieldValue, lists, getMultichoiceOptions } =
+  const { onUpdateForm, getFormFieldValue, asyncData, getMultichoiceOptions } =
     useFormContext();
   const [options, setOptions] = useState<SelectboxOption[]>(
-    buildOptions(lists, context)
+    buildOptions(asyncData, context)
   );
   const value = getFormFieldValue(context);
 

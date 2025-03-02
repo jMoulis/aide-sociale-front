@@ -83,6 +83,19 @@ export interface ICollection {
   fields: ICollectionField[];
 }
 
+export interface IVirtualCollection {
+  _id: string;
+  name: string;
+  slug: string;
+  fields: ICollectionField[];
+  virtual: boolean;
+}
+export interface ICollectionSummary {
+  _id: string;
+  name: string;
+  slug: string;
+  fields: ICollectionField[];
+}
 export interface IDatasetConnexion {
   input?: IDatasetConnexionItem;
   output?: IDatasetConnexionItem;
@@ -278,9 +291,9 @@ export interface IStore {
   slug: string;
   name: string;
   description?: string;
-  collection?: ICollection;
+  collection?: ICollectionSummary | IVirtualCollection;
   routeParam?: string;
-  virtual?: boolean;
+  virtual: boolean;
   type: 'list' | 'form';
 }
 
@@ -361,9 +374,7 @@ export interface IContactInfo {
   type: string;
 }
 
-export type AsyncForms = Record<string, { store: IStore, form: FormType }>;
-export type AsyncLists = Record<string, { store: IStore, list: FormType[] }>;
-export type AsyncPayloadMap = { forms: AsyncForms, lists: AsyncLists };
+export type AsyncPayloadMap = Record<string, { store: IStore, data: FormType | FormType[] }>;
 
 export type Method =
   | 'update'

@@ -5,14 +5,14 @@ import { ChangeEvent, useCallback, useEffect, useState } from 'react';
 import { buildOptions } from '../utils';
 
 function SelectComponent({ props, context }: PropsWithChildrenAndContext) {
-  const { onUpdateForm, getFormFieldValue, lists } = useFormContext();
+  const { onUpdateForm, getFormFieldValue, asyncData } = useFormContext();
   const [options, setOptions] = useState<SelectboxOption[]>(
-    buildOptions(lists, context)
+    buildOptions(asyncData, context)
   );
   const value = getFormFieldValue(context);
 
   useEffect(() => {
-    setOptions(buildOptions(lists, context));
+    setOptions(buildOptions(asyncData, context));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [context.dataset]);
 

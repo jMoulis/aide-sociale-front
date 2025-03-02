@@ -1,8 +1,8 @@
 import { SelectboxOption } from "@/components/form/Selectbox";
-import { AsyncLists, VDOMContext } from "@/lib/interfaces/interfaces";
+import { AsyncPayloadMap, VDOMContext } from "@/lib/interfaces/interfaces";
 
 export const buildOptions = (
-  lists: AsyncLists,
+  lists: AsyncPayloadMap,
   context: VDOMContext
 ): SelectboxOption[] => {
   const connexion = context?.dataset?.connexion;
@@ -19,8 +19,8 @@ export const buildOptions = (
     externalDataOptions?.valueField
   ) {
     const asyncList = lists[externalDataOptions.collectionSlug];
-    if (!asyncList?.list) return [] as any;
-    const list = asyncList.list;
+    if (!asyncList?.data || !Array.isArray(asyncList.data)) return [] as any;
+    const list = asyncList.data;
     const options = list.reduce((acc: SelectboxOption[], item: any) => {
       if (!item[externalDataOptions.labelField]) return acc;
       return [

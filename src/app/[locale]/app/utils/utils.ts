@@ -168,15 +168,14 @@ export const collectAsyncPayloads = async (
   stores: IStore[] = []
 ): Promise<AsyncPayloadMap> => {
   const resultMap: AsyncPayloadMap = {
-    forms: {},
-    lists: {}
+
   };
 
   if (stores.length) {
     await Promise.all(stores.map(async (store) => {
       const storeData = getStoreData(store, systemParams, routeParams);
       if (storeData) {
-        resultMap.forms[store.slug] = await storeData || {} as any;
+        resultMap[store.slug] = await storeData || {} as any;
       }
     }));
   }
@@ -195,13 +194,13 @@ export const collectAsyncPayloads = async (
       ) {
         const { collectionSlug } = dataset.connexion.input?.externalDataOptions;
         if (query?.data) {
-          resultMap.lists[collectionSlug] = query.data;
+          resultMap[collectionSlug] = query.data;
         }
       } else if (query?.data && dataset.connexion?.input?.storeId) {
         const store = stores.find((store) => store.slug === dataset.connexion?.input?.storeId) as IStore || {};
-        resultMap.lists[dataset.connexion?.input?.storeId] = {
+        resultMap[dataset.connexion?.input?.storeId] = {
           store,
-          list: query.data
+          data: query.data
         };
       }
     }

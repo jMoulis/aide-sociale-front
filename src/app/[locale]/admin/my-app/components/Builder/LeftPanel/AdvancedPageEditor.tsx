@@ -87,11 +87,7 @@ function AdvancedPageEditor() {
               value={JSON.stringify(pageVersion?.vdom || {}, undefined, 2)}
             />
           </div>
-          <RenderLayout
-            pageVersion={pageVersion}
-            asyncData={{ forms: {}, lists: {} }}
-            preview
-          />
+          <RenderLayout pageVersion={pageVersion} asyncData={{}} preview />
         </div>
         <FormFooterAction>
           <Button type='button' onClick={handleGenerateUuid}>

@@ -32,7 +32,8 @@ function Stores({ page }: Props) {
     slug: '',
     name: '',
     description: '',
-    type: 'form'
+    type: 'form',
+    virtual: false
   };
   const [selectedStore, setSelectStore] = useState<IStore>(defaultStore);
   const [open, setOpen] = useState(false);
@@ -175,6 +176,7 @@ function Stores({ page }: Props) {
           </Form>
           <Collections
             selectedCollectionId={selectedStore?.collection?._id}
+            virtual={selectedStore?.virtual}
             onSelectCollection={handleSelectCollection}
           />
         </div>

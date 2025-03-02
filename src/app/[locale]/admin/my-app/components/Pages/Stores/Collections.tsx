@@ -14,16 +14,18 @@ import { useMongoUser } from '@/lib/mongo/MongoUserContext/MongoUserContext';
 type Props = {
   onSelectCollection: (collection: ICollection) => void;
   selectedCollectionId?: string;
+  virtual?: boolean;
 };
-function Collections({ onSelectCollection, selectedCollectionId }: Props) {
+function Collections({
+  onSelectCollection,
+  selectedCollectionId,
+  virtual
+}: Props) {
   const [collections, setCollections] = useState<ICollection[]>([]);
   const organizationId = usePageBuilderStore((state) => state.organizationId);
   const user = useMongoUser();
   const [selectedCollection, setSelectedCollection] =
     useState<ICollection | null>(null);
-  const [open, setOpen] = useState(false);
-
-  const t = useTranslations('CollectionSection');
 
   useEffect(() => {
     if (selectedCollectionId) {
@@ -46,6 +48,7 @@ function Collections({ onSelectCollection, selectedCollectionId }: Props) {
       // fetch collections
     }
   }, [organizationId]);
+
   const handleSubmit = (collection: ICollection, create: boolean) => {
     if (create) {
       setCollections((prev) => [...prev, collection]);
@@ -56,23 +59,12 @@ function Collections({ onSelectCollection, selectedCollectionId }: Props) {
         )
       );
     }
-    setOpen(false);
   };
 
   if (!organizationId || !user) return null;
   return (
     <div>
-      <Dialog
-        open={open}
-        onOpenChange={setOpen}
-        Trigger={<Button>{t('create.action')}</Button>}>
-        <CollectionForm
-          organizationId={organizationId}
-          user={user}
-          onSubmit={handleSubmit}
-          onCancel={() => setOpen(false)}
-        />
-      </Dialog>
+      <CollectionForm onSubmit={handleSubmit} virtual={virtual} />
       <div className='flex'>
         <ul>
           {collections.map((collection) => (

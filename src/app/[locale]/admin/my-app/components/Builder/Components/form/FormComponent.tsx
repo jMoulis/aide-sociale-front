@@ -13,7 +13,7 @@ import ChildrenDndWrapper from '../ChildrenDndWrapper';
 
 const FormComponent = forwardRef<HTMLFormElement, PropsWithChildrenAndContext>(
   ({ props, children, context, dndChildrenContainerRef }, ref) => {
-    const { forms } = useFormContext();
+    const { asyncData } = useFormContext();
     const formRef = useRef<HTMLFormElement | null>(null);
     const formId = useId();
     const user = useMongoUser();
@@ -63,8 +63,8 @@ const FormComponent = forwardRef<HTMLFormElement, PropsWithChildrenAndContext>(
           return;
         }
 
-        const { form: formToSave, store } = forms[storeId] || {
-          form: {},
+        const { data: formToSave, store } = asyncData[storeId] || {
+          data: {},
           store: {}
         };
 
@@ -103,6 +103,8 @@ const FormComponent = forwardRef<HTMLFormElement, PropsWithChildrenAndContext>(
             console.warn('User is missing');
             return;
           }
+          if (Array.isArray(formToSave)) return;
+
           if (!formToSave._id || isCreation) {
             const id = nanoid();
             const newEntry: FormType = {
@@ -114,26 +116,26 @@ const FormComponent = forwardRef<HTMLFormElement, PropsWithChildrenAndContext>(
               collectionSlug,
               organizationId: user.organizationId
             };
-            // await client.create<FormType>(
-            //   collectionSlug as ENUM_COLLECTIONS,
-            //   newEntry
-            // );
+            await client.create<FormType>(
+              collectionSlug as ENUM_COLLECTIONS,
+              newEntry
+            );
             formElement.reset();
           } else if (formToSave._id) {
-            // await client.update<FormType>(
-            //   collectionSlug as ENUM_COLLECTIONS,
-            //   {
-            //     _id: formToSave._id
-            //   },
-            //   {
-            //     $set: {
-            //       updatedAt: new Date(),
-            //       updatedBy: getUserSummary(user),
-            //       data: formToSave.data,
-            //       templatePageVersionId: context.dataset.pageTemplateVersionId
-            //     }
-            //   }
-            // );
+            await client.update<FormType>(
+              collectionSlug as ENUM_COLLECTIONS,
+              {
+                _id: formToSave._id
+              },
+              {
+                $set: {
+                  updatedAt: new Date(),
+                  updatedBy: getUserSummary(user),
+                  data: formToSave.data,
+                  templatePageVersionId: context.dataset.pageTemplateVersionId
+                }
+              }
+            );
           }
           toast({
             title: 'Succès',
@@ -148,7 +150,13 @@ const FormComponent = forwardRef<HTMLFormElement, PropsWithChildrenAndContext>(
           });
         }
       },
-      [context.dataset, context.isBuilderMode, context.routeParams, forms, user]
+      [
+        context.dataset,
+        context.isBuilderMode,
+        context.routeParams,
+        asyncData,
+        user
+      ]
     );
 
     return (

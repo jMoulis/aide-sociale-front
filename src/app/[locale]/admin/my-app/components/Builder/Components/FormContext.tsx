@@ -1,6 +1,4 @@
 import {
-  AsyncForms,
-  AsyncLists,
   AsyncPayloadMap,
   IDataset,
   IUserSummary,
@@ -39,9 +37,7 @@ export type FormType = {
   organizationId: string;
 };
 interface FormContextProps {
-  forms: AsyncForms;
-  lists: AsyncLists;
-  queryResults: Record<string, any>;
+  asyncData: AsyncPayloadMap;
   onUpdateList: (collectionSlug: string, list: any[]) => void;
   onAddListItem: (collectionSlug: string, item: any) => void;
   // onInputChange: (
@@ -69,9 +65,7 @@ interface FormContextProps {
 }
 // Define Context
 const FormContext = createContext<FormContextProps>({
-  forms: {},
-  lists: {},
-  queryResults: {},
+  asyncData: {},
   onUpdateList: () => {},
   onAddListItem: () => {},
   // onInputChange: () => {},
@@ -101,172 +95,170 @@ export const FormProvider = ({
   isBuilderMode
 }: FormProviderProps) => {
   const [asyncData, setAsyncData] = useState<AsyncPayloadMap>(initialAsyncData);
-  const [queryResults, setQueryResults] = useState<Record<string, any>>({});
+  // const [queryResults, setQueryResults] = useState<Record<string, any>>({});
 
-  const onInputChange = useCallback(
-    (
-      e: React.ChangeEvent<
-        HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
-      >,
-      context: VDOMContext
-    ) => {
-      if (isBuilderMode) return;
-      const { name, value } = e.target;
-      console.log(context.dataset);
-      const storeId = context.dataset?.connexion?.input?.storeId;
-      const listIndex = context.listIndex;
-      const unbind = context.unbind;
-      if (!storeId) {
-        console.error('Collection slug is missing');
-        return;
-      }
-      if (!name) {
-        console.error('Name is missing');
-        return;
-      }
+  // const onInputChange = useCallback(
+  //   (
+  //     e: React.ChangeEvent<
+  //       HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
+  //     >,
+  //     context: VDOMContext
+  //   ) => {
+  //     if (isBuilderMode) return;
+  //     const { name, value } = e.target;
+  //     console.log(context.dataset);
+  //     const storeId = context.dataset?.connexion?.input?.storeId;
+  //     const listIndex = context.listIndex;
+  //     const unbind = context.unbind;
+  //     if (!storeId) {
+  //       console.error('Collection slug is missing');
+  //       return;
+  //     }
+  //     if (!name) {
+  //       console.error('Name is missing');
+  //       return;
+  //     }
 
-      if (listIndex !== undefined) {
-        if (unbind) {
-          const output = context.dataset?.connexion?.output;
-          const input = context.dataset?.connexion?.input;
-          const inputStoreId = input?.storeId;
-          const outputStoreId = output?.storeId;
+  //     if (listIndex !== undefined) {
+  //       if (unbind) {
+  //         const output = context.dataset?.connexion?.output;
+  //         const input = context.dataset?.connexion?.input;
+  //         const inputStoreId = input?.storeId;
+  //         const outputStoreId = output?.storeId;
 
-          if (!outputStoreId || !inputStoreId) return;
+  //         if (!outputStoreId || !inputStoreId) return;
 
-          const asyncOutput = asyncData.forms[outputStoreId];
-          const asyncInput = asyncData.lists[inputStoreId];
+  //         const asyncOutput = asyncData[outputStoreId];
+  //         const asyncInput = asyncData[inputStoreId];
 
-          console.log(asyncOutput, asyncInput);
-          const inputForm =
-            asyncInput?.list?.find(
-              (_item: any, index: number) => index === Number(listIndex)
-            ) || ({ data: {} } as FormType);
+  //         console.log(asyncOutput, asyncInput);
+  //         const inputForm =
+  //           (asyncInput?.data as FormType[])?.find(
+  //             (_item: any, index: number) => index === Number(listIndex)
+  //           ) || ({ data: {} } as FormType);
 
-          const getValue = (field: string, form: FormType) => {
-            // get field value from output form
-            const fields = field.split('.');
-            const fieldName = fields[fields.length - 1];
-            const fieldValue = fields.reduce(
-              (acc, field) => (acc as any)?.[field],
-              form
-            );
-            return { fieldName, fieldValue };
-          };
+  //         const getValue = (field: string, form: FormType) => {
+  //           // get field value from output form
+  //           const fields = field.split('.');
+  //           const fieldName = fields[fields.length - 1];
+  //           const fieldValue = fields.reduce(
+  //             (acc, field) => (acc as any)?.[field],
+  //             form
+  //           );
+  //           return { fieldName, fieldValue };
+  //         };
 
-          const { fieldName: inputFieldName, fieldValue: inputValue } =
-            getValue(input.field || '', inputForm);
-          const { fieldValue: outputValue, fieldName: outputFieldName } =
-            getValue(output?.field || '', asyncOutput.form);
+  //         const { fieldName: inputFieldName, fieldValue: inputValue } =
+  //           getValue(input.field || '', inputForm);
 
-          console.log('output', outputValue, outputFieldName);
-          console.log('input', inputValue, inputFieldName);
+  //         const { fieldValue: outputValue, fieldName: outputFieldName } =
+  //           getValue(output?.field || '', asyncOutput.data);
 
-          setAsyncData((prev) => {
-            return {
-              ...prev,
-              forms: {
-                ...prev.forms,
-                [outputStoreId]: {
-                  ...prev.forms[outputStoreId],
-                  // store: asyncOutput.store,
-                  form: {
-                    ...prev.forms[outputStoreId]?.form,
-                    data: {
-                      ...prev.forms[outputStoreId]?.form?.data,
-                      [outputFieldName]: inputValue
-                    }
-                  }
-                }
-                // [inputStoreId]: {
-                //   ...prev.forms[inputStoreId],
-                //   form: {
-                //     ...asyncOutput.form,
-                //     data: {
-                //       ...asyncOutput.form.data,
-                //       [fieldName]: inputValue
-                //     }
-                //   }
-                // }
-              }
-            };
-          });
-          return;
-        }
-        const list = asyncData.lists[storeId]?.list;
+  //         console.log('output', outputValue, outputFieldName);
+  //         console.log('input', inputValue, inputFieldName);
 
-        const listFormItem = list?.find(
-          (_item: any, index: number) => index === Number(listIndex)
-        ) || { data: {} };
+  //         setAsyncData((prev) => {
+  //           return {
+  //             ...prev,
+  //             forms: {
+  //               ...prev.forms,
+  //               [outputStoreId]: {
+  //                 ...prev.forms[outputStoreId],
+  //                 // store: asyncOutput.store,
+  //                 form: {
+  //                   ...prev.forms[outputStoreId]?.form,
+  //                   data: {
+  //                     ...prev.forms[outputStoreId]?.form?.data,
+  //                     [outputFieldName]: inputValue
+  //                   }
+  //                 }
+  //               }
+  //               // [inputStoreId]: {
+  //               //   ...prev.forms[inputStoreId],
+  //               //   form: {
+  //               //     ...asyncOutput.form,
+  //               //     data: {
+  //               //       ...asyncOutput.form.data,
+  //               //       [fieldName]: inputValue
+  //               //     }
+  //               //   }
+  //               // }
+  //             }
+  //           };
+  //         });
+  //         return;
+  //       }
+  //       const list = asyncData.lists[storeId]?.list;
 
-        const fields = name.split('.');
-        const fieldName = fields[fields.length - 1];
+  //       const listFormItem = list?.find(
+  //         (_item: any, index: number) => index === Number(listIndex)
+  //       ) || { data: {} };
 
-        const updatedList = {
-          ...listFormItem,
-          data: {
-            ...listFormItem.data,
-            [fieldName]: value
-          }
-        };
-        const updatedLists = list?.map((item: any, index: number) => {
-          if (index === Number(listIndex)) {
-            return updatedList;
-          }
-          return item;
-        });
-        setAsyncData((prev) => {
-          return {
-            ...prev,
-            lists: {
-              ...prev.lists,
-              [storeId]: {
-                ...prev.lists[storeId],
-                list: updatedLists
-              }
-            }
-          };
-        });
-      } else {
-        setAsyncData((prev) => {
-          const form = prev.forms[storeId] || {
-            data: {}
-          };
-          const fields = name.split('.');
-          const fieldName = fields[fields.length - 1];
+  //       const fields = name.split('.');
+  //       const fieldName = fields[fields.length - 1];
 
-          return {
-            ...prev,
-            forms: {
-              ...prev.forms,
-              [storeId]: {
-                ...form,
-                form: {
-                  ...form.form,
-                  data: {
-                    ...form.form.data,
-                    [fieldName]: value
-                  }
-                }
-              }
-            }
-          };
-        });
-      }
-    },
-    [asyncData.lists, isBuilderMode, asyncData.forms]
-  );
+  //       const updatedList = {
+  //         ...listFormItem,
+  //         data: {
+  //           ...listFormItem.data,
+  //           [fieldName]: value
+  //         }
+  //       };
+  //       const updatedLists = list?.map((item: any, index: number) => {
+  //         if (index === Number(listIndex)) {
+  //           return updatedList;
+  //         }
+  //         return item;
+  //       });
+  //       setAsyncData((prev) => {
+  //         return {
+  //           ...prev,
+  //           lists: {
+  //             ...prev.lists,
+  //             [storeId]: {
+  //               ...prev.lists[storeId],
+  //               list: updatedLists
+  //             }
+  //           }
+  //         };
+  //       });
+  //     } else {
+  //       setAsyncData((prev) => {
+  //         const form = prev.forms[storeId] || {
+  //           data: {}
+  //         };
+  //         const fields = name.split('.');
+  //         const fieldName = fields[fields.length - 1];
 
-  const onUpdateList = useCallback((storeId: string, list: any[]) => {
+  //         return {
+  //           ...prev,
+  //           forms: {
+  //             ...prev.forms,
+  //             [storeId]: {
+  //               ...form,
+  //               form: {
+  //                 ...form.form,
+  //                 data: {
+  //                   ...form.form.data,
+  //                   [fieldName]: value
+  //                 }
+  //               }
+  //             }
+  //           }
+  //         };
+  //       });
+  //     }
+  //   },
+  //   [asyncData.lists, isBuilderMode, asyncData.forms]
+  // );
+
+  const onUpdateList = useCallback((storeId: string, data: FormType[]) => {
     setAsyncData((prev) => {
       return {
         ...prev,
-        lists: {
-          ...prev.lists,
-          [storeId]: {
-            ...prev.lists[storeId],
-            list
-          }
+        [storeId]: {
+          ...prev[storeId],
+          data
         }
       };
     });
@@ -281,7 +273,7 @@ export const FormProvider = ({
     ) => {
       const listIndex = context.listIndex;
       if (listIndex !== undefined) {
-        const list = asyncData.lists[storeId]?.list;
+        const list = (asyncData[storeId]?.data as FormType[]) || [];
         const listFormItem = list?.find(
           (_item: any, index: number) => index === Number(listIndex)
         );
@@ -308,33 +300,27 @@ export const FormProvider = ({
         setAsyncData((prev) => {
           return {
             ...prev,
-            lists: {
-              ...prev.lists,
-              [storeId]: {
-                ...prev.lists[storeId],
-                list: updatedLists
-              }
+            [storeId]: {
+              ...prev[storeId],
+              data: updatedLists
             }
           };
         });
       } else {
         setAsyncData((prev) => {
-          const formToUpdate = prev.forms[storeId] || { data: {} };
+          const formToUpdate = prev[storeId] || { data: {} };
           const fields = fieldName.split('.');
           const field = fields[fields.length - 1];
-
+          console.log('prev', formToUpdate);
           return {
             ...prev,
-            forms: {
-              ...prev.forms,
-              [storeId]: {
-                ...formToUpdate,
-                form: {
-                  ...formToUpdate.form,
-                  data: {
-                    ...formToUpdate.form?.data,
-                    [field]: value
-                  }
+            [storeId]: {
+              ...formToUpdate,
+              data: {
+                ...formToUpdate.data,
+                data: {
+                  ...(prev[storeId].data as FormType)?.data,
+                  [field]: value
                 }
               }
             }
@@ -342,19 +328,16 @@ export const FormProvider = ({
         });
       }
     },
-    [asyncData.lists]
+    [asyncData]
   );
 
   const onAddListItem = useCallback((storeId: string, item: any) => {
     setAsyncData((prev) => {
       return {
         ...prev,
-        lists: {
-          ...prev.lists,
-          [storeId]: {
-            ...prev.lists[storeId],
-            list: [...(prev.lists[storeId]?.list || []), item]
-          }
+        [storeId]: {
+          ...prev[storeId],
+          data: [...((prev[storeId]?.data as FormType[]) || []), item]
         }
       };
     });
@@ -366,11 +349,11 @@ export const FormProvider = ({
       if (!context) return '';
       const { dataset, listIndex } = context;
       if (!dataset?.connexion?.input?.storeId) return '';
-      const asyncForm = asyncData.forms[dataset.connexion.input.storeId];
+      const asyncForm = asyncData[dataset.connexion.input.storeId];
       const fields = (dataset.connexion.input?.field || '').split('.');
 
       if (listIndex !== undefined) {
-        const asyncList = asyncData.lists[dataset.connexion.input.storeId];
+        const asyncList = asyncData[dataset.connexion.input.storeId];
 
         // if (dataset?.connexion?.input?.plugToQuery) {
         //   const field = fields[fields.length - 1];
@@ -378,7 +361,7 @@ export const FormProvider = ({
         //   const value = result?.[listIndex]?.[field];
         //   return value;
         // }
-        const mapper: FormType[] = asyncList?.list || [];
+        const mapper: FormType[] = (asyncList?.data as FormType[]) || [];
         const value =
           fields.reduce(
             (acc, field) => (acc as any)?.[field],
@@ -387,11 +370,11 @@ export const FormProvider = ({
         return value;
       }
       return (
-        fields.reduce((acc, field) => (acc as any)?.[field], asyncForm.form) ||
+        fields.reduce((acc, field) => (acc as any)?.[field], asyncForm.data) ||
         ''
       );
     },
-    [asyncData.forms, isBuilderMode, asyncData.lists]
+    [asyncData, isBuilderMode]
   );
 
   const getListItem = useCallback(
@@ -400,11 +383,11 @@ export const FormProvider = ({
       const { dataset, listIndex } = context;
       if (!dataset) return null;
       if (listIndex !== undefined && dataset.connexion?.input?.storeId) {
-        const asyncList = asyncData.lists[dataset.connexion.input.storeId];
-        return asyncList?.list?.[listIndex]?.data || null;
+        const asyncList = asyncData[dataset.connexion.input.storeId];
+        return (asyncList?.data as FormType[])?.[listIndex]?.data || null;
       }
     },
-    [asyncData.lists]
+    [asyncData]
   );
 
   const getMultichoiceOptions = useCallback(async (dataset: IDataset) => {
@@ -448,52 +431,48 @@ export const FormProvider = ({
       datasetKey: 'input' | 'output'
     ) => {
       const outputStoreId = context.dataset?.connexion?.[datasetKey]?.storeId;
-
-      if (!outputStoreId) return;
+      console.log('outputStoreId', outputStoreId);
+      if (!outputStoreId) {
+        console.error('StoreId not found');
+        return;
+      }
 
       const result = results[outputStoreId];
 
-      const asyncStore =
-        asyncData.lists[outputStoreId] || asyncData.forms[outputStoreId];
-
+      const asyncStore = asyncData[outputStoreId];
+      console.log(asyncStore);
       if (!asyncStore) {
         console.error('Store not found');
         return;
       }
 
-      if (Array.isArray(result) && asyncStore.store.type === 'list') {
+      if (Array.isArray(result)) {
+        console.log(result);
         setAsyncData((prev) => ({
           ...prev,
-          lists: {
-            ...prev.lists,
-            [outputStoreId]: {
-              ...asyncStore,
-              list: result
-            }
+          [outputStoreId]: {
+            ...asyncStore,
+            data: result
           }
         }));
       } else if (asyncStore.store.type === 'form' && !Array.isArray(result)) {
         setAsyncData((prev) => ({
           ...prev,
-          forms: {
-            ...prev.forms,
-            [outputStoreId]: {
-              ...asyncStore,
-              form: result
-            }
+          [outputStoreId]: {
+            ...asyncStore,
+            data: result
           }
         }));
       }
     },
-    [asyncData.lists, asyncData.forms]
+    [asyncData]
   );
 
   const value = useMemo(
     () =>
       ({
-        forms: asyncData.forms,
-        lists: asyncData.lists,
-        queryResults,
+        asyncData,
+        // queryResults,
         // onInputChange,
         getFormFieldValue,
         onUpdateForm,
@@ -505,7 +484,7 @@ export const FormProvider = ({
       } as FormContextProps),
     [
       asyncData,
-      queryResults,
+      // queryResults,
       // onInputChange,
       getFormFieldValue,
       onUpdateForm,

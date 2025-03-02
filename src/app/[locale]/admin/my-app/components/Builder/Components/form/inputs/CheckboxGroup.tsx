@@ -9,10 +9,11 @@ import { SelectboxOption } from '@/components/form/Selectbox';
 import { buildOptions } from '../../utils';
 
 function CheckboxComponent({ props, context }: PropsWithChildrenAndContext) {
-  const { getFormFieldValue, lists, getMultichoiceOptions } = useFormContext();
+  const { getFormFieldValue, asyncData, getMultichoiceOptions } =
+    useFormContext();
   const value = getFormFieldValue(context);
   const [options, setOptions] = useState<SelectboxOption[]>(
-    buildOptions(lists, context)
+    buildOptions(asyncData, context)
   );
   const handleInputChange = (_state: CheckedState) => {
     //TODO:  Add the possibility to select multiple options

@@ -72,7 +72,7 @@ function ButtonComponent({
   context,
   dndChildrenContainerRef
 }: PropsWithChildrenAndContext) {
-  const { forms, lists, onUpdateQueryResults } = useFormContext();
+  const { asyncData, onUpdateQueryResults } = useFormContext();
 
   const handleClick = async (event: React.MouseEvent<HTMLButtonElement>) => {
     if (context.isBuilderMode && typeof props.onClick === 'function') {
@@ -89,12 +89,12 @@ function ButtonComponent({
         console.warn('Store ID is missing');
         return;
       }
-      const asyncStore = forms[context.dataset.connexion.input?.storeId];
-
+      const asyncStore = asyncData[context.dataset.connexion.input?.storeId];
+      console.log(asyncStore);
       if (
         context.dataset.connexion.input?.query &&
         isValidJSON(context.dataset.connexion.input?.query) &&
-        asyncStore?.form
+        asyncStore?.data
       ) {
         const query = JSON.parse(context.dataset.connexion.input?.query) as
           | IQuery
@@ -102,10 +102,11 @@ function ButtonComponent({
 
         let payload: any;
         if (Array.isArray(query)) {
-          payload = await executeQueryChain(client, query, asyncStore.form);
+          payload = await executeQueryChain(client, query, asyncStore.data);
         } else {
-          payload = await getMethod(client, query, {}, asyncStore.form);
+          payload = await getMethod(client, query, {}, asyncStore.data);
         }
+        console.log(payload);
         onUpdateQueryResults(payload, context, 'output');
       }
     }

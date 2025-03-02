@@ -8,9 +8,9 @@ import { useFormContext } from '../FormContext';
 
 const Multichoices = ({ props, context }: PropsWithChildrenAndContext) => {
   const { className, ...rest } = props || {};
-  const { onUpdateForm, getFormFieldValue, lists } = useFormContext();
+  const { onUpdateForm, getFormFieldValue, asyncData } = useFormContext();
   const [options, setOptions] = useState<SelectboxOption[]>(
-    buildOptions(lists, context)
+    buildOptions(asyncData, context)
   );
   const value = getFormFieldValue(context);
   const [selectedChoices, setSelectedChoices] = useState<string[]>(
@@ -18,7 +18,7 @@ const Multichoices = ({ props, context }: PropsWithChildrenAndContext) => {
   );
 
   useEffect(() => {
-    setOptions(buildOptions(lists, context));
+    setOptions(buildOptions(asyncData, context));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [context.dataset]);
 
