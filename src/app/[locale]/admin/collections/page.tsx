@@ -1,12 +1,8 @@
 import { ICollection } from '@/lib/interfaces/interfaces';
 import clientMongoServer from '@/lib/mongo/initMongoServer';
 import { ENUM_COLLECTIONS } from '@/lib/mongo/interfaces';
-import {
-  getMongoUser,
-  getServerSideCurrentUserOrganizationId
-} from '@/lib/utils/auth/serverUtils';
+import { getServerSideCurrentUserOrganizationId } from '@/lib/utils/auth/serverUtils';
 import Collections from './components/Collections';
-import { getUserSummary } from '@/lib/utils/utils';
 
 export default async function CollectionsPage() {
   const organizationId = await getServerSideCurrentUserOrganizationId();
@@ -16,12 +12,5 @@ export default async function CollectionsPage() {
       organizationId
     }
   );
-  const user = await getMongoUser();
-  return (
-    <Collections
-      initialCollections={collections || []}
-      organizationId={organizationId}
-      user={getUserSummary(user)}
-    />
-  );
+  return <Collections initialCollections={collections || []} />;
 }

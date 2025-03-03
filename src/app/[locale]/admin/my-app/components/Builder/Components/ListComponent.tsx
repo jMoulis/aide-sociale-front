@@ -16,8 +16,8 @@ function ListComponent({
 }: PropsWithChildrenAndContext) {
   const { asyncData } = useFormContext();
   const [items, setItems] = useState<any[]>(
-    (context.dataset?.connexion?.input?.storeId &&
-      (asyncData[context.dataset?.connexion?.input?.storeId]
+    (context.dataset?.connexion?.input?.storeSlug &&
+      (asyncData[context.dataset?.connexion?.input?.storeSlug]
         ?.data as FormType[])) ||
       [] ||
       []
@@ -28,25 +28,14 @@ function ListComponent({
 
   useEffect(() => {
     if (context.isBuilderMode) return;
-
-    // if (context.dataset?.connexion?.input?.plugToQuery) {
-    //   const queryKey = context.dataset?.connexion?.input?.plugToQuery;
-    //   if (queryResults && queryResults[queryKey]) {
-    //     const result = queryResults[queryKey];
-    //     if (Array.isArray(result)) {
-    //       setItems(queryResults[queryKey]);
-    //     }
-    //   }
-    //   return;
-    // }
-    if (!context.dataset?.connexion?.input?.storeId) return;
+    if (!context.dataset?.connexion?.input?.storeSlug) return;
 
     const datas =
-      (asyncData[context.dataset?.connexion?.input?.storeId]
+      (asyncData[context.dataset?.connexion?.input?.storeSlug]
         ?.data as FormType[]) || [];
     setItems(datas);
   }, [
-    context.dataset?.connexion?.input?.storeId,
+    context.dataset?.connexion?.input?.storeSlug,
     // context.dataset?.connexion?.input?.plugToQuery,
     context.isBuilderMode,
     asyncData,

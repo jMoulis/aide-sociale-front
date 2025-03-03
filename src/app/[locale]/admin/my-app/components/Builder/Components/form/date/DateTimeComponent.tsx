@@ -10,10 +10,10 @@ function DateTimeComponent({ props, context }: PropsWithChildrenAndContext) {
 
   const handleDateInputChange = useCallback(
     (date?: Date) => {
-      const storeId = context.dataset?.connexion?.input?.storeId;
+      const storeSlug = context.dataset?.connexion?.input?.storeSlug;
       const filedName = context.dataset?.connexion?.input?.field;
-      if (!storeId || !filedName) return;
-      onUpdateForm(context, storeId, filedName, date);
+      if (!storeSlug || !filedName) return;
+      onUpdateForm(context, storeSlug, filedName, date);
     },
     [context, onUpdateForm]
   );
@@ -21,7 +21,7 @@ function DateTimeComponent({ props, context }: PropsWithChildrenAndContext) {
   if (context.isBuilderMode) return <DateBuilderPlaceholder {...props} />;
   return (
     <DateTimePicker
-      data-store={context.dataset?.connexion?.input?.storeId}
+      data-store={context.dataset?.connexion?.input?.storeSlug}
       onChange={handleDateInputChange}
       date={value as Date}
     />

@@ -199,12 +199,11 @@ function Header() {
       testScenariosWithFilters.map(async (searchedData) => {
         const queries = JSON.parse(fakeJsonQueries) as IQuery[];
         // console.log(searchedData);
-        const placementsPayload = await executeQueryChain(
+        const placementsPayload = await executeQueryChain({
           client,
           queries,
-          searchedData,
-          {}
-        );
+          params: searchedData
+        });
 
         const availableInstitutions =
           placementsPayload?.availableInstitutions?.data || [];

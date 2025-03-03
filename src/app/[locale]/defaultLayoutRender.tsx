@@ -42,7 +42,7 @@ export default async function DefaultLayoutRender({
   const messages = (await getMessages()) as any;
 
   return (
-    <html lang='fr'>
+    <html lang='fr' data-color-mode='dark'>
       <head>{headers}</head>
       <ClerkProvider dynamic>
         <body

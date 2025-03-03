@@ -18,8 +18,6 @@ import DeleteButton from '@/components/buttons/DeleteButton';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faTrash } from '@awesome.me/kit-8441d3fdf2/icons/classic/solid';
 import { removeObjectFields, slugifyFunction } from '@/lib/utils/utils';
-import { Checkbox } from '@/components/ui/checkbox';
-import { CheckedState } from '@radix-ui/react-checkbox';
 import Selectbox from '@/components/form/Selectbox';
 
 type Props = {
@@ -32,8 +30,7 @@ function Stores({ page }: Props) {
     slug: '',
     name: '',
     description: '',
-    type: 'form',
-    virtual: false
+    type: 'form'
   };
   const [selectedStore, setSelectStore] = useState<IStore>(defaultStore);
   const [open, setOpen] = useState(false);
@@ -69,9 +66,10 @@ function Stores({ page }: Props) {
     }
   };
 
-  const handleSelectCollection = (collection: ICollection) => {
+  const handleSelectCollection = (collection: ICollection | null) => {
     const prevStore = selectedStore;
-    if (prevStore?.['collection']?._id === collection._id) {
+
+    if (!collection || prevStore?.['collection']?._id === collection._id) {
       const clearedStore = removeObjectFields(prevStore, ['collection']);
       setSelectStore(clearedStore);
       return;
@@ -109,17 +107,21 @@ function Stores({ page }: Props) {
     setStores(updatedStores);
     onEditPageVersion({ ...page, stores: updatedStores });
   };
-  const handleCheckboxChange = (checked: CheckedState, fieldKey: string) => {
-    setSelectStore(
-      (prev) => ({ ...(prev || {}), [fieldKey]: checked } as IStore)
-    );
-  };
+
   return (
     <div>
       <h1>Stores</h1>
       <Dialog
         open={open}
         onOpenChange={setOpen}
+        contentStyle={{
+          width: '90vh',
+          height: '90vh',
+          overflow: 'auto',
+          maxWidth: 'none',
+          display: 'flex',
+          flexDirection: 'column'
+        }}
         Trigger={<Button onClick={handleCreateStore}>Add Store</Button>}
         title='Add Store'>
         <div className='flex'>
@@ -133,13 +135,6 @@ function Stores({ page }: Props) {
                 value={selectedStore?.name || ''}
                 placeholder='Name'
                 onChange={handleInputChange}
-              />
-            </FormField>
-            <FormField className='flex-row items-center'>
-              <FormLabel className='mb-0 mr-1'>Virtuel</FormLabel>
-              <Checkbox
-                checked={selectedStore?.virtual}
-                onCheckedChange={(e) => handleCheckboxChange(e, 'virtual')}
               />
             </FormField>
             <FormField>
@@ -176,7 +171,6 @@ function Stores({ page }: Props) {
           </Form>
           <Collections
             selectedCollectionId={selectedStore?.collection?._id}
-            virtual={selectedStore?.virtual}
             onSelectCollection={handleSelectCollection}
           />
         </div>

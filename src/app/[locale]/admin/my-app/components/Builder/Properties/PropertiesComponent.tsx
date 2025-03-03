@@ -10,6 +10,7 @@ import OptionsLink from './OptionsLink/OptionsLink';
 import AiFormPrompt from './AiFormPrompt/AiFormPrompt';
 import { aiFormInitialMessage } from '@/lib/TemplateBuilder/AiPromptTemplate/aiFormInstructions';
 import Datasets from './Dataset/Datasets';
+import TableProperties from './TableProperties/TableProperties';
 
 export const PropertiesComponent: {
   [key: string]: React.FC<{
@@ -34,5 +35,6 @@ export const PropertiesComponent: {
   [ENUM_PROPERTIES_COMPONENTS.LINK_OPTIONS]: OptionsLink,
   [ENUM_PROPERTIES_COMPONENTS.AI_FORM]: (props) => (
     <AiFormPrompt {...props} aiInitMessage={aiFormInitialMessage} />
-  )
+  ),
+  [ENUM_PROPERTIES_COMPONENTS.TABLE]: TableProperties
 };

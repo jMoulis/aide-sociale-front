@@ -1,3 +1,5 @@
+import { ENUM_METHODS } from '@/lib/interfaces/interfaces';
+
 export const buildQuerySchema = (
   collection: string,
   inputStore: string,
@@ -12,7 +14,7 @@ export const buildQuerySchema = (
   return {
     type: 'object',
     properties: {
-      method: { enum: ['list', 'get', 'search'] },
+      method: { enum: Object.keys(ENUM_METHODS) },
       collection: { type: 'string', enum: Object.keys(collectionFieldMap) },
       inputStore: {
         type: 'string',

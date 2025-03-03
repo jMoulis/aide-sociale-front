@@ -118,7 +118,7 @@ const Dataset = ({ config, datasetKey }: Props) => {
         ...selectedNode?.context?.dataset?.connexion,
         [datasetKey]: {
           ...selectedNode?.context?.dataset?.connexion?.[datasetKey],
-          storeId: value
+          storeSlug: value
         }
       }
     };
@@ -144,7 +144,7 @@ const Dataset = ({ config, datasetKey }: Props) => {
         ...selectedNode?.context?.dataset?.connexion,
         [datasetKey]: {
           ...selectedNode?.context?.dataset?.connexion?.[datasetKey],
-          storeId: ''
+          storeSlug: ''
         }
       }
     };
@@ -164,8 +164,8 @@ const Dataset = ({ config, datasetKey }: Props) => {
             value: store.slug
           }))}
           value={
-            selectedNode?.context?.dataset?.connexion?.[datasetKey]?.storeId ||
-            ''
+            selectedNode?.context?.dataset?.connexion?.[datasetKey]
+              ?.storeSlug || ''
           }
           onChange={handleSelectStore}
         />

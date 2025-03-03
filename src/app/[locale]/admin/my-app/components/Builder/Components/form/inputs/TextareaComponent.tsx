@@ -10,10 +10,10 @@ function TextareaComponent({ props, context }: PropsWithChildrenAndContext) {
   const handleChangeValue = useCallback(
     (e: ChangeEvent<HTMLTextAreaElement>) => {
       const { value } = e.target;
-      const storeId = context.dataset?.connexion?.input?.storeId;
+      const storeSlug = context.dataset?.connexion?.input?.storeSlug;
       const filedName = context.dataset?.connexion?.input?.field;
-      if (!storeId || !filedName) return;
-      onUpdateForm(context, storeId, filedName, value);
+      if (!storeSlug || !filedName) return;
+      onUpdateForm(context, storeSlug, filedName, value);
     },
     [context, onUpdateForm]
   );
@@ -21,7 +21,7 @@ function TextareaComponent({ props, context }: PropsWithChildrenAndContext) {
     <Textarea
       {...props}
       {...context.input}
-      data-store={context.dataset?.connexion?.input?.storeId}
+      data-store={context.dataset?.connexion?.input?.storeSlug}
       data-listindex={context.listIndex}
       onChange={handleChangeValue}
       value={value}

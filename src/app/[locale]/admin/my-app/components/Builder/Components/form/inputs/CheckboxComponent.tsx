@@ -10,10 +10,10 @@ function CheckboxComponent({ props, context }: PropsWithChildrenAndContext) {
 
   const handleChangeValue = useCallback(
     (value: CheckedState) => {
-      const storeId = context.dataset?.connexion?.input?.storeId;
+      const storeSlug = context.dataset?.connexion?.input?.storeSlug;
       const filedName = context.dataset?.connexion?.input?.field;
-      if (!storeId || !filedName) return;
-      onUpdateForm(context, storeId, filedName, value);
+      if (!storeSlug || !filedName) return;
+      onUpdateForm(context, storeSlug, filedName, value);
     },
     [context, onUpdateForm]
   );

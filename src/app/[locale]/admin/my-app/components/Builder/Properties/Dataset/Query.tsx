@@ -7,6 +7,55 @@ import IDE from '../IDE';
 import { useCallback, useEffect, useState } from 'react';
 import { getContextStoreDataset } from '@/lib/utils/utils';
 import { buildQuerySchema } from './querySchema';
+import Markdown from '@/components/Markdown/Markdown';
+
+const source = `
+## Full query example
+\`\`\`json
+[
+  {
+    "method": "list",
+    "collection": "Yjk0ZjAz_placements",
+    "inputStore": "search",
+    "filters": {
+      "data.periode_placement.from": {
+        "$lte": "{{:data.range.to}}"
+      },
+      "data.periode_placement.to": {
+        "$gte": "{{:data.range.from}}"
+      }
+    },
+    "output": {
+      "type": "list",
+      "name": "bookedids",
+      "operation": "map",
+      "input": "{{:data}}",
+      "mapper": "{{:current.data.etablissement}}"
+    }
+  },
+  {
+    "method": "list",
+    "collection": "etablissements",
+    "inputStore": "search",
+    "filters": {
+      "_id": {
+        "$nin": "{{:bookedids}}"
+      },
+      "data.gender": "{{:data.gender}}",
+      "data.age": { "$in": "{{:data.age}}" },
+      "data.hcp": "{{:data.hcp}}"
+    },
+    "output": {
+      "type": "list",
+      "name": "availableinstitutions",
+      "operation": "map",
+      "input": "{{:data}}",
+      "mapper": "{{:current}}"
+    }
+  }
+]
+\`\`\`
+`;
 
 type Props = {
   selectedNode: IVDOMNode | null;
@@ -190,14 +239,21 @@ function Query({ selectedNode, config, datasetKey }: Props) {
         onOpenChange={setOpen}
         Trigger={<Button>Query</Button>}
         title='Query'>
-        <div className='p-4 h-[70vh] overflow-auto'>
+        <div className='p-4 h-[70vh] flex flex-col overflow-auto'>
           <Button onClick={handleSubmit}>Save</Button>
-          <IDE
-            lang='json'
-            value={query}
-            onChange={handleInputChange}
-            schemaDef={dynamicSchema}
-          />
+          <div className='flex flex-1'>
+            <div className='flex-[2]'>
+              <IDE
+                lang='json'
+                value={query}
+                onChange={handleInputChange}
+                schemaDef={dynamicSchema}
+              />
+            </div>
+            <div className='flex-1 flex'>
+              <Markdown source={source} />
+            </div>
+          </div>
         </div>
       </Dialog>
     </div>

@@ -14,10 +14,11 @@ function DateRangePickerComponent({
 
   const handleDateInputChange = useCallback(
     (date?: DateRange) => {
-      const storeId = context.dataset?.connexion?.input?.storeId;
+      const storeSlug = context.dataset?.connexion?.input?.storeSlug;
       const filedName = context.dataset?.connexion?.input?.field;
-      if (!storeId || !filedName) return;
-      onUpdateForm(context, storeId, filedName, date);
+
+      if (!storeSlug || !filedName) return;
+      onUpdateForm(context, storeSlug, filedName, date);
     },
     [context, onUpdateForm]
   );
@@ -26,7 +27,6 @@ function DateRangePickerComponent({
 
   return (
     <DateRangePicker
-      data-store={context.dataset?.connexion?.input?.storeId}
       onChange={handleDateInputChange}
       date={value as DateRange}
     />

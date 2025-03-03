@@ -48,21 +48,21 @@ function InputFileComponent({ props, context }: PropsWithChildrenAndContext) {
     async (files: File[]) => {
       try {
         const urls = await uploadMultipleFiles(
-          context.dataset?.connexion?.input?.storeId || '',
+          context.dataset?.connexion?.input?.storeSlug || '',
           [...files],
           ({ fileName, progress: fileProgress }: FileUploadProgress) => {
             setProgress((prev) => ({ ...prev, [fileName]: fileProgress }));
           }
         );
         // setDownloadURLs(urls);
-        const storeId = context.dataset?.connexion?.input?.storeId;
+        const storeSlug = context.dataset?.connexion?.input?.storeSlug;
         const filedName = context.dataset?.connexion?.input?.field;
-        if (!storeId || !filedName) return;
-        // const storagePath = `${context.dataset?.storeId}/${file.name}`;
+        if (!storeSlug || !filedName) return;
+        // const storagePath = `${context.dataset?.storeSlug}/${file.name}`;
         // const url = await uploadFile(file, storagePath);
         // console.log('url', url);
         // console.log(filedName);
-        onUpdateForm(context, storeId, filedName, urls);
+        onUpdateForm(context, storeSlug, filedName, urls);
       } catch (error) {
         console.log(error);
       }

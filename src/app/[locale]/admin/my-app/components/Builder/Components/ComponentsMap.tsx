@@ -35,6 +35,7 @@ import CollapseTriggerComponent from './collapsable/Collapse/CollapseTriggerComp
 import SchedulerComponent from './SchedulerComponent';
 import SchedulerFormComponent from './SchedulerFormComponent';
 import Multichoices from './form/Multichoices';
+import TableComponent from './TableComponent/TableComponent';
 
 type ComponentMapProps = {
   [key: string]: (params: PropsWithChildrenAndContext) => React.ReactNode;
@@ -94,6 +95,7 @@ export const ComponentsMap: ComponentMapProps = {
   [ENUM_COMPONENTS.SCHEDULER]: SchedulerComponent,
   [ENUM_COMPONENTS.SCHEDULER_FORM]: SchedulerFormComponent,
   [ENUM_COMPONENTS.SELECT]: SelectComponent,
+  [ENUM_COMPONENTS.TABLE]: TableComponent,
   [ENUM_COMPONENTS.TABS]: TabsComponent,
   [ENUM_COMPONENTS.TABSCONTENT]: TabsContentComponent,
   [ENUM_COMPONENTS.TABSLIST]: TabsListComponent,

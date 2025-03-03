@@ -23,6 +23,7 @@ function Datasets({ config }: Props) {
           <Dataset config={config} datasetKey='input' />
         </CollapsibleContent>
       </Collapsible>
+      {}
       <Collapsible open={outputOpen} onOpenChange={setOutputOpen}>
         <CollapsibleTrigger>
           <h1>Output</h1>

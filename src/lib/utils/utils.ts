@@ -169,6 +169,6 @@ export const convertDates = (obj: any): any => {
 
 
 export const getContextStoreDataset = (datasetKey: 'input' | 'output', context?: VDOMContext) => {
-  if (!context?.dataset?.connexion?.[datasetKey]?.storeId) return null;
+  if (!context?.dataset?.connexion?.[datasetKey]?.storeSlug) return null;
   return context?.dataset?.connexion?.[datasetKey]
 }

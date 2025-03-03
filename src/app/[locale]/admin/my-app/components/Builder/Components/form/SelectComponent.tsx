@@ -19,10 +19,10 @@ function SelectComponent({ props, context }: PropsWithChildrenAndContext) {
   const handleChangeValue = useCallback(
     (event: ChangeEvent<HTMLSelectElement>) => {
       const { value } = event.target;
-      const storeId = context.dataset?.connexion?.input?.storeId;
+      const storeSlug = context.dataset?.connexion?.input?.storeSlug;
       const filedName = context.dataset?.connexion?.input?.field;
-      if (!storeId || !filedName) return;
-      onUpdateForm(context, storeId, filedName, value);
+      if (!storeSlug || !filedName) return;
+      onUpdateForm(context, storeSlug, filedName, value);
     },
     [context, onUpdateForm]
   );
@@ -35,7 +35,7 @@ function SelectComponent({ props, context }: PropsWithChildrenAndContext) {
       options={options}
       name={context.dataset?.connexion?.input?.field}
       value={value}
-      data-store={context.dataset?.connexion?.input?.storeId}
+      data-store={context.dataset?.connexion?.input?.storeSlug}
       data-listindex={context.listIndex}
       backdrop={context.isBuilderMode}
       onChange={handleChangeValue}

@@ -59,14 +59,19 @@ export interface IMenu {
   roles: string[];
   entries: IMenuEntry[];
 }
+export type SchemaType = 'string' | 'number' | 'boolean' | 'object' | 'array' | 'date';
+
 export interface ICollectionField {
   label: string;
   key: string;
-  new: boolean;
+  new?: boolean;
   system?: boolean;
-  type: 'string' | 'number' | 'boolean' | 'date' | 'object' | 'array';
-  of?: ICollectionField
+  type: SchemaType;
+  required?: boolean;
+  // For an object type or array items of type object, define nested properties.
   fields?: ICollectionField[];
+  // For arrays, you can store the type of the items.
+  arrayItemType?: SchemaType;
 }
 export interface ICollection {
   _id: string;
@@ -81,6 +86,7 @@ export interface ICollection {
   createdAt: Date;
   organizationId: string;
   fields: ICollectionField[];
+  schema?: string;
 }
 
 export interface IVirtualCollection {
@@ -99,13 +105,13 @@ export interface ICollectionSummary {
 export interface IDatasetConnexion {
   input?: IDatasetConnexionItem;
   output?: IDatasetConnexionItem;
+  outputs?: IDatasetConnexionItem[];
 }
 export interface IDatasetConnexionItem {
-  storeId?: string;
+  storeSlug?: string;
   parametersToSave?: string[];
   optionsSourceType?: 'static' | 'database';
   staticDataOptions?: string[];
-  // plugToQuery?: string;
   externalDataOptions?: {
     collectionSlug: string;
     labelField: string;
@@ -138,6 +144,25 @@ export type LinkAttributes = {
     }
   }
 };
+export enum ENUM_TABLE_COMPONENTS {
+  TEXT = 'text',
+  NUMBER = 'number',
+  DATE = 'date',
+  DATE_RANGE = 'dateRange',
+  BOOLEAN = 'boolean',
+  IMAGE = 'image',
+  LINK = 'link',
+}
+export interface ITableField extends ICollectionField {
+  component: ENUM_TABLE_COMPONENTS;
+  link?: LinkAttributes;
+}
+export interface ITable {
+  fields: ITableField[];
+}
+export interface IContextTableProps {
+  table: ITable
+}
 export type VDOMContext = {
   [key: string]: any;
   styling?: {
@@ -148,6 +173,7 @@ export type VDOMContext = {
   isBuilderMode?: boolean;
   dataset?: IDataset;
   routeParams?: Record<string, string>;
+  table?: ITable;
 }
 export interface PropsWithChildrenAndContext extends PropsWithChildren {
   dndChildrenContainerRef?: any;
@@ -293,7 +319,6 @@ export interface IStore {
   description?: string;
   collection?: ICollectionSummary | IVirtualCollection;
   routeParam?: string;
-  virtual: boolean;
   type: 'list' | 'form';
 }
 
@@ -376,6 +401,16 @@ export interface IContactInfo {
 
 export type AsyncPayloadMap = Record<string, { store: IStore, data: FormType | FormType[] }>;
 
+export enum ENUM_METHODS {
+  update = 'update',
+  create = 'create',
+  delete = 'delete',
+  list = 'list',
+  get = 'get',
+  search = 'search',
+  "update-many" = 'update-many',
+  "update-store" = 'update-store'
+}
 export type Method =
   | 'update'
   | 'create'
@@ -383,7 +418,8 @@ export type Method =
   | 'list'
   | 'get'
   | 'search'
-  | 'update-many';
+  | 'update-many'
+  | 'update-store';
 
 export interface IQuery {
   method: Method;

@@ -10,10 +10,10 @@ function InputComponent({ props, context }: PropsWithChildrenAndContext) {
   const handleChangeValue = useCallback(
     (e: ChangeEvent<HTMLInputElement>) => {
       const { value } = e.target;
-      const storeId = context.dataset?.connexion?.input?.storeId;
+      const storeSlug = context.dataset?.connexion?.input?.storeSlug;
       const filedName = context.dataset?.connexion?.input?.field;
-      if (!storeId || !filedName) return;
-      onUpdateForm(context, storeId, filedName, value);
+      if (!storeSlug || !filedName) return;
+      onUpdateForm(context, storeSlug, filedName, value);
     },
     [context, onUpdateForm]
   );
@@ -23,6 +23,7 @@ function InputComponent({ props, context }: PropsWithChildrenAndContext) {
       {...props}
       {...context.input}
       onChange={handleChangeValue}
+      // onBlur={handleOnBlur}
       value={value}
       name={context.dataset?.connexion?.input?.field}
     />

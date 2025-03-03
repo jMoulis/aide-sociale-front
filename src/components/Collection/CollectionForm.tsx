@@ -28,7 +28,8 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { useTranslations } from 'next-intl';
 import { ChangeEvent, FormEvent, useEffect, useMemo, useState } from 'react';
 import { nanoid } from 'nanoid';
-import FieldDialogForm from '../../my-app/components/Builder/Properties/Dataset/FieldDialogForm';
+import FieldDialogForm from './FieldDialogForm';
+import { mappingFielTypeIcons } from './mappingFieldTypeIcons';
 
 function debounce<T extends (...args: any[]) => void>(
   func: T,
@@ -221,15 +222,9 @@ function CollectionFormDialog({ prevCollection, onSubmit, virtual }: Props) {
     }
   };
 
-  const handleUpsertField = (field: ICollectionField) => {
+  const handleUpsertFields = (fields: ICollectionField[], schema: string) => {
     setCollection((prev) => {
-      if (field.new) {
-        return { ...prev, fields: [...prev.fields, { ...field, new: false }] };
-      }
-      const updatedFields = [...prev.fields].map((prevField) =>
-        prevField.key === field.key ? field : prevField
-      );
-      return { ...prev, fields: updatedFields };
+      return { ...prev, fields: fields, schema };
     });
   };
 
@@ -253,16 +248,10 @@ function CollectionFormDialog({ prevCollection, onSubmit, virtual }: Props) {
     }
   };
 
-  const handleDeleteField = (field: ICollectionField) => {
-    setCollection((prev) => ({
-      ...prev,
-      fields: prev.fields.filter((prevField) => prevField.key !== field.key)
-    }));
-  };
   return (
     <Dialog
       onOpenChange={handleOpenChange}
-      title={t('create.title')}
+      title={prevCollection ? t('edit.title') : t('create.title')}
       Trigger={
         <Button>
           {virtual ? 'Virtual ' : ''}
@@ -330,32 +319,26 @@ function CollectionFormDialog({ prevCollection, onSubmit, virtual }: Props) {
               <FieldDialogForm
                 Trigger={
                   <button>
-                    <FontAwesomeIcon icon={faAdd} />
+                    <FontAwesomeIcon icon={faEdit} />
                   </button>
                 }
-                field={{
-                  key: '',
-                  label: '',
-                  new: true,
-                  type: 'string'
-                }}
-                onUpsertField={handleUpsertField}
+                fields={collection.fields}
+                onUpsertFields={handleUpsertFields}
               />
-              {/* <Button type='button' onClick={handleAddNewField}>
-                <FontAwesomeIcon icon={faAdd} />
-              </Button> */}
             </div>
-            {collection.fields.map((field, index) => {
-              return (
-                <FieldDialogForm
-                  Trigger={<button>{field.label}</button>}
-                  key={field.key || index}
-                  field={field}
-                  onUpsertField={handleUpsertField}
-                  onDeleteField={handleDeleteField}
-                />
-              );
-            })}
+            <ul>
+              {collection.fields.map((field, index) => {
+                return (
+                  <li key={index} className='flex items-center'>
+                    <FontAwesomeIcon
+                      icon={mappingFielTypeIcons[field.type]}
+                      className='text-xs mr-2 w-4'
+                    />
+                    <span className='text-xs'>{field.label}</span>
+                  </li>
+                );
+              })}
+            </ul>
           </FormField>
           <FormFooterAction>
             <SaveButton

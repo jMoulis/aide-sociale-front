@@ -40,6 +40,20 @@
     "validCollection": "Collection valide",
     "startTyping": "Commencez à taper",
     "correspondingCollections": "Collections correspondantes",
+    "propertyEditor": {
+      "labels": {
+        "propertyKey": "Clé",
+        "nestedProperties": "Propriétés imbriquées",
+        "arrayItemType": "Type d'élément de tableau",
+        "defineObjectSchemaForArrayItems": "Définir le schéma d'objet pour les éléments de tableau",
+        "addNestedProperty": "Ajouter une propriété imbriquée",
+        "selectRootSchemaType": "Sélectionner le type de schéma racine",
+        "objectProperties": "Propriétés de l'objet",
+        "addProperty": "Ajouter une propriété",
+        "generatedJsonSchema": "Schéma JSON généré",
+        "fieldsConfiguration": "Configuration des champs"
+      }
+    },
     "labels": {
       "slug": "Slug",
       "name": "Nom",

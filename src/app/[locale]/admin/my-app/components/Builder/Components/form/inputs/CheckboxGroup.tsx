@@ -22,7 +22,7 @@ function CheckboxComponent({ props, context }: PropsWithChildrenAndContext) {
     //     name: context.dataset?.connexion?.input?.field,
     //     value: state,
     //     dataset: {
-    //       store: context.dataset?.connexion?.input?.storeId
+    //       store: context.dataset?.connexion?.input?.storeSlug
     //     } as any
     //   }
     // } as React.ChangeEvent<HTMLInputElement>);

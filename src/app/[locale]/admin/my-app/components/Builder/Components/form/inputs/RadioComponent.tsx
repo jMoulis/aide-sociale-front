@@ -23,10 +23,10 @@ function RadioComponent({ context, props }: PropsWithChildrenAndContext) {
 
   const handleChangeValue = useCallback(
     (value: string) => {
-      const storeId = context.dataset?.connexion?.input?.storeId;
+      const storeSlug = context.dataset?.connexion?.input?.storeSlug;
       const filedName = context.dataset?.connexion?.input?.field;
-      if (!storeId || !filedName) return;
-      onUpdateForm(context, storeId, filedName, value);
+      if (!storeSlug || !filedName) return;
+      onUpdateForm(context, storeSlug, filedName, value);
     },
     [context, onUpdateForm]
   );
@@ -35,7 +35,7 @@ function RadioComponent({ context, props }: PropsWithChildrenAndContext) {
     return (
       <RadioGroup
         ref={props.ref}
-        data-store={context.dataset?.connexion?.input?.storeId}
+        data-store={context.dataset?.connexion?.input?.storeSlug}
         data-listindex={context.listIndex}
         className={props.className}
         onClick={props.onClick}

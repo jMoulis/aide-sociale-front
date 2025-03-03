@@ -1,18 +1,20 @@
 'use client';
 
-import Button from '@/components/buttons/Button';
-import Dialog from '@/components/dialog/Dialog';
 import { ICollection } from '@/lib/interfaces/interfaces';
-import { useTranslations } from 'next-intl';
 import { useEffect, useState } from 'react';
-import CollectionForm from '@/app/[locale]/admin/collections/components/CollectionForm';
+import CollectionForm from '@/components/Collection/CollectionForm';
 import client from '@/lib/mongo/initMongoClient';
 import { ENUM_COLLECTIONS } from '@/lib/mongo/interfaces';
 import { usePageBuilderStore } from '../../stores/pagebuilder-store-provider';
 import { useMongoUser } from '@/lib/mongo/MongoUserContext/MongoUserContext';
+import { Checkbox } from '@/components/ui/checkbox';
+import { CheckedState } from '@radix-ui/react-checkbox';
+import { useTranslations } from 'next-intl';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { mappingFielTypeIcons } from '@/components/Collection/mappingFieldTypeIcons';
 
 type Props = {
-  onSelectCollection: (collection: ICollection) => void;
+  onSelectCollection: (collection: ICollection | null) => void;
   selectedCollectionId?: string;
   virtual?: boolean;
 };
@@ -21,7 +23,9 @@ function Collections({
   selectedCollectionId,
   virtual
 }: Props) {
+  const t = useTranslations('CollectionSection');
   const [collections, setCollections] = useState<ICollection[]>([]);
+
   const organizationId = usePageBuilderStore((state) => state.organizationId);
   const user = useMongoUser();
   const [selectedCollection, setSelectedCollection] =
@@ -61,33 +65,65 @@ function Collections({
     }
   };
 
+  const handleSelectCollection = (
+    status: CheckedState,
+    collection: ICollection
+  ) => {
+    if (status) {
+      onSelectCollection(collection);
+    } else {
+      onSelectCollection(null);
+    }
+  };
+
   if (!organizationId || !user) return null;
+
   return (
-    <div>
+    <div className='mx-4'>
       <CollectionForm onSubmit={handleSubmit} virtual={virtual} />
-      <div className='flex'>
+      <div className='flex mt-4'>
         <ul>
           {collections.map((collection) => (
-            <li key={collection._id}>
-              <Button
-                className={
-                  selectedCollectionId === collection._id
-                    ? 'bg-black text-white'
-                    : ''
+            <li key={collection._id} className='flex items-center mb-2'>
+              <Checkbox
+                className='mr-2'
+                checked={selectedCollectionId === collection._id}
+                onCheckedChange={(status) =>
+                  handleSelectCollection(status, collection)
                 }
-                onClick={() => onSelectCollection(collection)}>
-                {collection.name}
-              </Button>
+              />
+              <span className='text-sm'>{collection.name}</span>
             </li>
           ))}
         </ul>
-        <ul>
-          {selectedCollection?.fields?.map((field, key) => (
-            <li key={key}>
-              <span>{field.label}</span>
-            </li>
-          ))}
-        </ul>
+        <div className='flex flex-col ml-4'>
+          <div className='flex items-center'>
+            <div className='flex flex-col mb-2 mr-4'>
+              <span>{selectedCollection?.name}</span>
+              <span className='text-xs color-gray-600'>
+                {t('labels.fields')}
+              </span>
+            </div>
+            {selectedCollection ? (
+              <CollectionForm
+                onSubmit={handleSubmit}
+                virtual={virtual}
+                prevCollection={selectedCollection}
+              />
+            ) : null}
+          </div>
+          <ul className='ml-1'>
+            {selectedCollection?.fields?.map((field, key) => (
+              <li key={key} className='flex items-center'>
+                <FontAwesomeIcon
+                  icon={mappingFielTypeIcons[field.type]}
+                  className='text-xs mr-2 w-4'
+                />
+                <span className='text-xs'>{field.label}</span>
+              </li>
+            ))}
+          </ul>
+        </div>
       </div>
     </div>
   );

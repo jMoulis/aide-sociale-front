@@ -6,7 +6,6 @@ import { useProperties } from "../useProperties";
 import client from "@/lib/mongo/initMongoClient";
 import { ENUM_COLLECTIONS } from "@/lib/mongo/interfaces";
 import { usePageBuilderStore } from "../../../stores/pagebuilder-store-provider";
-import { toast } from "@/lib/hooks/use-toast";
 
 // function findClosestFormParent(
 //   vdom: IVDOMNode,
@@ -116,16 +115,10 @@ export const useDataset = ({ config, datasetKey }: Props) => {
     let collection: ICollection | null = null;
     if (!pageTemplateVersion?._id) return;
 
-    if (currentValue?.connexion?.[datasetKey]?.storeId) {
-      const store = stores.find(store => store.slug === currentValue.connexion?.[datasetKey]?.storeId);
+    const datasetItem = currentValue?.connexion?.[datasetKey];
+    if (datasetItem?.storeSlug) {
+      const store = stores.find(store => store.slug === datasetItem?.storeSlug);
       if (!store?.collection?.name) {
-        if (!store?.virtual) {
-          toast({
-            title: 'No store found',
-            description: 'No store found for the selected dataset',
-            variant: 'destructive'
-          })
-        }
         return;
       }
       collection = collections[store.collection.slug];

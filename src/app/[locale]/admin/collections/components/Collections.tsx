@@ -3,18 +3,16 @@
 import Button from '@/components/buttons/Button';
 import Dialog from '@/components/dialog/Dialog';
 import { ENUM_APP_ROUTES } from '@/lib/interfaces/enums';
-import { ICollection, IUserSummary } from '@/lib/interfaces/interfaces';
+import { ICollection } from '@/lib/interfaces/interfaces';
 import Link from 'next/link';
-import CollectionForm from './CollectionForm';
+import CollectionForm from '../../../../../components/Collection/CollectionForm';
 import { useTranslations } from 'next-intl';
 import { useState } from 'react';
 
 type Props = {
   initialCollections: ICollection[];
-  organizationId: string;
-  user: IUserSummary;
 };
-function Collections({ initialCollections, organizationId, user }: Props) {
+function Collections({ initialCollections }: Props) {
   const [collections, setCollections] =
     useState<ICollection[]>(initialCollections);
   const [open, setOpen] = useState(false);
@@ -38,12 +36,7 @@ function Collections({ initialCollections, organizationId, user }: Props) {
         open={open}
         onOpenChange={setOpen}
         Trigger={<Button>{t('create.action')}</Button>}>
-        <CollectionForm
-          organizationId={organizationId}
-          user={user}
-          onSubmit={handleSubmit}
-          onCancel={() => setOpen(false)}
-        />
+        <CollectionForm onSubmit={handleSubmit} />
       </Dialog>
       <ul>
         {collections.map((collection) => (

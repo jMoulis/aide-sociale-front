@@ -79,9 +79,9 @@ const SchedulerComponent = ({
       const query = buildQuery(currentDate);
       if (context.isBuilderMode) return;
 
-      if (!context.dataset?.connexion?.input?.storeId) return;
+      if (!context.dataset?.connexion?.input?.storeSlug) return;
       const store =
-        asyncData[context.dataset?.connexion?.input?.storeId]?.store;
+        asyncData[context.dataset?.connexion?.input?.storeSlug]?.store;
 
       if (!store?.collection?.name) return;
       client
@@ -89,7 +89,7 @@ const SchedulerComponent = ({
         .then(({ data }) => {
           if (data) {
             onUpdateList(
-              context.dataset?.connexion?.input?.storeId as string,
+              context.dataset?.connexion?.input?.storeSlug as string,
               data
             );
             setEvents(
@@ -110,7 +110,7 @@ const SchedulerComponent = ({
         });
     },
     [
-      context.dataset?.connexion?.input?.storeId,
+      context.dataset?.connexion?.input?.storeSlug,
       context.isBuilderMode,
       asyncData,
       onUpdateList
@@ -153,13 +153,13 @@ const SchedulerComponent = ({
         return;
       }
 
-      const storeId = context.dataset.connexion?.input?.storeId;
+      const storeSlug = context.dataset.connexion?.input?.storeSlug;
 
-      if (!storeId) {
+      if (!storeSlug) {
         console.warn('Collection slug is missing');
         return;
       }
-      const asyncList = asyncData[storeId] || [];
+      const asyncList = asyncData[storeSlug] || [];
       // get the right from store
       if (!Array.isArray(asyncList.data)) {
         console.warn('List is missing');
@@ -271,12 +271,12 @@ const SchedulerComponent = ({
   );
   const handleAddEvent = useCallback(
     (event: CalendarEvent) => {
-      const storeId = context.dataset?.connexion?.input?.storeId;
-      if (!storeId) {
+      const storeSlug = context.dataset?.connexion?.input?.storeSlug;
+      if (!storeSlug) {
         console.warn('Collection slug is missing');
         return;
       }
-      const asyncList = asyncData[storeId] || [];
+      const asyncList = asyncData[storeSlug] || [];
       const collectionSlug = asyncList.store.collection?.name;
 
       const pageTemplateVersionId = context.dataset?.pageTemplateVersionId;
@@ -318,7 +318,7 @@ const SchedulerComponent = ({
     },
     [
       context.dataset?.connexion?.input?.parametersToSave,
-      context.dataset?.connexion?.input?.storeId,
+      context.dataset?.connexion?.input?.storeSlug,
       context.dataset?.pageTemplateVersionId,
       context.routeParams,
       asyncData,

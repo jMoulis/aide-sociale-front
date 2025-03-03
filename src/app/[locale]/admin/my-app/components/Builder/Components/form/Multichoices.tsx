@@ -23,10 +23,10 @@ const Multichoices = ({ props, context }: PropsWithChildrenAndContext) => {
   }, [context.dataset]);
 
   const update = (choices: string[]) => {
-    const storeId = context.dataset?.connexion?.input?.storeId;
+    const storeSlug = context.dataset?.connexion?.input?.storeSlug;
     const fieldName = context.dataset?.connexion?.input?.field;
-    if (!storeId || !fieldName) return;
-    onUpdateForm(context, storeId, fieldName, choices);
+    if (!storeSlug || !fieldName) return;
+    onUpdateForm(context, storeSlug, fieldName, choices);
   };
   const handleSelect = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const value = e.target.value;
@@ -50,7 +50,7 @@ const Multichoices = ({ props, context }: PropsWithChildrenAndContext) => {
         options={options}
         name={context.dataset?.connexion?.input?.field}
         value={value || []}
-        data-store={context.dataset?.connexion?.input?.storeId}
+        data-store={context.dataset?.connexion?.input?.storeSlug}
         data-listindex={context.listIndex}
         backdrop={context.isBuilderMode}
         onChange={handleSelect}

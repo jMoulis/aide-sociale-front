@@ -56,14 +56,14 @@ const FormComponent = forwardRef<HTMLFormElement, PropsWithChildrenAndContext>(
           return;
         } // Prevent form submission from other forms
 
-        const storeId = context.dataset.connexion?.input?.storeId;
+        const storeSlug = context.dataset.connexion?.input?.storeSlug;
 
-        if (!storeId) {
+        if (!storeSlug) {
           console.warn('Store ID is missing');
           return;
         }
 
-        const { data: formToSave, store } = asyncData[storeId] || {
+        const { data: formToSave, store } = asyncData[storeSlug] || {
           data: {},
           store: {}
         };

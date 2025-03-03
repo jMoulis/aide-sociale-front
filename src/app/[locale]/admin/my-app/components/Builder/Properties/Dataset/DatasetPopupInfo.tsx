@@ -18,7 +18,7 @@ function DatasetPopupInfo({ parentForm, datasetKey }: Props) {
           <FontAwesomeIcon icon={faInfoCircle} className='mr-1 text-blue-600' />
           {t('parentCollection', {
             collectionName:
-              parentForm?.context?.dataset?.connexion?.[datasetKey]?.storeId
+              parentForm?.context?.dataset?.connexion?.[datasetKey]?.storeSlug
           })}
         </span>
       }>

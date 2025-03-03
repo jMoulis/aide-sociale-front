@@ -95,18 +95,15 @@ export async function getPublishedMasterTemplates({ slug, user, templateSearch, 
   }
 }
 
-
-
 // Helper function to recursively replace placeholders in any value.
 
-const extractAndReplacePlaceholders = (query: string | null, systemParams: Record<string, string>): Promise<ApiResponse<any> | null> | null => {
+const executeQuery = (query: string | null, systemParams: Record<string, string>): Promise<ApiResponse<any> | null> | null => {
   if (!query) return null;
 
   if (isValidJSON(query)) {
     const queryParsed = JSON.parse(query) as IQuery;
     const data = {};
     const method = getMethod(clientMongoServer, queryParsed, data, systemParams);
-
     return method;
   }
   return null;
@@ -119,41 +116,32 @@ const getParamValue = (param: string, systemParams: Record<string, string>, rout
   return routeParams[param];
 }
 
-const getStoreData = async (store: IStore, systemParams: Record<string, string>, routeParams: Record<string, string>): Promise<{ store: IStore, form: FormType | null } | null> => {
+const getStoreData = async (store: IStore, systemParams: Record<string, string>, routeParams: Record<string, string>): Promise<{ store: IStore, data: FormType | null } | null> => {
   const { routeParam, collection } = store;
 
   if (!collection?.name) {
-    if (!store?.virtual) {
-      console.warn('No collection found for store', store?.slug);
-      return null;
-    }
-    // Virtual store no db persistence
-    return {
-      store,
-      form: {} as FormType
-    };
+    console.warn('No collection found for store', store?.slug);
+    return null;
   };
 
 
   const param = getParamValue(routeParam as string, systemParams, routeParams);
-
   if (!param) {
     console.info('No param found for store', store?.slug);
     return {
       store,
-      form: {} as FormType
+      data: {} as FormType
     };
   };
 
   try {
-    const { data: form } = await clientMongoServer.get<FormType>(
+    const { data } = await clientMongoServer.get<FormType>(
       collection.slug as ENUM_COLLECTIONS,
       { _id: param }
     );
-
     return {
       store,
-      form
+      data
     };
   } catch (error) {
     console.error(`Error fetching data for node:`, error);
@@ -180,11 +168,11 @@ export const collectAsyncPayloads = async (
     }));
   }
 
-  const listTypeComponents = [ENUM_COMPONENTS.LIST, ENUM_COMPONENTS.RADIO, ENUM_COMPONENTS.SELECT];
+  const listTypeComponents = [ENUM_COMPONENTS.LIST, ENUM_COMPONENTS.RADIO, ENUM_COMPONENTS.SELECT, ENUM_COMPONENTS.TABLE];
   // Recursive helper function.
   const traverse = async (node: IVDOMNode) => {
     const dataset = node.context?.dataset;
-    const query = await extractAndReplacePlaceholders(dataset?.connexion?.input?.query || null, systemParams);
+    const queryPayload = await executeQuery(dataset?.connexion?.input?.query || null, systemParams);
 
     if (listTypeComponents.includes(node.type) && dataset) {
       if (
@@ -193,14 +181,14 @@ export const collectAsyncPayloads = async (
         dataset.connexion?.input?.externalDataOptions?.valueField
       ) {
         const { collectionSlug } = dataset.connexion.input?.externalDataOptions;
-        if (query?.data) {
-          resultMap[collectionSlug] = query.data;
+        if (queryPayload?.data) {
+          resultMap[collectionSlug] = queryPayload.data;
         }
-      } else if (query?.data && dataset.connexion?.input?.storeId) {
-        const store = stores.find((store) => store.slug === dataset.connexion?.input?.storeId) as IStore || {};
-        resultMap[dataset.connexion?.input?.storeId] = {
+      } else if (queryPayload?.data && dataset.connexion?.input?.storeSlug) {
+        const store = stores.find((store) => store.slug === dataset.connexion?.input?.storeSlug) as IStore || {};
+        resultMap[dataset.connexion?.input?.storeSlug] = {
           store,
-          data: query.data
+          data: queryPayload.data
         };
       }
     }
