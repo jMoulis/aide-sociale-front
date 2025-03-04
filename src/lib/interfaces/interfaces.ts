@@ -138,6 +138,7 @@ export type LinkAttributes = {
     slug: string,
     route: string,
     name: string,
+    routeParam?: string,
     dataset?: {
       field?: string,
       routeParam?: string
@@ -155,7 +156,7 @@ export enum ENUM_TABLE_COMPONENTS {
 }
 export interface ITableField extends ICollectionField {
   component: ENUM_TABLE_COMPONENTS;
-  link?: LinkAttributes;
+  link?: LinkAttributes[];
 }
 export interface ITable {
   fields: ITableField[];

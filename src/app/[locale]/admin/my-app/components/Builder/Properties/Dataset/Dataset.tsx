@@ -173,18 +173,17 @@ const Dataset = ({ config, datasetKey }: Props) => {
           <FontAwesomeIcon icon={faUnlink} />
         </DeleteButton>
       </div>
-      {/* {config.options?.includes('FIELDS') ? ( */}
-      <>
-        <FieldList
-          onSelectField={handleSelectField}
-          // selectedCollection={collectionsSelectedCollection}
-          selectedCollection={collectionsSelectedCollection}
-          currentField={
-            selectedNode?.context?.dataset?.connexion?.[datasetKey]?.field
-          }
-        />
-      </>
-      {/* ) : null} */}
+      {config.options?.includes('FIELDS') ? (
+        <>
+          <FieldList
+            onSelectField={handleSelectField}
+            selectedCollection={collectionsSelectedCollection}
+            currentField={
+              selectedNode?.context?.dataset?.connexion?.[datasetKey]?.field
+            }
+          />
+        </>
+      ) : null}
 
       {config.options?.includes('CREATE') ? (
         <FormField className='mt-2 flex flex-row items-center'>
@@ -199,15 +198,17 @@ const Dataset = ({ config, datasetKey }: Props) => {
         </FormField>
       ) : null}
 
-      <ParametersToSave
-        selectedCollection={collectionsSelectedCollection}
-        onSetParams={handleSetParams}
-        pageParams={pageParams}
-        currentParams={
-          selectedNode?.context?.dataset?.connexion?.[datasetKey]
-            ?.parametersToSave || []
-        }
-      />
+      {config.options?.includes('PARAM_TO_SAVE') ? (
+        <ParametersToSave
+          selectedCollection={collectionsSelectedCollection}
+          onSetParams={handleSetParams}
+          pageParams={pageParams}
+          currentParams={
+            selectedNode?.context?.dataset?.connexion?.[datasetKey]
+              ?.parametersToSave || []
+          }
+        />
+      ) : null}
       {config.options?.includes('STATIC_OPTIONS') ? (
         <DatasetStaticOptionsField
           collections={collections}

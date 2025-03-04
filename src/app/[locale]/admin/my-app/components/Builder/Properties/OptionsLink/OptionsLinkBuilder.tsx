@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { ChangeEvent, useEffect, useState } from 'react';
 import FormField from '@/components/form/FormField';
 import FormLabel from '@/components/form/FormLabel';
 import Input from '@/components/form/Input';
@@ -143,6 +143,26 @@ function OptionsLinkBuilder({ config, onUpdate, value }: Props) {
     onUpdate({ [config.propKey]: newAttributes }, config.context);
   };
 
+  const handleRouteParam = (
+    event: ChangeEvent<HTMLInputElement>,
+    index: number
+  ) => {
+    const { name, value } = event.target;
+    const newAttributes = [...attributes].map((attribute, i) => {
+      if (i === index) {
+        return {
+          ...attribute,
+          page: {
+            ...(attribute.page as IPage),
+            [name]: value
+          }
+        };
+      }
+      return attribute;
+    });
+    setAttributes(newAttributes);
+    onUpdate({ [config.propKey]: newAttributes }, config.context);
+  };
   return (
     <FormField>
       <FormLabel className='block'>
@@ -169,6 +189,7 @@ function OptionsLinkBuilder({ config, onUpdate, value }: Props) {
                   onValueChange={(page) => handleSelectPage(page, index)}
                   value={attribute.page}
                   onDelete={() => handleDeletePageLink(index)}
+                  onRouteParamChange={(e) => handleRouteParam(e, index)}
                 />
               ) : null}
               <DeleteButton onClick={() => handleDeleteLink(index)} />

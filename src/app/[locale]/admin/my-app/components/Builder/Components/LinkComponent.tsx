@@ -3,50 +3,10 @@ import { useFormContext } from './FormContext';
 import ChildrenDndWrapper from './ChildrenDndWrapper';
 import { cn } from '@/lib/utils/shadcnUtils';
 import { useEffect, useState } from 'react';
-import { pathToRegexp } from 'path-to-regexp';
 import { Link } from '@/i18n/routing';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faExclamation } from '@awesome.me/kit-8441d3fdf2/icons/classic/solid';
-
-const isValidParam = (param: string) => {
-  if (param.includes(':')) {
-    return false;
-  }
-  return true;
-};
-
-const buildUrl = (
-  url = '',
-  param = '',
-  routeParam = '',
-  routeParams: Record<string, string> = {}
-) => {
-  const testRouteParams = {
-    ...routeParams,
-    [routeParam]: param
-  };
-  const { keys } = pathToRegexp(url, {});
-  const allKeys = [...keys.map((key) => key.name)];
-
-  const paramsValues = allKeys.reduce((acc: Record<string, string>, key) => {
-    if (testRouteParams[key]) {
-      acc[key] = testRouteParams[key];
-    }
-    return acc;
-  }, {});
-  let parsedUrl = url;
-  const isAllParamsAreValid = Object.values(paramsValues).every((param) =>
-    isValidParam(param as string)
-  );
-  if (!isAllParamsAreValid) {
-    return '';
-  }
-  Object.keys(paramsValues).forEach((key) => {
-    parsedUrl = parsedUrl.replace(`:${key}`, paramsValues[key]);
-  });
-  const ROOT = 'app';
-  return `/${ROOT}/${parsedUrl}`;
-};
+import { buildUrl } from './utils';
 
 const Error = () => {
   return (
@@ -82,7 +42,7 @@ function LinkComponent({
               href: buildUrl(
                 attr.value || attr.page?.route,
                 value as string,
-                context?.dataset?.connexion?.input?.routeParam,
+                attr.page?.routeParam,
                 context.routeParams
               )
             };

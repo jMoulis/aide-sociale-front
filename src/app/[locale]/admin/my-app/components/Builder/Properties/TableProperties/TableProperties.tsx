@@ -1,4 +1,4 @@
-import { ChangeEvent, useMemo, useState } from 'react';
+import { ChangeEvent, useCallback, useMemo, useState } from 'react';
 import { ElementConfigProps } from '../../../interfaces';
 import { usePageBuilderStore } from '../../../stores/pagebuilder-store-provider';
 import { useProperties } from '../useProperties';
@@ -17,6 +17,11 @@ import FormFooterAction from '@/components/dialog/FormFooterAction';
 import SaveButton from '@/components/buttons/SaveButton';
 import Selectbox from '@/components/form/Selectbox';
 import OptionsLink from './OptionsLinks';
+import {
+  faArrowDown,
+  faArrowUp
+} from '@awesome.me/kit-8441d3fdf2/icons/classic/solid';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
 type Props = {
   config: ElementConfigProps;
@@ -39,7 +44,6 @@ function TableProperties({ config }: Props) {
     const store = stores.find((store) => store.slug === storeSlug);
     const fields = store?.collection?.fields || [];
 
-    console.log(fields);
     return {
       store,
       fields
@@ -108,6 +112,7 @@ function TableProperties({ config }: Props) {
       config.context
     );
   };
+
   const handleSelectStoreField = (event: ChangeEvent<HTMLSelectElement>) => {
     const { value } = event.target;
     const previousFields = (selectedNode?.context?.table?.fields ||
@@ -124,6 +129,31 @@ function TableProperties({ config }: Props) {
       config.context
     );
   };
+  const handleReorder = useCallback(
+    (entryIdx: number, direction: 'up' | 'down') => {
+      const updatedFields = [...(selectedNode?.context?.table?.fields || [])];
+      if (direction === 'up' && entryIdx > 0) {
+        [updatedFields[entryIdx - 1], updatedFields[entryIdx]] = [
+          updatedFields[entryIdx],
+          updatedFields[entryIdx - 1]
+        ];
+      } else if (direction === 'down' && entryIdx < updatedFields.length - 1) {
+        [updatedFields[entryIdx + 1], updatedFields[entryIdx]] = [
+          updatedFields[entryIdx],
+          updatedFields[entryIdx + 1]
+        ];
+      }
+      onUpdateNodeProperty(
+        {
+          table: {
+            fields: updatedFields
+          }
+        },
+        config.context
+      );
+    },
+    [config.context, onUpdateNodeProperty, selectedNode?.context?.table?.fields]
+  );
 
   return (
     <div>
@@ -145,8 +175,8 @@ function TableProperties({ config }: Props) {
             />
           </FormField>
           <ul>
-            {selectedNode?.context?.table?.fields.map((field, key) => (
-              <li key={key}>
+            {selectedNode?.context?.table?.fields.map((field, entryIndex) => (
+              <li key={entryIndex}>
                 <FormField className='flex-row items-center'>
                   <Checkbox
                     id={field.key}
@@ -162,7 +192,6 @@ function TableProperties({ config }: Props) {
                   </FormLabel>
                 </FormField>
                 <FormField>
-                  <FormLabel>Component</FormLabel>
                   <Selectbox
                     value={field.component}
                     onChange={(e) => handleSelectComponent(e, field)}
@@ -174,6 +203,21 @@ function TableProperties({ config }: Props) {
                     )}
                   />
                 </FormField>
+                <div className='flex items-center'>
+                  <Button
+                    onClick={() => handleReorder(entryIndex, 'up')}
+                    disabled={entryIndex === 0}>
+                    <FontAwesomeIcon icon={faArrowUp} />
+                  </Button>
+                  <Button
+                    onClick={() => handleReorder(entryIndex, 'down')}
+                    disabled={
+                      entryIndex ===
+                      (selectedNode?.context?.table?.fields || []).length - 1
+                    }>
+                    <FontAwesomeIcon icon={faArrowDown} />
+                  </Button>
+                </div>
                 {field.component === ENUM_TABLE_COMPONENTS.LINK ? (
                   <OptionsLink
                     config={config}

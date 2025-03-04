@@ -266,7 +266,7 @@ export const FormProvider = ({
         return value;
       }
       return (
-        fields.reduce((acc, field) => (acc as any)?.[field], asyncForm.data) ||
+        fields.reduce((acc, field) => (acc as any)?.[field], asyncForm?.data) ||
         ''
       );
     },

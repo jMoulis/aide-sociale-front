@@ -1,5 +1,6 @@
 import { SelectboxOption } from "@/components/form/Selectbox";
 import { AsyncPayloadMap, VDOMContext } from "@/lib/interfaces/interfaces";
+import { pathToRegexp } from 'path-to-regexp';
 
 export const buildOptions = (
   lists: AsyncPayloadMap,
@@ -40,4 +41,44 @@ export const buildOptions = (
     }));
   }
   return [] as any;
+};
+
+const isValidParam = (param: string) => {
+  if (param.includes(':')) {
+    return false;
+  }
+  return true;
+};
+
+export const buildUrl = (
+  url = '',
+  param = '',
+  routeParam = '',
+  routeParams: Record<string, string> = {}
+) => {
+  const testRouteParams = {
+    ...routeParams,
+    [routeParam]: param
+  };
+  const { keys } = pathToRegexp(url, {});
+  const allKeys = [...keys.map((key) => key.name)];
+
+  const paramsValues = allKeys.reduce((acc: Record<string, string>, key) => {
+    if (testRouteParams[key]) {
+      acc[key] = testRouteParams[key];
+    }
+    return acc;
+  }, {});
+  let parsedUrl = url;
+  const isAllParamsAreValid = Object.values(paramsValues).every((param) =>
+    isValidParam(param as string)
+  );
+  if (!isAllParamsAreValid) {
+    return '';
+  }
+  Object.keys(paramsValues).forEach((key) => {
+    parsedUrl = parsedUrl.replace(`:${key}`, paramsValues[key]);
+  });
+  const ROOT = 'app';
+  return `/${ROOT}${parsedUrl}`;
 };

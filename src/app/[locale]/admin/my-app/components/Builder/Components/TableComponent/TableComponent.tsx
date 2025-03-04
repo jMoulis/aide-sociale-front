@@ -1,6 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
 import {
-  ICollectionField,
   ITableField,
   PropsWithChildrenAndContext
 } from '@/lib/interfaces/interfaces';
@@ -9,12 +8,10 @@ import {
   ModuleRegistry,
   AllCommunityModule,
   ColDef,
-  ValueParserLiteParams,
-  DataTypeDefinition,
-  ValueFormatterLiteParams
+  DataTypeDefinition
 } from 'ag-grid-community';
 import { AgGridReact } from 'ag-grid-react'; // React Data Grid Component
-import { format, parse } from 'date-fns';
+import { format } from 'date-fns';
 import { cellRender } from './CellRenderer';
 
 ModuleRegistry.registerModules([AllCommunityModule]);
@@ -47,7 +44,11 @@ function TableComponent({ props, context }: PropsWithChildrenAndContext) {
       field: field.key,
       headerName: field.label,
       cellDataType: types[field.type] || 'text',
-      cellRenderer: cellRender[field.component] || undefined
+      cellRenderer: cellRender[field.component] || undefined,
+      cellRendererParams: {
+        context,
+        field
+      } as any
     }));
 
     setColumns(columns);
@@ -57,10 +58,12 @@ function TableComponent({ props, context }: PropsWithChildrenAndContext) {
     setData(parsedData);
   }, [
     asyncData,
+    context,
     context.dataset?.connexion?.input?.query,
     context.dataset?.connexion?.input?.storeSlug,
     context.table?.fields
   ]);
+
   const dataTypeDefinitions = useMemo<{
     [cellDataType: string]: DataTypeDefinition;
   }>(() => {

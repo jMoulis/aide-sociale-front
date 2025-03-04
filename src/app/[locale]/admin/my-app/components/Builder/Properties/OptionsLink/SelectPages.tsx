@@ -12,15 +12,18 @@ import { ENUM_COLLECTIONS } from '@/lib/mongo/interfaces';
 import { useMongoUser } from '@/lib/mongo/MongoUserContext/MongoUserContext';
 import { faTimes } from '@awesome.me/kit-8441d3fdf2/icons/classic/solid';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { useEffect, useState } from 'react';
+import { ChangeEvent, useEffect, useState } from 'react';
 import { usePageBuilderStore } from '../../../stores/pagebuilder-store-provider';
+import FormField from '@/components/form/FormField';
+import Input from '@/components/form/Input';
 
 type Props = {
   disabled?: boolean;
   onValueChange: (value: IPage) => void;
   defaultValue?: string;
-  value?: { slug: string; route: string; name: string };
+  value?: { slug: string; route: string; name: string; routeParam?: string };
   onDelete: () => void;
+  onRouteParamChange: (event: ChangeEvent<HTMLInputElement>) => void;
 };
 
 function SelectPages({
@@ -28,7 +31,8 @@ function SelectPages({
   defaultValue,
   disabled,
   onValueChange,
-  onDelete
+  onDelete,
+  onRouteParamChange
 }: Props) {
   const [pages, setPages] = useState<IPage[]>([]);
   const user = useMongoUser();
@@ -84,6 +88,16 @@ function SelectPages({
           <FontAwesomeIcon icon={faTimes} />
         </CancelButton>
       </div>
+      {value?.route ? (
+        <FormField>
+          <FormLabel>Route param</FormLabel>
+          <Input
+            name='routeParam'
+            onChange={onRouteParamChange}
+            value={value.routeParam || ''}
+          />
+        </FormField>
+      ) : null}
     </div>
   );
 }
