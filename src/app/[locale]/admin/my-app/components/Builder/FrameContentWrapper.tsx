@@ -4,6 +4,7 @@ import { IVDOMNode } from '../interfaces';
 import { usePageBuilderStore } from '../stores/pagebuilder-store-provider';
 import DndWrapper from './DndWrapper';
 import PageBuilderDesignStyle from './PageBuilderDesignStyle';
+import TestScene from './TestScene';
 
 function FrameContentWrapper() {
   const pageVersion = usePageBuilderStore((state) => state.pageVersion);
@@ -27,6 +28,11 @@ function FrameContentWrapper() {
     <>
       <SceneDynamicStyle />
       <PageBuilderDesignStyle />
+      <TestScene
+        node={pageVersion.vdom}
+        builderContext={builderContext}
+        onTreeUpdate={onTreeUpdate}
+      />
       <DndWrapper
         node={pageVersion?.vdom}
         onTreeUpdate={onTreeUpdate}

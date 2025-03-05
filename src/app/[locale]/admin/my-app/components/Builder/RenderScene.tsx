@@ -6,6 +6,7 @@ import FrameComponent from 'react-frame-component';
 import { useCssLive } from '../stores/useCssLive';
 import React from 'react';
 import FrameContentWrapper from './FrameContentWrapper';
+import TestScene from './TestScene';
 
 export const RenderScene = () => {
   const selectedBreakpoint = usePageBuilderStore(
@@ -21,6 +22,7 @@ export const RenderScene = () => {
         justifyContent:
           selectedBreakpoint.name === 'mobile' ? 'center' : 'flex-start'
       }}>
+      {/* <TestScene /> */}
       <FrameComponent
         style={{
           border: 'none',

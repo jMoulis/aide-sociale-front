@@ -1,3 +1,7 @@
+.static {
+  position: static
+}
+
 .fixed {
   position: fixed
 }
@@ -54,6 +58,10 @@
   margin-bottom: 1px
 }
 
+.ml-2 {
+  margin-left: 0.5rem
+}
+
 .ml-auto {
   margin-left: auto
 }
@@ -98,12 +106,20 @@
   display: inline-flex
 }
 
+.table {
+  display: table
+}
+
 .grid {
   display: grid
 }
 
 .inline-grid {
   display: inline-grid
+}
+
+.h-8 {
+  height: 2rem
 }
 
 .h-9 {
@@ -140,6 +156,10 @@
 
 .min-h-screen {
   min-height: 100vh
+}
+
+.w-12 {
+  width: 3rem
 }
 
 .w-auto {
@@ -1108,6 +1128,10 @@
   --test: green;
 }
 
+.static {
+  position: static
+}
+
 .fixed {
   position: fixed
 }
@@ -1212,12 +1236,20 @@
   display: inline-flex
 }
 
+.table {
+  display: table
+}
+
 .grid {
   display: grid
 }
 
 .inline-grid {
   display: inline-grid
+}
+
+.h-8 {
+  height: 2rem
 }
 
 .h-9 {
@@ -1254,6 +1286,10 @@
 
 .min-h-screen {
   min-height: 100vh
+}
+
+.w-12 {
+  width: 3rem
 }
 
 .w-auto {
@@ -1686,6 +1722,10 @@
 .bg-yellow-900 {
   --tw-bg-opacity: 1;
   background-color: rgb(113 63 18 / var(--tw-bg-opacity, 1))
+}
+
+.p-4 {
+  padding: 1rem
 }
 
 .p-px {
