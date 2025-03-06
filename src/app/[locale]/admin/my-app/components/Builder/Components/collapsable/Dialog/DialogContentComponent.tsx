@@ -1,5 +1,4 @@
 import { PropsWithChildrenAndContext } from '@/lib/interfaces/interfaces';
-import ChildrenDndWrapper from '../../ChildrenDndWrapper';
 import {
   DialogContent,
   DialogHeader,
@@ -10,8 +9,7 @@ import { cn } from '@/lib/utils/shadcnUtils';
 
 const DialogContentComponent = ({
   props,
-  children,
-  dndChildrenContainerRef
+  children
 }: PropsWithChildrenAndContext) => {
   const { ...rest } = props || {};
 
@@ -23,9 +21,8 @@ const DialogContentComponent = ({
         <DialogTitle>{props.name}</DialogTitle>
         <DialogDescription hidden>{props.name}</DialogDescription>
       </DialogHeader>
-      <ChildrenDndWrapper ref={dndChildrenContainerRef}>
-        {children}
-      </ChildrenDndWrapper>
+
+      {children}
     </DialogContent>
   );
 };

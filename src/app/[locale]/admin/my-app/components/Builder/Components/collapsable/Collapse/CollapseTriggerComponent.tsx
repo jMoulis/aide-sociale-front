@@ -1,22 +1,16 @@
 import { PropsWithChildrenAndContext } from '@/lib/interfaces/interfaces';
-import ChildrenDndWrapper from '../../ChildrenDndWrapper';
 import { cn } from '@/lib/utils/shadcnUtils';
-import {
-  CollapsibleTrigger
-} from '@/components/ui/collapsible';
+import { CollapsibleTrigger } from '@/components/ui/collapsible';
 
 const CollapseTriggerComponent = ({
   props,
-  children,
-  dndChildrenContainerRef
+  children
 }: PropsWithChildrenAndContext) => {
   const { className } = props || {};
 
   return (
     <CollapsibleTrigger className={cn('p-1', className)}>
-      <ChildrenDndWrapper ref={dndChildrenContainerRef}>
-        <div>{children}</div>
-      </ChildrenDndWrapper>
+      <div>{children}</div>
     </CollapsibleTrigger>
   );
 };

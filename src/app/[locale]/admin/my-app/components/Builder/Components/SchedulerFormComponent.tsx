@@ -1,5 +1,4 @@
 import { PropsWithChildrenAndContext } from '@/lib/interfaces/interfaces';
-import ChildrenDndWrapper from './ChildrenDndWrapper';
 import { Fragment, useMemo } from 'react';
 import { renderVNode } from './renderVode';
 import { useCalendarStore } from '@/components/Scheduler/store/useCalendarStore';
@@ -12,7 +11,6 @@ const SchedulerFormComponent = ({
   props,
   context,
   children,
-  dndChildrenContainerRef,
   node
 }: PropsWithChildrenAndContext) => {
   const { className, ...rest } = props;
@@ -108,13 +106,7 @@ const SchedulerFormComponent = ({
   }, [node, selectedEvent, context.path, context.routeParams, events]);
 
   if (context.isBuilderMode) {
-    return (
-      <div>
-        <ChildrenDndWrapper ref={dndChildrenContainerRef}>
-          {children}
-        </ChildrenDndWrapper>
-      </div>
-    );
+    return children;
   }
   return (
     <Form className={cn('p-1', className)} {...rest}>

@@ -1,13 +1,11 @@
 import { PropsWithChildrenAndContext } from '@/lib/interfaces/interfaces';
 import Button from '@/components/buttons/Button';
-import ChildrenDndWrapper from './ChildrenDndWrapper';
 import { useCallbackQueryTrigger } from '../useCallbackQueryTrigger';
 
 function ButtonComponent({
   props,
   children,
-  context,
-  dndChildrenContainerRef
+  context
 }: PropsWithChildrenAndContext) {
   const { executeQuery } = useCallbackQueryTrigger();
   const handleClick = async (event: React.MouseEvent<HTMLButtonElement>) => {
@@ -23,9 +21,7 @@ function ButtonComponent({
   };
   return (
     <Button {...props} onClick={handleClick}>
-      <ChildrenDndWrapper ref={dndChildrenContainerRef}>
-        {children}
-      </ChildrenDndWrapper>
+      {children}
     </Button>
   );
 }

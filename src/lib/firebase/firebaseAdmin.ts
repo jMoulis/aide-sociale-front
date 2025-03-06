@@ -1,8 +1,7 @@
 /* eslint-disable @typescript-eslint/no-non-null-asserted-optional-chain */
-import * as admin from 'firebase-admin';
-import { App } from 'firebase-admin/app';
+import admin from 'firebase-admin';
 
-let app: App | undefined;
+let app: any | undefined;
 
 if (!admin.apps.length) {
   app = admin.initializeApp({

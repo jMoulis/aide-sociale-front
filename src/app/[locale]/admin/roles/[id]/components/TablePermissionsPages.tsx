@@ -24,7 +24,6 @@ const Row = ({
         <div className='flex flex-col'>
           <span className='text-sm'>{page.name}</span>
           <div>
-            <span className='text-xs'>{page.slug}</span>
             <span className='text-xs'>{page.route}</span>
           </div>
         </div>

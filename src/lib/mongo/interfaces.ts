@@ -19,6 +19,7 @@ export enum ENUM_COLLECTIONS {
   PAGE_TEMPLATES = 'page-templates',
   PAGES = 'pages',
   SYSTEM_PARAMS = 'system-params',
+  BOOKINGS = 'bookings',
 }
 
 export interface IAutocompleteResponse<T> {

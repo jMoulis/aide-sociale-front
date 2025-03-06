@@ -40,7 +40,7 @@ function DialogPageForm({
 }: Props) {
   const defaultPage: ITreePage = useMemo(() => {
     return {
-      _id: nanoid(),
+      _id: '',
       name: '',
       slug: '',
       createdAt: new Date(),
@@ -60,6 +60,7 @@ function DialogPageForm({
   const [page, setPage] = useState<ITreePage>(initialPage || defaultPage);
   const addPage = usePageBuilderStore((state) => state.addPage);
   const onEditPage = usePageBuilderStore((state) => state.onEditPage);
+  const onDeletePage = usePageBuilderStore((state) => state.onDeletePage);
 
   useEffect(() => {
     if (initialPage && !create) {
@@ -105,15 +106,21 @@ function DialogPageForm({
       );
       onEditPage(page);
     } else {
+      const id = nanoid();
+
+      const newPage = {
+        ...page,
+        _id: id
+      };
       toastPromise(
         client.create<IPage>(
           ENUM_COLLECTIONS.PAGES,
-          removeObjectFields(page, ['children'])
+          removeObjectFields(newPage, ['children'])
         ),
         t,
         'create'
       );
-      addPage(page);
+      addPage(newPage);
     }
     setPage(defaultPage);
     setOpen(false);
@@ -134,6 +141,8 @@ function DialogPageForm({
         t,
         'delete'
       );
+      onDeletePage(initialPage);
+      setOpen(false);
     }
   };
   return (

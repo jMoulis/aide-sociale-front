@@ -1,6 +1,5 @@
 import { PropsWithChildrenAndContext } from '@/lib/interfaces/interfaces';
 import { TabsTrigger } from '@/components/ui/tabs';
-import ChildrenDndWrapper from '../ChildrenDndWrapper';
 
 const TabsTriggerComponent = ({
   props,
@@ -9,9 +8,7 @@ const TabsTriggerComponent = ({
   const { ...rest } = props || {};
   return (
     <TabsTrigger value={rest.value} {...rest}>
-      <ChildrenDndWrapper ref={rest.dndChildrenContainerRef}>
-        {children}
-      </ChildrenDndWrapper>
+      {children}
     </TabsTrigger>
   );
 };

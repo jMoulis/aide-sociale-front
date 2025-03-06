@@ -1,12 +1,9 @@
 import { usePageBuilderStore } from '../stores/pagebuilder-store-provider';
-import { DndProvider } from 'react-dnd';
-import { HTML5Backend } from 'react-dnd-html5-backend';
 import { FrameContextConsumer } from 'react-frame-component';
 import FrameComponent from 'react-frame-component';
 import { useCssLive } from '../stores/useCssLive';
 import React from 'react';
 import FrameContentWrapper from './FrameContentWrapper';
-import TestScene from './TestScene';
 
 export const RenderScene = () => {
   const selectedBreakpoint = usePageBuilderStore(
@@ -22,7 +19,6 @@ export const RenderScene = () => {
         justifyContent:
           selectedBreakpoint.name === 'mobile' ? 'center' : 'flex-start'
       }}>
-      {/* <TestScene /> */}
       <FrameComponent
         style={{
           border: 'none',
@@ -42,11 +38,7 @@ export const RenderScene = () => {
           </>
         }>
         <FrameContextConsumer>
-          {({ window }) => (
-            <DndProvider backend={HTML5Backend} context={window}>
-              <FrameContentWrapper />
-            </DndProvider>
-          )}
+          {() => <FrameContentWrapper />}
         </FrameContextConsumer>
       </FrameComponent>
     </div>

@@ -3,7 +3,6 @@
 import fs from 'fs';
 import path from 'path';
 import { exec } from 'child_process';
-import { IVDOMNode } from './components/interfaces';
 import { bucket } from '@/lib/firebase/firebaseAdmin';
 import { getDownloadURL } from 'firebase-admin/storage';
 import { IPage, IPageTemplateVersion, IStylesheet, IWebsite } from '@/lib/interfaces/interfaces';
@@ -66,40 +65,7 @@ async function downloadFilesFromLinks(links: string[]): Promise<string[]> {
 
   return tempFilePaths;
 }
-export const generateCss = async (vdom: IVDOMNode, pageId: string, organizationId: string): Promise<string> => {
-  const tempInputPath = path.resolve(`./temp/temp-${pageId}.css`);
-  const tempUsedClassesInputPath = path.resolve(`./temp/vdom-${pageId}.json`);
-  const outputPath = path.resolve(`./public/styles/${organizationId}/page-${pageId}.css`);
-  const tailwindDirectives = `
-@tailwind components;
-@tailwind utilities;
-`;
-  fs.mkdirSync(path.dirname(tempInputPath), { recursive: true }); // Ensure the temp directory exists
-  fs.writeFileSync(tempUsedClassesInputPath, JSON.stringify(vdom));
-  fs.writeFileSync(tempInputPath, tailwindDirectives); // Create the file
 
-  const command = `npx tailwindcss -i ${tempInputPath} -o ${outputPath} --content ${tempUsedClassesInputPath} --minify`;
-
-  return new Promise((resolve, reject) => {
-    // Step 3: Run the CLI command
-    exec(command, (error, _stdout, stderr) => {
-      // Step 4: Clean up the temporary file
-      fs.unlinkSync(tempInputPath);
-      fs.unlinkSync(tempUsedClassesInputPath);
-      if (error) {
-        return reject(JSON.stringify(parseErrorMessage(stderr)));
-      }
-      const css = fs.readFileSync(outputPath, 'utf-8');
-
-
-      console.info(`CSS generated for page `);
-      resolve(css); // Return the path to the generated CSS
-    });
-  });
-
-}
-
-const MAIN_NAME_FILE = 'main';
 const COMPILED_NAME_FILE = 'compiled';
 
 const processStylesheetsFilesTailwindImports = async (stylesheets: IStylesheet[]) => {
@@ -240,26 +206,4 @@ export const generateStylesheet = async (
     return { pageUrl: null, error: error.message };
   }
 };
-
-export const updateMainStylesheet = async (
-  style: string,
-  organizationId: string,
-  website: IWebsite
-): Promise<{ pageUrl: string | null, error?: string }> => {
-  const mainStoragePath = `websites/${organizationId}/${website._id}/${MAIN_NAME_FILE}.css`;
-  const pageStylesPath = path.resolve(`./temp/${MAIN_NAME_FILE}.css`);
-
-  fs.mkdirSync('./temp', { recursive: true });
-  fs.writeFileSync(pageStylesPath, style);
-  try {
-    const [pageUrl] = await Promise.all([
-      uploadFile(pageStylesPath, mainStoragePath),
-    ]);
-
-    return { pageUrl };
-  } catch (error: any) {
-    return { pageUrl: null, error: error.message };
-  }
-};
-
 

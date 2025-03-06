@@ -177,11 +177,10 @@ export type VDOMContext = {
   table?: ITable;
 }
 export interface PropsWithChildrenAndContext extends PropsWithChildren {
-  dndChildrenContainerRef?: any;
   context: VDOMContext;
   props: any;
   node: IVDOMNode;
-  ref?: any
+  ref?: any;
 
 }
 export interface IRessource {

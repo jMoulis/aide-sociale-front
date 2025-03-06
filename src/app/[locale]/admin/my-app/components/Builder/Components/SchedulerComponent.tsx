@@ -2,7 +2,6 @@ import {
   IUser,
   PropsWithChildrenAndContext
 } from '@/lib/interfaces/interfaces';
-import ChildrenDndWrapper from './ChildrenDndWrapper';
 import { Scheduler } from '@/components/Scheduler/Scheduler';
 import {
   Fragment,
@@ -65,7 +64,6 @@ const generateDefaultFormEntry = (
 const SchedulerComponent = ({
   context,
   children,
-  dndChildrenContainerRef,
   node
 }: PropsWithChildrenAndContext) => {
   const [events, setEvents] = useState<any>([]);
@@ -328,13 +326,7 @@ const SchedulerComponent = ({
   );
 
   if (context.isBuilderMode) {
-    return (
-      <div>
-        <ChildrenDndWrapper ref={dndChildrenContainerRef}>
-          {children}
-        </ChildrenDndWrapper>
-      </div>
-    );
+    return children;
   }
   return (
     <>

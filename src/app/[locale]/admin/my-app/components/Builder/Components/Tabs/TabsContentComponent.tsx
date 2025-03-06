@@ -1,19 +1,15 @@
 import { PropsWithChildrenAndContext } from '@/lib/interfaces/interfaces';
 import { cn } from '@/lib/utils/shadcnUtils';
-import ChildrenDndWrapper from '../ChildrenDndWrapper';
 import { TabsContent } from '@/components/ui/tabs';
 
 const TabsContentComponent = ({
   props,
-  children,
-  dndChildrenContainerRef
+  children
 }: PropsWithChildrenAndContext) => {
   const { className, ...rest } = props || {};
   return (
     <TabsContent className={cn('', className)} {...rest}>
-      <ChildrenDndWrapper ref={dndChildrenContainerRef}>
-        {children}
-      </ChildrenDndWrapper>
+      {children}
     </TabsContent>
   );
 };

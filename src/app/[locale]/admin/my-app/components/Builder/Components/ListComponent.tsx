@@ -2,7 +2,6 @@ import { PropsWithChildrenAndContext } from '@/lib/interfaces/interfaces';
 import { cn } from '@/lib/utils/shadcnUtils';
 import React, { Fragment, useCallback, useEffect, useState } from 'react';
 import { FormType, useFormContext } from './FormContext';
-import ChildrenDndWrapper from './ChildrenDndWrapper';
 import { IVDOMNode } from '../../interfaces';
 import { renderVNode } from './renderVode';
 import { nanoid } from 'nanoid';
@@ -11,8 +10,7 @@ function ListComponent({
   props,
   children,
   context,
-  node,
-  dndChildrenContainerRef
+  node
 }: PropsWithChildrenAndContext) {
   const { asyncData } = useFormContext();
   const [items, setItems] = useState<any[]>(
@@ -63,9 +61,7 @@ function ListComponent({
 
   return (
     <CustomTag className={cn('p-1', className)} {...rest}>
-      <ChildrenDndWrapper ref={dndChildrenContainerRef}>
-        {context.isBuilderMode ? children : renderListChildren()}
-      </ChildrenDndWrapper>
+      {context.isBuilderMode ? children : renderListChildren()}
     </CustomTag>
   );
 }

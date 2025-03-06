@@ -4,7 +4,7 @@
   "license": "UNLICENSED",
   "private": true,
   "scripts": {
-    "dev": "next dev",
+    "dev": "next dev --turbopack",
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
@@ -78,7 +78,8 @@
     "path-to-regexp": "^8.2.0",
     "pg": "^8.13.3",
     "react": "^19.0.0",
-    "react-arborist": "^3.4.2",
+    "react-arborist": "^3.4.3",
+    "react-complex-tree": "^2.4.6",
     "react-day-picker": "^9.5.0",
     "react-dnd": "^16.0.1",
     "react-dnd-html5-backend": "^16.0.1",

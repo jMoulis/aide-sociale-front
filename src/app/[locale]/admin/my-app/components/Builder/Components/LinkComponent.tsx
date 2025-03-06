@@ -1,6 +1,5 @@
 import { PropsWithChildrenAndContext } from '@/lib/interfaces/interfaces';
 import { useFormContext } from './FormContext';
-import ChildrenDndWrapper from './ChildrenDndWrapper';
 import { cn } from '@/lib/utils/shadcnUtils';
 import { useEffect, useState } from 'react';
 import { Link } from '@/i18n/routing';
@@ -18,8 +17,7 @@ const Error = () => {
 function LinkComponent({
   props,
   context,
-  children,
-  dndChildrenContainerRef
+  children
 }: PropsWithChildrenAndContext) {
   const [init, setInit] = useState(false);
   const { getFormFieldValue } = useFormContext();
@@ -60,9 +58,7 @@ function LinkComponent({
   if (context.isBuilderMode) {
     return (
       <span className={cn('p-1 inline-block', className)} {...rest}>
-        <ChildrenDndWrapper ref={dndChildrenContainerRef}>
-          {children}
-        </ChildrenDndWrapper>
+        {children}
       </span>
     );
   }
@@ -70,9 +66,7 @@ function LinkComponent({
   return (
     <Link {...props} {...attributes}>
       {!props.href && !attributes.href && init ? <Error /> : null}
-      <ChildrenDndWrapper ref={dndChildrenContainerRef}>
-        {children}
-      </ChildrenDndWrapper>
+      {children}
     </Link>
   );
 }

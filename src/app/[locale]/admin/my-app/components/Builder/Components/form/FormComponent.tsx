@@ -9,10 +9,9 @@ import { nanoid } from 'nanoid';
 import { FormType, useFormContext } from '../FormContext';
 import { useMongoUser } from '@/lib/mongo/MongoUserContext/MongoUserContext';
 import { getUserSummary } from '@/lib/utils/utils';
-import ChildrenDndWrapper from '../ChildrenDndWrapper';
 
 const FormComponent = forwardRef<HTMLFormElement, PropsWithChildrenAndContext>(
-  ({ props, children, context, dndChildrenContainerRef }, ref) => {
+  ({ props, children, context }, ref) => {
     const { asyncData } = useFormContext();
     const formRef = useRef<HTMLFormElement | null>(null);
     const formId = useId();
@@ -166,9 +165,7 @@ const FormComponent = forwardRef<HTMLFormElement, PropsWithChildrenAndContext>(
         onSubmit={handleSubmit}
         className={cn('p-1', className)}
         {...rest}>
-        <ChildrenDndWrapper ref={dndChildrenContainerRef}>
-          {children}
-        </ChildrenDndWrapper>
+        {children}
       </Form>
     );
   }

@@ -63,6 +63,7 @@ export type PageBuilderActions = {
   setWebsite: (website: IWebsite) => void;
   addPage: (page: IPage) => void;
   onEditPage: (page: IPage) => void;
+  onDeletePage: (page: IPage) => void;
   onAddMasterTemplate: (masterTemplate: IMasterTemplate) => void;
   onEditMasterTemplate: (masterTemplate: IMasterTemplate) => void;
   onDeleteMasterTemplate: (masterTemplate: IMasterTemplate) => void;
@@ -521,6 +522,10 @@ export const createPageBuilderStore = (
     addPage: (page: IPage) => {
       const pages = get().pages;
       set({ pages: [...pages, page] })
+    },
+    onDeletePage: (page: IPage) => {
+      const pages = get().pages.filter((prevPage) => prevPage._id !== page._id);
+      set({ pages });
     },
     onEditPage: (page: IPage) => {
       const pages = get().pages;

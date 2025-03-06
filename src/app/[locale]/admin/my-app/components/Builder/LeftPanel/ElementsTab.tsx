@@ -1,7 +1,7 @@
 import AiHTMLPrompt from '../Properties/AiFormPrompt/AiHTMLPrompt copy';
 import AdvancedPageEditor from './AdvancedPageEditor';
 import ElementsSelector from './ElementSelector';
-import ElementsTree from './Tree/ElementsTree';
+import TreeView from './Tree/TreeView';
 
 function ElementsTab() {
   return (
@@ -9,7 +9,7 @@ function ElementsTab() {
       <AiHTMLPrompt />
       <AdvancedPageEditor />
       <ElementsSelector />
-      <ElementsTree />
+      <TreeView />
     </div>
   );
 }
